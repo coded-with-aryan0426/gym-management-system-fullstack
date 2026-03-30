@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useMemo, useCallback } from 'react';
 import './DataTable.css';
 
 export interface Column<T> {
@@ -37,6 +37,57 @@ interface DataTableProps<T> {
     skeletonRows?: number;
 }
 
+/**
+ * Memoized Table Row Component - prevents re-render unless item changes
+ * Stage 1 Optimization: Reduces re-renders in large lists
+ */
+interface TableRowProps<T> {
+    item: T;
+    index: number;
+    rowNumber: number;
+    columns: Column<T>[];
+    keyExtractor: (item: T) => string | number;
+    onRowClick?: (item: T) => void;
+    showRowNumbers: boolean;
+}
+
+const TableRowComponent = <T,>({
+    item,
+    index,
+    rowNumber,
+    columns,
+    onRowClick,
+    showRowNumbers,
+}: TableRowProps<T>) => {
+    const handleClick = useCallback(() => {
+        onRowClick?.(item);
+    }, [onRowClick, item]);
+
+    return (
+        <tr
+            className={`data-table__row ${onRowClick ? 'data-table__row--clickable' : ''}`}
+            onClick={handleClick}
+        >
+            {showRowNumbers && (
+                <td className="data-table__td data-table__td--number">
+                    <span className="row-number">{rowNumber}</span>
+                </td>
+            )}
+            {columns.map((col) => (
+                <td key={col.key} className="data-table__td">
+                    {col.render
+                        ? col.render(item, index)
+                        : (item as Record<string, unknown>)[col.key] as React.ReactNode
+                    }
+                </td>
+            ))}
+        </tr>
+    );
+};
+
+// Memoized row - only re-renders if item reference changes
+const MemoizedTableRow = memo(TableRowComponent) as typeof TableRowComponent;
+
 function DataTable<T>({
     columns,
     data,
@@ -61,13 +112,20 @@ function DataTable<T>({
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    const tableClassNames = [
+    // Memoize visible columns to prevent recalculation
+    const visibleColumns = useMemo(() => 
+        columns.filter(col => !isMobile || !col.hideOnMobile),
+        [columns, isMobile]
+    );
+
+    // Memoize table class names
+    const tableClassNames = useMemo(() => [
         'data-table',
         className,
         isMobile ? 'data-table--mobile' : '',
         compact ? 'data-table--compact' : '',
         stickyHeader ? 'data-table--sticky' : '',
-    ].filter(Boolean).join(' ');
+    ].filter(Boolean).join(' '), [className, isMobile, compact, stickyHeader]);
 
     // Skeleton Loading State
     if (loading) {
@@ -145,10 +203,6 @@ function DataTable<T>({
         );
     }
 
-    const visibleColumns = isMobile
-        ? columns.filter(col => !col.hideOnMobile)
-        : columns;
-
     const getPageNumbers = () => {
         if (!pagination) return [];
         const { currentPage, totalPages } = pagination;
@@ -223,25 +277,16 @@ function DataTable<T>({
                                         ? pagination.currentPage * pagination.pageSize + index + 1
                                         : index + 1;
                                     return (
-                                        <tr
+                                        <MemoizedTableRow
                                             key={id}
-                                            className={`data-table__row ${onRowClick ? 'data-table__row--clickable' : ''}`}
-                                            onClick={() => onRowClick?.(item)}
-                                        >
-                                            {showRowNumbers && (
-                                                <td className="data-table__td data-table__td--number">
-                                                    <span className="row-number">{rowNumber}</span>
-                                                </td>
-                                            )}
-                                            {visibleColumns.map((col) => (
-                                                <td key={col.key} className="data-table__td">
-                                                    {col.render
-                                                        ? col.render(item, index)
-                                                        : (item as Record<string, unknown>)[col.key] as React.ReactNode
-                                                    }
-                                                </td>
-                                            ))}
-                                        </tr>
+                                            item={item}
+                                            index={index}
+                                            rowNumber={rowNumber}
+                                            columns={visibleColumns}
+                                            keyExtractor={keyExtractor}
+                                            onRowClick={onRowClick}
+                                            showRowNumbers={showRowNumbers}
+                                        />
                                     );
                                 })
                             )}
@@ -325,4 +370,7 @@ function DataTable<T>({
     );
 }
 
-export default DataTable;
+// Memoize the entire DataTable component
+const MemoizedDataTable = memo(DataTable) as typeof DataTable;
+
+export default MemoizedDataTable;

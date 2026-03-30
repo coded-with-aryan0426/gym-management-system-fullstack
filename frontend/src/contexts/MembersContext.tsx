@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode, useMemo, useCallback, useRef } from 'react';
+import React, { createContext, useContext, type ReactNode, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import { type MemberDTO } from '../types/user';
 import { useAuth } from './AuthContext';
@@ -19,45 +20,36 @@ interface MembersContextType {
 
 const MembersContext = createContext<MembersContextType | undefined>(undefined);
 
+/**
+ * MembersProvider - Now powered by React Query for optimized caching
+ * 
+ * Stage 1 Optimization:
+ * - Replaced useState/useEffect with React Query
+ * - Automatic caching (2min stale, 15min gc)
+ * - Background refetching on window focus
+ * - Deduplication of concurrent requests
+ * - No more cascading re-renders on every fetch
+ */
 export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { user, isAuthenticated } = useAuth();
-    const [members, setMembers] = useState<MemberDTO[]>([]);
-    const [loading, setLoading] = useState(true);
-    // Use ref to track initial load - avoids circular dependency issue
-    const isInitialLoadRef = useRef(true);
+    const { isAuthenticated } = useAuth();
+    const queryClient = useQueryClient();
 
-    const fetchMembers = useCallback(async () => {
-        if (!isAuthenticated || !user) {
-            setLoading(false);
-            return;
-        }
+    // Use React Query instead of useState/useEffect
+    const { data: membersData, isLoading } = useQuery({
+        queryKey: ['members', 'context-all'],
+        queryFn: () => api.getMembers(),
+        enabled: isAuthenticated,
+        staleTime: 2 * 60 * 1000, // 2 minutes
+        gcTime: 15 * 60 * 1000,   // 15 minutes
+        refetchOnWindowFocus: true,
+        placeholderData: [],
+    });
 
-        // Only show loading spinner on initial load to avoid flicker
-        if (isInitialLoadRef.current) {
-            setLoading(true);
-        }
+    const members = useMemo(() => {
+        return Array.isArray(membersData) ? membersData : [];
+    }, [membersData]);
 
-        try {
-            const data = await api.getMembers();
-            setMembers(Array.isArray(data) ? data : []);
-            isInitialLoadRef.current = false;
-        } catch (error) {
-            console.warn("Failed to load members", error);
-            setMembers([]); // Fallback
-        } finally {
-            setLoading(false);
-        }
-    }, [isAuthenticated, user]); // Removed members.length dependency - fixes circular issue
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetchMembers();
-        } else {
-            setMembers([]);
-            setLoading(false);
-        }
-    }, [isAuthenticated, fetchMembers]);
-
+    // Memoized stats calculation - only recalculates when members change
     const stats = useMemo(() => {
         const total = members.length;
         const active = members.filter(m => (m.status || '').toUpperCase() === 'ACTIVE').length;
@@ -73,7 +65,7 @@ export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children })
                 const d = new Date(dateStr);
                 d.setHours(0, 0, 0, 0);
                 return d.getTime() === today.getTime();
-            } catch (e) { return false; }
+            } catch { return false; }
         }).length;
 
         const now = new Date();
@@ -93,7 +85,7 @@ export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children })
             } else if (m.startDate && m.planDuration) {
                 const startDate = new Date(m.startDate);
                 const durationStr = m.planDuration.toLowerCase();
-                let expiryDate = new Date(startDate);
+                const expiryDate = new Date(startDate);
                 if (durationStr.includes('year')) {
                     expiryDate.setMonth(expiryDate.getMonth() + (parseInt(durationStr) || 1) * 12);
                 } else if (durationStr.includes('month')) {
@@ -120,8 +112,21 @@ export const MembersProvider: React.FC<{ children: ReactNode }> = ({ children })
         return { total, active, inactive, todaysJoins, expiringSoon, newThisMonth };
     }, [members]);
 
+    // refreshMembers now invalidates React Query cache
+    const refreshMembers = async () => {
+        await queryClient.invalidateQueries({ queryKey: ['members'] });
+    };
+
+    // Memoize the context value to prevent unnecessary re-renders
+    const value = useMemo(() => ({
+        members,
+        loading: isLoading,
+        refreshMembers,
+        stats,
+    }), [members, isLoading, stats]);
+
     return (
-        <MembersContext.Provider value={{ members, loading, refreshMembers: fetchMembers, stats }}>
+        <MembersContext.Provider value={value}>
             {children}
         </MembersContext.Provider>
     );

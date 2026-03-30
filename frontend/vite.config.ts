@@ -14,16 +14,25 @@ export default defineConfig({
     }),
   ],
   server: {
-    host: true,
+    host: '0.0.0.0',
     port: 5173,
-    // Add additional ports for multiple instances
-    ports: [5173, 5174, 5175, 5176, 5177, 5178, 5179, 5180],
     strictPort: false,
     allowedHosts: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8081',
         changeOrigin: true,
+        rewrite: (path) => path,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            if (proxyReq.path.startsWith('/api')) {
+              console.log('[Vite Proxy] Forwarding:', proxyReq.path, '-> http://localhost:8081' + proxyReq.path);
+            }
+          });
+          proxy.on('error', (err, req, res) => {
+            console.error('[Vite Proxy Error]', err.message);
+          });
+        },
       },
     },
   },

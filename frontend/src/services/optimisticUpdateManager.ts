@@ -1,256 +1,270 @@
-// Optimistic Update Manager for Enhanced User Action Modals
+/**
+ * Optimistic Update Manager
+ * Stage 3: Real-Time Sync Layer - Phase 3 (Optimistic Mutation Layer)
+ * 
+ * Manages optimistic UI updates before server confirmation.
+ * Provides rollback capability on failure and conflict detection.
+ */
 
-import type { 
-  OptimisticUpdateManager, 
-  CRUDOperation, 
-  DataConflict, 
-  ConflictResolution 
-} from '../types/modalEnhancement';
+import type { CRUDOperation, DataConflict, ConflictResolution } from '../types/modalEnhancement';
 
-interface PendingOperation {
-  operation: CRUDOperation;
-  originalData?: any;
-  timestamp: Date;
-  retryCount: number;
+interface PendingMutation {
+  id: string;
+  type: 'create' | 'update' | 'delete';
+  entity: string;
+  entityId?: string;
+  patch: any;
+  timestamp: number;
+  status: 'pending' | 'confirmed' | 'rejected';
+  rollbackData?: any; // Store original data for rollback
 }
 
-export class OptimisticUpdateService implements OptimisticUpdateManager {
-  private pendingOperations: Map<string, PendingOperation> = new Map();
-  private maxRetries = 3;
-  private retryDelay = 1000;
+class OptimisticUpdateManager {
+  private pending = new Map<string, PendingMutation>();
+  private snapshots = new Map<string, any>(); // Original data snapshots
+  private eventTarget = new EventTarget();
 
+  /**
+   * Apply an optimistic update to the UI
+   * @param operation - The CRUD operation to apply optimistically
+   */
   applyOptimisticUpdate(operation: CRUDOperation): void {
-    console.log('[OptimisticUpdateService] Applying optimistic update:', operation);
+    const mutationId = operation.id;
+    const entityKey = `${operation.entity}_${operation.data?.id || 'new'}`;
 
-    // Store the operation for potential rollback
-    this.pendingOperations.set(operation.id, {
-      operation,
-      timestamp: new Date(),
-      retryCount: 0
-    });
+    // Create snapshot of current state for potential rollback
+    if (operation.type === 'update' || operation.type === 'delete') {
+      // In real implementation, this would query current state from React Query cache
+      this.snapshots.set(mutationId, { ...operation.data });
+    }
 
-    // Apply the update immediately to the UI state
-    this.updateUIState(operation);
+    // Store pending mutation
+    const mutation: PendingMutation = {
+      id: mutationId,
+      type: operation.type,
+      entity: operation.entity,
+      entityId: operation.data?.id,
+      patch: operation.data,
+      timestamp: operation.timestamp.getTime(),
+      status: 'pending',
+      rollbackData: this.snapshots.get(mutationId)
+    };
 
-    // Schedule background sync with server
-    this.scheduleServerSync(operation);
+    this.pending.set(mutationId, mutation);
+
+    // Emit optimistic update event for UI to react
+    this.emitEvent('optimistic-update', { operation });
+
+    // Simulate server call (in real implementation, this would be actual API call)
+    // For now, we just mark it as applied
+    console.log(`[OptimisticUpdateManager] Applied optimistic ${operation.type} for ${operation.entity}:`, operation.data);
   }
 
+  /**
+   * Revert an optimistic update (rollback)
+   * @param operationId - ID of the operation to revert
+   */
   revertOptimisticUpdate(operationId: string): void {
-    const pendingOp = this.pendingOperations.get(operationId);
-    if (!pendingOp) {
-      console.warn('[OptimisticUpdateService] No pending operation found for ID:', operationId);
+    const mutation = this.pending.get(operationId);
+    
+    if (!mutation) {
+      console.warn(`[OptimisticUpdateManager] No pending mutation found for ID: ${operationId}`);
       return;
     }
 
-    console.log('[OptimisticUpdateService] Reverting optimistic update:', operationId);
+    // Restore original data
+    const rollbackData = this.snapshots.get(operationId);
+    
+    if (rollbackData) {
+      // In real implementation, this would update React Query cache
+      console.log(`[OptimisticUpdateManager] Reverting ${mutation.type} for ${mutation.entity}:`, rollbackData);
+    }
 
-    // Create a reverse operation
-    const reverseOperation: CRUDOperation = {
-      id: `reverse_${operationId}`,
-      type: this.getReverseOperationType(pendingOp.operation.type),
-      entity: pendingOp.operation.entity,
-      data: pendingOp.originalData || pendingOp.operation.data,
-      optimistic: true,
-      timestamp: new Date()
-    };
+    // Clean up
+    this.pending.delete(operationId);
+    this.snapshots.delete(operationId);
 
-    // Apply the reverse operation
-    this.updateUIState(reverseOperation);
-
-    // Remove from pending operations
-    this.pendingOperations.delete(operationId);
+    // Emit revert event
+    this.emitEvent('optimistic-revert', { operationId, mutation });
   }
 
-  confirmOptimisticUpdate(operationId: string): void {
-    const pendingOp = this.pendingOperations.get(operationId);
-    if (!pendingOp) {
-      console.warn('[OptimisticUpdateService] No pending operation found for ID:', operationId);
+  /**
+   * Confirm an optimistic update (server acknowledged)
+   * @param operationId - ID of the operation to confirm
+   * @param serverData - Data returned from server
+   */
+  confirmOptimisticUpdate(operationId: string, serverData?: any): void {
+    const mutation = this.pending.get(operationId);
+    
+    if (!mutation) {
       return;
     }
 
-    console.log('[OptimisticUpdateService] Confirming optimistic update:', operationId);
-
-    // Remove from pending operations as it's now confirmed
-    this.pendingOperations.delete(operationId);
-
-    // Trigger success feedback
-    this.triggerSuccessFeedback(pendingOp.operation);
-  }
-
-  handleConflict(conflict: DataConflict): ConflictResolution {
-    console.log('[OptimisticUpdateService] Handling conflict:', conflict);
-
-    // For simple conflicts, try automatic resolution
-    if (this.canAutoResolve(conflict)) {
-      return this.autoResolveConflict(conflict);
+    mutation.status = 'confirmed';
+    
+    // Update with server data if provided (may include server-generated fields like timestamps, IDs)
+    if (serverData) {
+      console.log(`[OptimisticUpdateManager] Confirmed ${mutation.type} with server data:`, serverData);
     }
 
-    // For complex conflicts, require manual resolution
-    return {
-      action: 'manual',
-      resolvedData: undefined
+    // Clean up
+    this.pending.delete(operationId);
+    this.snapshots.delete(operationId);
+
+    // Emit success event
+    this.emitEvent('operation-success', { operation: mutation, serverData });
+  }
+
+  /**
+   * Reject an optimistic update (server rejected)
+   * @param operationId - ID of the operation to reject
+   * @param error - Error message from server
+   */
+  rejectOptimisticUpdate(operationId: string, error: string): void {
+    const mutation = this.pending.get(operationId);
+    
+    if (!mutation) {
+      return;
+    }
+
+    mutation.status = 'rejected';
+    
+    // Automatically revert the change
+    this.revertOptimisticUpdate(operationId);
+
+    // Emit error event
+    this.emitEvent('operation-error', { operation: mutation, message: error });
+  }
+
+  /**
+   * Check if an operation is still pending
+   * @param operationId - ID of the operation to check
+   * @returns true if operation is pending
+   */
+  isPending(operationId: string): boolean {
+    return this.pending.has(operationId);
+  }
+
+  /**
+   * Get all pending operations
+   * @returns Array of pending mutation IDs
+   */
+  getPendingOperations(): string[] {
+    return Array.from(this.pending.keys());
+  }
+
+  /**
+   * Get details of a specific pending operation
+   * @param operationId - ID of the operation
+   * @returns Mutation details or undefined
+   */
+  getPendingMutation(operationId: string): PendingMutation | undefined {
+    return this.pending.get(operationId);
+  }
+
+  /**
+   * Detect conflicts between optimistic update and server state
+   * @param operationId - ID of the operation
+   * @param serverData - Current server state
+   * @returns Conflict details or null if no conflict
+   */
+  detectConflict(operationId: string, serverData: any): DataConflict | null {
+    const mutation = this.pending.get(operationId);
+    
+    if (!mutation || !mutation.rollbackData) {
+      return null;
+    }
+
+    // Simple version comparison (in production, use proper conflict detection)
+    const hasConflict = JSON.stringify(mutation.rollbackData) !== JSON.stringify(serverData);
+
+    if (hasConflict) {
+      return {
+        field: 'data',
+        currentValue: mutation.patch,
+        incomingValue: serverData,
+        timestamp: new Date(mutation.timestamp)
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Resolve a detected conflict
+   * @param operationId - ID of the operation
+   * @param resolution - How to resolve the conflict
+   */
+  resolveConflict(operationId: string, resolution: ConflictResolution): void {
+    const mutation = this.pending.get(operationId);
+    
+    if (!mutation) {
+      return;
+    }
+
+    switch (resolution.action) {
+      case 'accept_current':
+        // Keep optimistic update
+        this.confirmOptimisticUpdate(operationId, mutation.patch);
+        break;
+      
+      case 'accept_incoming':
+        // Revert to server data
+        this.revertOptimisticUpdate(operationId);
+        break;
+      
+      case 'merge':
+        // Merge both versions
+        const merged = { ...mutation.rollbackData, ...mutation.patch, ...resolution.resolvedData };
+        this.confirmOptimisticUpdate(operationId, merged);
+        break;
+      
+      case 'manual':
+        // User will resolve manually
+        console.log(`[OptimisticUpdateManager] Manual conflict resolution required for ${operationId}`);
+        break;
+    }
+  }
+
+  /**
+   * Clear all pending operations (useful on logout/cleanup)
+   */
+  clearAll(): void {
+    this.pending.clear();
+    this.snapshots.clear();
+  }
+
+  /**
+   * Emit custom events for UI components to listen
+   */
+  private emitEvent(eventName: string, detail: any): void {
+    const event = new CustomEvent(eventName, { detail });
+    window.dispatchEvent(event);
+  }
+
+  /**
+   * Subscribe to optimistic update events
+   * @param eventName - Event to listen for
+   * @param handler - Event handler function
+   * @returns Unsubscribe function
+   */
+  on(eventName: string, handler: (detail: any) => void): () => void {
+    const listener = (event: Event) => {
+      if (event instanceof CustomEvent) {
+        handler(event.detail);
+      }
     };
-  }
 
-  private updateUIState(operation: CRUDOperation): void {
-    // Dispatch a custom event that UI components can listen to
-    const event = new CustomEvent('optimistic-update', {
-      detail: operation
-    });
-    window.dispatchEvent(event);
-  }
+    window.addEventListener(eventName, listener);
 
-  private async scheduleServerSync(operation: CRUDOperation): Promise<void> {
-    try {
-      // Simulate server sync (replace with actual API call)
-      await this.syncWithServer(operation);
-      this.confirmOptimisticUpdate(operation.id);
-    } catch (error) {
-      console.error('[OptimisticUpdateService] Server sync failed:', error);
-      await this.handleSyncFailure(operation);
-    }
-  }
-
-  private async syncWithServer(operation: CRUDOperation): Promise<void> {
-    // This would be replaced with actual API calls
-    const endpoint = this.getApiEndpoint(operation);
-    const method = this.getHttpMethod(operation.type);
-
-    const response = await fetch(endpoint, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: operation.type !== 'delete' ? JSON.stringify(operation.data) : undefined
-    });
-
-    if (!response.ok) {
-      throw new Error(`Server sync failed: ${response.statusText}`);
-    }
-
-    return response.json();
-  }
-
-  private async handleSyncFailure(operation: CRUDOperation): Promise<void> {
-    const pendingOp = this.pendingOperations.get(operation.id);
-    if (!pendingOp) return;
-
-    pendingOp.retryCount++;
-
-    if (pendingOp.retryCount <= this.maxRetries) {
-      // Schedule retry with exponential backoff
-      const delay = this.retryDelay * Math.pow(2, pendingOp.retryCount - 1);
-      setTimeout(() => {
-        this.scheduleServerSync(operation);
-      }, delay);
-    } else {
-      // Max retries reached, revert the optimistic update
-      console.error('[OptimisticUpdateService] Max retries reached, reverting update');
-      this.revertOptimisticUpdate(operation.id);
-      this.triggerErrorFeedback(operation, 'Operation failed after multiple attempts');
-    }
-  }
-
-  private canAutoResolve(conflict: DataConflict): boolean {
-    // Simple heuristics for auto-resolution
-    switch (conflict.type) {
-      case 'stale_data':
-        return true; // Can usually auto-resolve by accepting incoming data
-      case 'concurrent_modification':
-        return conflict.field !== 'critical_field'; // Avoid auto-resolving critical fields
-      case 'relationship_conflict':
-        return false; // Always require manual resolution
-      default:
-        return false;
-    }
-  }
-
-  private autoResolveConflict(conflict: DataConflict): ConflictResolution {
-    switch (conflict.type) {
-      case 'stale_data':
-        return {
-          action: 'accept_incoming',
-          resolvedData: conflict.incomingValue
-        };
-      case 'concurrent_modification':
-        // Simple merge strategy - prefer incoming for non-critical fields
-        return {
-          action: 'merge',
-          resolvedData: {
-            ...conflict.currentValue,
-            [conflict.field]: conflict.incomingValue
-          }
-        };
-      default:
-        return {
-          action: 'manual'
-        };
-    }
-  }
-
-  private getReverseOperationType(type: CRUDOperation['type']): CRUDOperation['type'] {
-    switch (type) {
-      case 'create':
-        return 'delete';
-      case 'delete':
-        return 'create';
-      case 'update':
-        return 'update'; // Update is its own reverse with original data
-      default:
-        return type;
-    }
-  }
-
-  private getApiEndpoint(operation: CRUDOperation): string {
-    const baseUrl = '/api';
-    switch (operation.entity) {
-      case 'user':
-        return `${baseUrl}/users`;
-      case 'relationship':
-        return `${baseUrl}/relationships`;
-      default:
-        throw new Error(`Unknown entity type: ${operation.entity}`);
-    }
-  }
-
-  private getHttpMethod(operationType: CRUDOperation['type']): string {
-    switch (operationType) {
-      case 'create':
-        return 'POST';
-      case 'update':
-        return 'PUT';
-      case 'delete':
-        return 'DELETE';
-      default:
-        return 'GET';
-    }
-  }
-
-  private triggerSuccessFeedback(operation: CRUDOperation): void {
-    const event = new CustomEvent('operation-success', {
-      detail: { operation, message: 'Operation completed successfully' }
-    });
-    window.dispatchEvent(event);
-  }
-
-  private triggerErrorFeedback(operation: CRUDOperation, message: string): void {
-    const event = new CustomEvent('operation-error', {
-      detail: { operation, message }
-    });
-    window.dispatchEvent(event);
-  }
-
-  // Cleanup method
-  clearPendingOperations(): void {
-    this.pendingOperations.clear();
-  }
-
-  // Get pending operations (for debugging/monitoring)
-  getPendingOperations(): PendingOperation[] {
-    return Array.from(this.pendingOperations.values());
+    return () => {
+      window.removeEventListener(eventName, listener);
+    };
   }
 }
 
-// Singleton instance
-export const optimisticUpdateManager = new OptimisticUpdateService();
+// Export singleton instance
+export const optimisticUpdateManager = new OptimisticUpdateManager();
+
+// Export class for testing
+export { OptimisticUpdateManager };

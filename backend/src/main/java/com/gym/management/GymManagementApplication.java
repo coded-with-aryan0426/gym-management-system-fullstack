@@ -6,12 +6,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication
-@org.springframework.scheduling.annotation.EnableScheduling
+// @EnableScheduling  // DISABLED - Outbox chat system on hold
 public class GymManagementApplication extends SpringBootServletInitializer {
 
-	/**
-	 * Configure the application for WAR deployment to external Tomcat server.
-	 */
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
 		return builder.sources(GymManagementApplication.class);
@@ -20,5 +17,4 @@ public class GymManagementApplication extends SpringBootServletInitializer {
 	public static void main(String[] args) {
 		SpringApplication.run(GymManagementApplication.class, args);
 	}
-
 }

@@ -3,5 +3,19 @@
     "java.configuration.updateBuildConfiguration": "disabled",
     "typescript.autoClosingTags": false,
     "kiroAgent.configureMCP": "enabled",
-    "github.copilot.nextEditSuggestions.enabled": true
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "npm-visual-manager.ignoredPackages": [
+        {
+            "name": "@eslint/js"
+        },
+        {
+            "name": "@vitejs/plugin-react"
+        },
+        {
+            "name": "eslint-plugin-react-refresh"
+        },
+        {
+            "name": "fast-check"
+        }
+    ]
 }

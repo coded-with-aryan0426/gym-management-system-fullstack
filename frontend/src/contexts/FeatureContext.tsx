@@ -47,10 +47,10 @@ export const FeatureProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (cached) {
         return JSON.parse(cached);
       }
-      // Default: chat enabled
-      return { [CHAT_FEATURE_KEY]: true };
+      // DISABLED BY DEFAULT - Chat feature is on hold
+      return { [CHAT_FEATURE_KEY]: false };
     } catch {
-      return { [CHAT_FEATURE_KEY]: true };
+      return { [CHAT_FEATURE_KEY]: false };
     }
   });
 

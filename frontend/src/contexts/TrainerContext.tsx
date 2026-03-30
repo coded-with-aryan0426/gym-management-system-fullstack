@@ -1,6 +1,7 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react'
+import React, { createContext, useContext, useMemo, type ReactNode } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
 import type { User } from '../types/user'
 import { useAuth } from './AuthContext'
@@ -31,43 +32,36 @@ interface TrainerProviderProps {
     children: ReactNode
 }
 
+/**
+ * TrainerProvider - Now powered by React Query for optimized caching
+ * 
+ * Stage 1 Optimization:
+ * - Replaced useState/useEffect with React Query
+ * - Automatic caching (2min stale, 15min gc)
+ * - Background refetching on window focus
+ * - Deduplication of concurrent requests
+ * - No more cascading re-renders on every fetch
+ */
 export const TrainerProvider: React.FC<TrainerProviderProps> = ({ children }) => {
     const { isAuthenticated } = useAuth()
-    const [trainers, setTrainers] = useState<User[]>([])
-    const [loading, setLoading] = useState(true)
+    const queryClient = useQueryClient()
 
-    const fetchTrainers = useCallback(async () => {
-        if (!isAuthenticated) {
-            setLoading(false)
-            return
-        }
+    // Use React Query instead of useState/useEffect
+    const { data: trainersData, isLoading } = useQuery({
+        queryKey: ['trainers', 'context-all'],
+        queryFn: () => api.getUsers('TRAINER'),
+        enabled: isAuthenticated,
+        staleTime: 2 * 60 * 1000, // 2 minutes
+        gcTime: 15 * 60 * 1000,   // 15 minutes
+        refetchOnWindowFocus: true,
+        placeholderData: [],
+    })
 
-        // Only show loading indicator on initial fetch
-        if (trainers.length === 0) {
-            setLoading(true)
-        }
+    const trainers = useMemo(() => {
+        return Array.isArray(trainersData) ? trainersData : []
+    }, [trainersData])
 
-        try {
-            const data = await api.getUsers('TRAINER')
-            setTrainers(Array.isArray(data) ? data : [])
-        } catch (error) {
-            console.warn('Failed to load trainers', error)
-            setTrainers([])
-        } finally {
-            setLoading(false)
-        }
-    }, [isAuthenticated, trainers.length])
-
-    // Initial fetch
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetchTrainers()
-        } else {
-            setTrainers([])
-            setLoading(false)
-        }
-    }, [isAuthenticated, fetchTrainers])
-
+    // Memoized stats calculation
     const stats = useMemo(() => {
         const total = trainers.length
 
@@ -92,12 +86,18 @@ export const TrainerProvider: React.FC<TrainerProviderProps> = ({ children }) =>
         return { total, active, inactive, newThisMonth, assignedToday }
     }, [trainers])
 
+    // refreshTrainers now invalidates React Query cache
+    const refreshTrainers = async () => {
+        await queryClient.invalidateQueries({ queryKey: ['trainers'] })
+    }
+
+    // Memoize the context value to prevent unnecessary re-renders
     const value = useMemo(() => ({
         trainers,
-        loading,
+        loading: isLoading,
         stats,
-        refreshTrainers: fetchTrainers,
-    }), [trainers, loading, stats, fetchTrainers])
+        refreshTrainers,
+    }), [trainers, isLoading, stats])
 
     return (
         <TrainerContext.Provider value={value}>

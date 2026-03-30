@@ -91,6 +91,7 @@ const ThemeSection: React.FC = () => {
                     </div>
                 </div>
 
+{/*}
                 <div className="form-group">
                     <div className="form-group__header">
                         <MessageSquare size={16} />
@@ -124,6 +125,7 @@ const ThemeSection: React.FC = () => {
                         </span>
                     </div>
                 </div>
+{*/}
             </div>
         </div>
     )

@@ -26,7 +26,7 @@ const Settings = lazy(() => import('./pages/Settings/Settings'));
 const StaffList = lazy(() => import('./pages/Staff/StaffList'));
 const StaffDetail = lazy(() => import('./pages/Staff/StaffDetail'));
 const OwnerNotifications = lazy(() => import('./pages/Dashboard/OwnerNotifications'));
-const OwnerMessages = lazy(() => import('./pages/Dashboard/OwnerMessages'));
+// import OwnerMessages from './pages/Dashboard/OwnerMessages';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'));
 const ChangePasswordFirst = lazy(() => import('./pages/ChangePasswordFirst'));
@@ -51,7 +51,7 @@ const MySchedule = lazy(() => import('./pages/trainer/MySchedule'));
 const MyClasses = lazy(() => import('./pages/trainer/MyClasses'));
 const TrainerNotifications = lazy(() => import('./pages/trainer/TrainerNotifications'));
 const ProgressNotes = lazy(() => import('./pages/trainer/ProgressNotes'));
-const TrainerMessages = lazy(() => import('./pages/trainer/TrainerMessages'));
+// const TrainerMessages = lazy(() => import('./pages/trainer/TrainerMessages'));
 const TrainerReports = lazy(() => import('./pages/trainer/TrainerReports'));
 const TrainerSettings = lazy(() => import('./pages/trainer/TrainerSettings'));
 
@@ -65,7 +65,7 @@ const MyTrainer = lazy(() => import('./pages/member/MyTrainer'));
 const MyBookings = lazy(() => import('./pages/member/MyBookings'));
 const AvailableClasses = lazy(() => import('./pages/member/AvailableClasses'));
 const MemberNotifications = lazy(() => import('./pages/member/MemberNotifications'));
-const MemberMessages = lazy(() => import('./pages/member/MemberMessages'));
+// const MemberMessages = lazy(() => import('./pages/member/MemberMessages'));
 const MemberSettings = lazy(() => import('./pages/member/MemberSettings'));
 
 // Super Admin Pages
@@ -173,7 +173,7 @@ function App() {
                             <Route path="schedule" element={<MySchedule />} />
                             <Route path="notifications" element={<TrainerNotifications />} />
                             <Route path="progress-notes" element={<ProgressNotes />} />
-                            <Route path="messages" element={<TrainerMessages />} />
+                            {/* <Route path="messages" element={<TrainerMessages />} /> */}
                             <Route path="reports" element={<TrainerReports />} />
                             <Route path="settings" element={<TrainerSettings />} />
                             <Route path="*" element={<Navigate to="/trainer" replace />} />
@@ -198,7 +198,7 @@ function App() {
                             <Route path="trainer" element={<MyTrainer />} />
                             <Route path="bookings" element={<MyBookings />} />
                             <Route path="notifications" element={<MemberNotifications />} />
-                            <Route path="messages" element={<MemberMessages />} />
+                            {/* <Route path="messages" element={<MemberMessages />} /> */}
                             <Route path="settings" element={<MemberSettings />} />
                             <Route path="*" element={<Navigate to="/member" replace />} />
                           </Routes>
@@ -253,7 +253,7 @@ function App() {
                             <Route path="/pt-sessions" element={<Navigate to="/classes?tab=sessions" replace />} />
                             <Route path="/reports" element={<Navigate to="/financials?tab=analytics" replace />} />
                               <Route path="/notifications" element={<OwnerNotifications />} />
-                              <Route path="/messages" element={<OwnerMessages />} />
+                              {/* <Route path="/messages" element={<OwnerMessages />} /> */}
                               <Route path="/settings" element={<Settings />} />
                               <Route path="/check-in" element={<CheckIn />} />
                               <Route path="/attendance" element={<AttendancePage />} />

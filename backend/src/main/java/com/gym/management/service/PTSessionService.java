@@ -207,19 +207,20 @@ public class PTSessionService {
 
     /**
      * Get all PT sessions
-     * 
-     * @return List of all session DTOs
+     *
+     * @return List of all session DTOs (excluding orphaned records)
      */
     public List<PTSessionDTO> getAllSessions() {
         List<PTSession> sessions = ptSessionRepository.findAll();
         return sessions.stream()
                 .map(this::convertToDTO)
+                .filter(dto -> dto != null)
                 .collect(Collectors.toList());
     }
 
     /**
      * Get all sessions for a trainer
-     * 
+     *
      * @param trainerId Trainer ID
      * @return List of session DTOs
      */
@@ -227,6 +228,7 @@ public class PTSessionService {
         List<PTSession> sessions = ptSessionRepository.findByTrainerId(trainerId);
         return sessions.stream()
                 .map(this::convertToDTO)
+                .filter(dto -> dto != null)
                 .collect(Collectors.toList());
     }
 
@@ -245,12 +247,13 @@ public class PTSessionService {
         List<PTSession> sessions = ptSessionRepository.findByTrainerIdAndDateRange(trainerId, start, end);
         return sessions.stream()
                 .map(this::convertToDTO)
+                .filter(dto -> dto != null)
                 .collect(Collectors.toList());
     }
 
     /**
      * Get all sessions for a member
-     * 
+     *
      * @param memberId Member ID
      * @return List of session DTOs
      */
@@ -258,12 +261,13 @@ public class PTSessionService {
         List<PTSession> sessions = ptSessionRepository.findByMemberId(memberId);
         return sessions.stream()
                 .map(this::convertToDTO)
+                .filter(dto -> dto != null)
                 .collect(Collectors.toList());
     }
 
     /**
      * Get sessions for a member within a date range
-     * 
+     *
      * @param memberId  Member ID
      * @param startDate Start date
      * @param endDate   End date
@@ -276,12 +280,13 @@ public class PTSessionService {
         List<PTSession> sessions = ptSessionRepository.findByMemberIdAndDateRange(memberId, start, end);
         return sessions.stream()
                 .map(this::convertToDTO)
+                .filter(dto -> dto != null)
                 .collect(Collectors.toList());
     }
 
     /**
      * Get a session by ID
-     * 
+     *
      * @param sessionId Session ID
      * @return Session DTO
      */
@@ -289,7 +294,11 @@ public class PTSessionService {
         Objects.requireNonNull(sessionId, "Session ID must not be null");
         PTSession session = ptSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("Session not found with ID: " + sessionId));
-        return convertToDTO(session);
+        PTSessionDTO dto = convertToDTO(session);
+        if (dto == null) {
+            throw new IllegalArgumentException("Session has orphaned trainer/member references: " + sessionId);
+        }
+        return dto;
     }
 
     /**
@@ -304,28 +313,47 @@ public class PTSessionService {
 
     /**
      * Convert PTSession entity to DTO
-     * 
+     * Handles orphaned records gracefully by checking for null trainer/member
+     *
      * @param session PT session entity
-     * @return PT session DTO
+     * @return PT session DTO, or null if session is orphaned
      */
     private PTSessionDTO convertToDTO(PTSession session) {
-        PTSessionDTO dto = new PTSessionDTO();
-        dto.setSessionId(session.getSessionId());
-        dto.setTrainerId(session.getTrainer().getUserId());
-        dto.setTrainerName(session.getTrainer().getFullName());
-        dto.setMemberId(session.getMember().getUserId());
-        dto.setMemberName(session.getMember().getFullName());
-        dto.setSessionDate(session.getSessionDate());
-        dto.setDurationMinutes(session.getDurationMinutes());
-        dto.setStatus(session.getStatus());
-        dto.setProgressNotes(session.getProgressNotes());
-        dto.setWorkoutPlan(session.getWorkoutPlan());
-        dto.setDietPlan(session.getDietPlan());
-        dto.setIsRecurring(session.getIsRecurring());
-        dto.setRecurringFrequency(session.getRecurringFrequency());
-        dto.setCreatedAt(session.getCreatedAt());
-        dto.setUpdatedAt(session.getUpdatedAt());
-        return dto;
+        try {
+            PTSessionDTO dto = new PTSessionDTO();
+            dto.setSessionId(session.getSessionId());
+
+            if (session.getTrainer() != null) {
+                dto.setTrainerId(session.getTrainer().getUserId());
+                dto.setTrainerName(session.getTrainer().getFullName());
+            } else {
+                dto.setTrainerId(null);
+                dto.setTrainerName("[Deleted User]");
+            }
+
+            if (session.getMember() != null) {
+                dto.setMemberId(session.getMember().getUserId());
+                dto.setMemberName(session.getMember().getFullName());
+            } else {
+                dto.setMemberId(null);
+                dto.setMemberName("[Deleted User]");
+            }
+
+            dto.setSessionDate(session.getSessionDate());
+            dto.setDurationMinutes(session.getDurationMinutes());
+            dto.setStatus(session.getStatus());
+            dto.setProgressNotes(session.getProgressNotes());
+            dto.setWorkoutPlan(session.getWorkoutPlan());
+            dto.setDietPlan(session.getDietPlan());
+            dto.setIsRecurring(session.getIsRecurring());
+            dto.setRecurringFrequency(session.getRecurringFrequency());
+            dto.setCreatedAt(session.getCreatedAt());
+            dto.setUpdatedAt(session.getUpdatedAt());
+            return dto;
+        } catch (Exception e) {
+            logger.error("Error converting PTSession to DTO for session ID: " + session.getSessionId(), e);
+            return null;
+        }
     }
 
     /**
@@ -548,7 +576,7 @@ public class PTSessionService {
 
     /**
      * Get upcoming sessions within 24 hours for reminder generation
-     * 
+     *
      * @return List of sessions needing reminders
      */
     public List<PTSessionDTO> getSessionsNeedingReminders() {
@@ -558,6 +586,7 @@ public class PTSessionService {
         List<PTSession> sessions = ptSessionRepository.findSessionsWithin24Hours(now, twentyFourHoursLater);
         return sessions.stream()
                 .map(this::convertToDTO)
+                .filter(dto -> dto != null)
                 .collect(Collectors.toList());
     }
 

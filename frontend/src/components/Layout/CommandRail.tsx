@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useState, useEffect } from "react"
+import React, { useRef, useState, useEffect, useCallback } from "react"
 import { NavLink, useNavigate, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -41,6 +41,7 @@ import { Logo } from "../ui/Logo"
 import Avatar from "../ui/Avatar"
 import "./CommandRail.css"
 import { useFeatureContext } from "../../contexts/FeatureContext"
+import { prefetchOnHover, cancelPrefetch } from "../../services/prefetchService"
 
 export interface NavItem {
   path: string;
@@ -137,13 +138,12 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
   const displayName = isSuperAdmin ? 'Creator' : (user?.fullName || 'User');
   const displayEmail = isSuperAdmin ? 'creator@titan.dev' : (user?.email || '—');
 
-  // Check if chat is enabled
-  const { localFeatures } = useFeatureContext();
-  const isChatEnabled = localFeatures['chat-enabled'] !== false;
+  // Chat feature is permanently disabled
+  // const { localFeatures } = useFeatureContext();
+  // const isChatEnabled = localFeatures['chat-enabled'] !== false;
 
   const itemsToRender = navItems === defaultNavItems ? navItems.filter(item => {
-    // Filter out chat/messages when disabled
-    if (!isChatEnabled && item.id === 'messages') return false;
+    // Filter for role-based access
     if (role === 'OWNER' || role === 'ADMIN') return true;
     const restricted = ['/financials', '/reports'];
     return !restricted.includes(item.path);
@@ -157,6 +157,20 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
       logout();
     }
   };
+
+  // Prefetch handler for link hover - Stage 2 optimization
+  const handleLinkHover = useCallback((path: string) => {
+    if (isCollapsed) {
+      setHoveredLink(path);
+    }
+    // Prefetch data for the route being hovered
+    prefetchOnHover(path);
+  }, [isCollapsed]);
+
+  const handleLinkLeave = useCallback(() => {
+    setHoveredLink(null);
+    cancelPrefetch();
+  }, []);
 
   return (
     <aside className={`command-rail ${isCollapsed ? "command-rail--collapsed" : ""}`}>
@@ -175,8 +189,8 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
                 end={item.end}
                 className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}
                 style={{ color: isActive ? item.color : undefined } as React.CSSProperties}
-                onMouseEnter={() => isCollapsed && setHoveredLink(item.path)}
-                onMouseLeave={() => setHoveredLink(null)}
+                onMouseEnter={() => handleLinkHover(item.path)}
+                onMouseLeave={handleLinkLeave}
               >
                 <span className="command-rail__icon">
                   {item.icon && React.cloneElement(item.icon as React.ReactElement<any>, {

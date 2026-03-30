@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AuditLog {
 
     @Id
@@ -60,7 +62,7 @@ public class AuditLog {
     private String details;
 
     @Column(name = "changes", columnDefinition = "CLOB")
-    private String changes; // JSON string for field changes
+    private String changes;
 
     @Column(name = "ip_address", length = 50)
     private String ipAddress;
@@ -69,7 +71,7 @@ public class AuditLog {
     private String location;
 
     @Column(name = "device_type", length = 50)
-    private String deviceType; // desktop, mobile, tablet
+    private String deviceType;
 
     @Column(name = "browser", length = 100)
     private String browser;
@@ -81,10 +83,11 @@ public class AuditLog {
     private String sessionId;
 
     @Column(name = "severity", length = 20)
-    private String severity = "info"; // info, low, medium, high, critical
+    @Builder.Default
+    private String severity = "info";
 
     @Column(name = "metadata", columnDefinition = "CLOB")
-    private String metadata; // JSON for additional data
+    private String metadata;
 
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
@@ -104,124 +107,6 @@ public class AuditLog {
         }
         if (severity == null) {
             severity = "info";
-        }
-    }
-
-    // Builder pattern for easy creation
-    public static AuditLogBuilder builder() {
-        return new AuditLogBuilder();
-    }
-
-    public static class AuditLogBuilder {
-        private final AuditLog log = new AuditLog();
-
-        public AuditLogBuilder action(String action) {
-            log.setAction(action);
-            return this;
-        }
-
-        public AuditLogBuilder entity(String entity) {
-            log.setEntity(entity);
-            return this;
-        }
-
-        public AuditLogBuilder entityId(String entityId) {
-            log.setEntityId(entityId);
-            return this;
-        }
-
-        public AuditLogBuilder entityName(String entityName) {
-            log.setEntityName(entityName);
-            return this;
-        }
-
-        public AuditLogBuilder target(String target) {
-            log.setTarget(target);
-            return this;
-        }
-
-        public AuditLogBuilder userName(String userName) {
-            log.setUserName(userName);
-            return this;
-        }
-
-        public AuditLogBuilder userRole(String userRole) {
-            log.setUserRole(userRole);
-            return this;
-        }
-
-        public AuditLogBuilder userAvatar(String userAvatar) {
-            log.setUserAvatar(userAvatar);
-            return this;
-        }
-
-        public AuditLogBuilder details(String details) {
-            log.setDetails(details);
-            return this;
-        }
-
-        public AuditLogBuilder changes(String changes) {
-            log.setChanges(changes);
-            return this;
-        }
-
-        public AuditLogBuilder ipAddress(String ipAddress) {
-            log.setIpAddress(ipAddress);
-            return this;
-        }
-
-        public AuditLogBuilder location(String location) {
-            log.setLocation(location);
-            return this;
-        }
-
-        public AuditLogBuilder deviceType(String deviceType) {
-            log.setDeviceType(deviceType);
-            return this;
-        }
-
-        public AuditLogBuilder browser(String browser) {
-            log.setBrowser(browser);
-            return this;
-        }
-
-        public AuditLogBuilder os(String os) {
-            log.setOs(os);
-            return this;
-        }
-
-        public AuditLogBuilder sessionId(String sessionId) {
-            log.setSessionId(sessionId);
-            return this;
-        }
-
-        public AuditLogBuilder severity(String severity) {
-            log.setSeverity(severity);
-            return this;
-        }
-
-        public AuditLogBuilder metadata(String metadata) {
-            log.setMetadata(metadata);
-            return this;
-        }
-
-        public AuditLogBuilder timestamp(LocalDateTime timestamp) {
-            log.setTimestamp(timestamp);
-            return this;
-        }
-
-        public AuditLogBuilder user(User user) {
-            log.setUser(user);
-            return this;
-        }
-
-        public AuditLogBuilder gym(Gym gym) {
-            log.setGym(gym);
-            return this;
-        }
-
-        public AuditLog build() {
-            return log;
         }
     }
 }
