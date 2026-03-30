@@ -4,6 +4,31 @@ import api from '../../services/api'
 import { showToast } from '../../utils/showToast'
 import './UserActionModals.css'
 
+
+/* Copy helper with fallback for secure and insecure contexts */
+const copyToClipboard = async (text: string): Promise<boolean> => {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text)
+      return true
+    } else {
+      // Fallback: old execCommand method
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      const success = document.execCommand('copy')
+      document.body.removeChild(textarea)
+      return success
+    }
+  } catch (err) {
+    console.error('Copy failed:', err)
+    return false
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────
    Types
 ───────────────────────────────────────────────────────────── */
@@ -248,11 +273,12 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
               <span>DELETE</span>
               <button
                 className="uam__title-copy"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation()
                   const label = `DELETE ${isBatch ? `${recipients.length} USERS` : recipients[0]?.fullName || ''}`
-                  navigator.clipboard.writeText(label)
-                  showToast('Label copied', 'success')
+                  const success = await copyToClipboard(label)
+                  if (success) showToast('Label copied', 'success')
+                  else showToast('Copy failed', 'error')
                 }}
                 title="Copy DELETE label"
                 type="button"
@@ -309,10 +335,11 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
               <span className="uam__confirm-label">to confirm</span>
               <button
                 className="uam__copy-btn"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation()
-                  navigator.clipboard.writeText('DELETE')
-                  showToast('Copied to clipboard', 'success')
+                  const success = await copyToClipboard('DELETE')
+                  if (success) showToast('Copied to clipboard', 'success')
+                  else showToast('Copy failed', 'error')
                 }}
                 title="Copy DELETE"
                 type="button"
