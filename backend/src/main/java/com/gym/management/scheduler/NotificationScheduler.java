@@ -234,10 +234,8 @@ public class NotificationScheduler {
         try {
             log.info("Running scheduled task: Cleanup old notifications");
 
-            LocalDateTime ninetyDaysAgo = LocalDateTime.now().minusDays(90);
-
             // Delete archived notifications older than 90 days
-            // This would require a custom repository method
+            // Future implementation: add notificationRepository.deleteOldArchivedNotifications(90)
             log.info("Cleanup task executed");
         } catch (Exception e) {
             log.error("Error in cleanupOldNotifications task", e);

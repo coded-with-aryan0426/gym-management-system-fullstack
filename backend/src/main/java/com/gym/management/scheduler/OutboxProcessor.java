@@ -26,7 +26,6 @@ public class OutboxProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(OutboxProcessor.class);
     private static final int MAX_RETRIES = 10;
-    private static final int BATCH_SIZE = 100;
 
     @Autowired
     private OutboxEventRepository outboxRepository;
