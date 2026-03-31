@@ -285,7 +285,7 @@ export default function LoginPage() {
                     left: 60,
                     maxWidth: 480,
                 }}>
-                    <Logo size={48} showText={false} />
+                    <Logo size={48} />
                     <h1 style={{ fontSize: 42, fontWeight: 800, marginBottom: 16, lineHeight: 1.1, marginTop: 24 }}>
                         Welcome to <span style={{ color: colors.crimson }}>AthlonX</span>
                     </h1>
@@ -337,16 +337,7 @@ export default function LoginPage() {
                                 background: isDark ? 'rgba(220, 38, 38, 0.12)' : 'rgba(220, 38, 38, 0.08)',
                                 border: `1px solid ${isDark ? 'rgba(220, 38, 38, 0.3)' : 'rgba(220, 38, 38, 0.2)'}`,
                             }}>
-                                <Logo size={20} showText={false} />
-                                <span style={{
-                                    fontSize: 11,
-                                    fontWeight: 700,
-                                    letterSpacing: '0.14em',
-                                    textTransform: 'uppercase',
-                                    color: colors.crimson
-                                }}>
-                                    AthlonX
-                                </span>
+                                <Logo size={40} />
                             </div>
                         </div>
                         <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8, letterSpacing: '-0.02em' }}>

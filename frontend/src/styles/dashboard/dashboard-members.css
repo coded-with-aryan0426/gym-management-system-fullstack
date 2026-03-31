@@ -60,6 +60,7 @@
   color: #fff;
   background: linear-gradient(135deg, var(--dash-blue), var(--dash-indigo));
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .dash-member__header__welcome {
@@ -459,6 +460,7 @@
   font-weight: var(--dash-fw-bold);
   color: #fff;
   background: linear-gradient(135deg, var(--dash-brand-primary), var(--dash-violet));
+  overflow: hidden;
 }
 
 .dash-member__trainer-card__info {
@@ -507,38 +509,31 @@
    8. MEMBER ACTIVITY FEED
    ════════════════════════════════════════════════════════════════════════════ */
 
-.dash-member__activity {
-  background: var(--dash-bg-card);
-  border: 1px solid var(--dash-border);
-  border-radius: var(--dash-radius-lg);
-  padding: var(--dash-space-4);
-}
-
-.dash-member__activity__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--dash-space-4);
-}
-
-.dash-member__activity__list {
+.dash-member__activity-list {
   display: flex;
   flex-direction: column;
   gap: var(--dash-space-2);
 }
 
-.dash-member__activity__item {
+.dash-member__activity-item {
   display: flex;
   align-items: flex-start;
   gap: var(--dash-space-3);
   padding: var(--dash-space-3);
   background: var(--dash-bg-card-hover);
   border-radius: var(--dash-radius-md);
+  border: 1px solid transparent;
+  transition: all var(--dash-transition-fast);
 }
 
-.dash-member__activity__icon {
-  width: 36px;
-  height: 36px;
+.dash-member__activity-item:hover {
+  background: var(--dash-glass-bg-hover);
+  border-color: var(--dash-border-subtle);
+}
+
+.dash-member__activity-icon {
+  width: 32px;
+  height: 32px;
   border-radius: var(--dash-radius-sm);
   display: flex;
   align-items: center;
@@ -546,24 +541,41 @@
   flex-shrink: 0;
 }
 
-.dash-member__activity__icon--workout { background: var(--dash-blue-light); color: var(--dash-blue); }
-.dash-member__activity__icon--class   { background: var(--dash-violet-light); color: var(--dash-violet); }
-.dash-member__activity__icon--goal    { background: var(--dash-green-light); color: var(--dash-green); }
-.dash-member__activity__icon--streak  { background: var(--dash-amber-light); color: var(--dash-amber); }
+.dash-member__activity-icon--checkin { background: var(--dash-blue-light); color: var(--dash-blue); }
+.dash-member__activity-icon--workout { background: var(--dash-green-light); color: var(--dash-green); }
+.dash-member__activity-icon--booking { background: var(--dash-violet-light); color: var(--dash-violet); }
+.dash-member__activity-icon--payment { background: var(--dash-amber-light); color: var(--dash-amber); }
 
-.dash-member__activity__content {
+.dash-member__activity-content {
   flex: 1;
   min-width: 0;
 }
 
-.dash-member__activity__text {
+.dash-member__activity-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.dash-member__activity-name {
   font-size: var(--dash-fs-sm);
+  font-weight: var(--dash-fw-semibold);
   color: var(--dash-text);
 }
 
-.dash-member__activity__time {
+.dash-member__activity-date {
   font-size: var(--dash-fs-xs);
   color: var(--dash-text-tertiary);
+}
+
+.dash-member__activity-reason {
+  font-size: var(--dash-fs-xs);
+  color: var(--dash-text-secondary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -668,7 +680,7 @@
 
 /* Scrollable lists */
 .dash-member__classes__list--scroll,
-.dash-member__activity__list--scroll {
+.dash-member__activity-list {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;

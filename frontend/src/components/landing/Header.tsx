@@ -132,7 +132,7 @@ export default function Header() {
             sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 1.5 }, cursor: 'pointer' }}
             onClick={() => navigate('/')}
           >
-            <Logo size={40} />
+            <Logo size={32} />
           </Box>
 
           {/* Nav Links - Desktop Only */}
@@ -356,7 +356,7 @@ export default function Header() {
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }} onClick={() => { navigate('/'); setMobileMenuOpen(false); }}>
-            <Logo size={40} />
+            <Logo size={32} />
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {/* Theme toggle in mobile menu */}

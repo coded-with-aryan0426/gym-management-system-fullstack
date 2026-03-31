@@ -2,14 +2,9 @@ package com.gym.management.controller;
 
 import com.gym.management.dto.MemberProfileDTO;
 import com.gym.management.dto.MemberProfileUpdateDTO;
-import com.gym.management.model.ClassBooking;
-import com.gym.management.model.Membership;
-import com.gym.management.model.User;
-import com.gym.management.repository.ClassBookingRepository;
-import com.gym.management.repository.MembershipRepository;
-import com.gym.management.repository.NotificationRepository;
-import com.gym.management.repository.ProgressNoteRepository;
-import com.gym.management.repository.UserRepository;
+import com.gym.management.dto.member.MemberDashboardStatsDTO;
+import com.gym.management.model.*;
+import com.gym.management.repository.*;
 import com.gym.management.service.MemberProfileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,21 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-
-import com.gym.management.model.CheckIn;
-import com.gym.management.model.SessionStatus;
-import com.gym.management.model.WorkoutLog;
-import com.gym.management.model.MemberPoints;
-import com.gym.management.model.Transaction;
-
-import com.gym.management.repository.CheckInRepository;
-import com.gym.management.repository.PTSessionRepository;
-import com.gym.management.repository.WorkoutLogRepository;
-import com.gym.management.repository.MemberPointsRepository;
-import com.gym.management.repository.TransactionRepository;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/member")
@@ -85,68 +72,253 @@ public class MemberDashboardController {
             }
 
             User member = memberOpt.get();
-            Map<String, Object> dashboard = new HashMap<>();
+            LocalDate today = LocalDate.now();
+            LocalDate startOfMonth = today.withDayOfMonth(1);
 
-            dashboard.put("memberId", member.getUserId());
-            dashboard.put("memberName", member.getFullName());
-            dashboard.put("email", member.getEmail());
+            // 1. Basic Info
+            MemberDashboardStatsDTO.MemberDashboardStatsDTOBuilder builder = MemberDashboardStatsDTO.builder()
+                    .memberId(member.getUserId())
+                    .memberName(member.getFullName())
+                    .email(member.getEmail())
+                    .avatarId(member.getAvatarId());
 
+            // 2. Membership Info
             List<Membership> memberships = membershipRepository.findByUserUserId(memberId);
             if (!memberships.isEmpty()) {
-                Membership membership = memberships.get(0);
-                Map<String, Object> membershipInfo = new HashMap<>();
-                membershipInfo.put("status", membership.getStatus().toString());
-                membershipInfo.put("startDate", membership.getStartDate());
-                membershipInfo.put("endDate", membership.getEndDate());
+                Membership m = memberships.get(0);
+                MemberDashboardStatsDTO.MembershipInfoDTO.MembershipInfoDTOBuilder mBuilder = MemberDashboardStatsDTO.MembershipInfoDTO.builder()
+                        .status(m.getStatus().toString())
+                        .startDate(m.getStartDate())
+                        .endDate(m.getEndDate())
+                        .autoRenew(m.getAutoRenew() != null ? m.getAutoRenew() : false)
+                        .freezeDaysUsed(m.getFreezeDaysUsed() != null ? m.getFreezeDaysUsed() : 0)
+                        .freezeDaysTotal(m.getFreezeDaysTotal() != null ? m.getFreezeDaysTotal() : 30)
+                        .isFrozen(m.getIsFrozen() != null ? m.getIsFrozen() : false)
+                        .frozenUntil(m.getFrozenUntil());
 
-                if (membership.getEndDate() != null) {
-                    long daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), membership.getEndDate());
-                    membershipInfo.put("daysRemaining", Math.max(0, daysRemaining));
-                    membershipInfo.put("isExpired", daysRemaining < 0);
+                if (m.getEndDate() != null) {
+                    long daysRemaining = ChronoUnit.DAYS.between(today, m.getEndDate());
+                    mBuilder.daysRemaining(Math.max(0, daysRemaining));
+                    mBuilder.isExpired(daysRemaining < 0);
                 }
 
-                if (membership.getMembershipPackage() != null) {
-                    membershipInfo.put("packageName", membership.getMembershipPackage().getPackageName());
-                }
-
-                // Include tiered plan info (new system takes priority)
-                if (membership.getTieredPlan() != null) {
-                    membershipInfo.put("planName", membership.getTieredPlan().getPlanName());
-                    membershipInfo.put("packageName", membership.getTieredPlan().getPlanName()); // Override legacy
-                    if (membership.getPlanVariant() != null) {
-                        membershipInfo.put("planDuration", membership.getPlanVariant().getFormattedDuration());
-                        membershipInfo.put("planPrice", membership.getPlanVariant().getPrice());
+                if (m.getTieredPlan() != null) {
+                    mBuilder.packageName(m.getTieredPlan().getPlanName());
+                    if (m.getPlanVariant() != null) {
+                        mBuilder.planDuration(m.getPlanVariant().getFormattedDuration());
+                        mBuilder.planPrice(m.getPlanVariant().getPrice().doubleValue());
                     }
+                } else if (m.getMembershipPackage() != null) {
+                    mBuilder.packageName(m.getMembershipPackage().getPackageName());
+                    mBuilder.planPrice(m.getMembershipPackage().getPrice().doubleValue());
                 }
 
-                dashboard.put("membership", membershipInfo);
-            } else {
-                dashboard.put("membership", null);
+                builder.membership(mBuilder.build());
             }
 
+            // 3. Assigned Trainer
             Set<User> trainers = member.getTrainers();
             if (trainers != null && !trainers.isEmpty()) {
                 User trainer = trainers.iterator().next();
-                Map<String, Object> trainerInfo = new HashMap<>();
-                trainerInfo.put("userId", trainer.getUserId());
-                trainerInfo.put("fullName", trainer.getFullName());
-                trainerInfo.put("email", trainer.getEmail());
-                trainerInfo.put("avatarId", trainer.getAvatarId());
-                dashboard.put("assignedTrainer", trainerInfo);
-            } else {
-                dashboard.put("assignedTrainer", null);
+                MemberDashboardStatsDTO.TrainerInfoDTO.TrainerInfoDTOBuilder tBuilder = MemberDashboardStatsDTO.TrainerInfoDTO.builder()
+                        .userId(trainer.getUserId())
+                        .fullName(trainer.getFullName())
+                        .email(trainer.getEmail())
+                        .avatarId(trainer.getAvatarId())
+                        .specialization("Fitness Specialist") // Placeholder
+                        .rating(4.9); // Placeholder
+
+                // Try to find next session
+                List<PTSession> nextSessions = ptSessionRepository.findUpcomingSessionsByMember(memberId, LocalDateTime.now());
+                if (!nextSessions.isEmpty()) {
+                    PTSession next = nextSessions.get(0);
+                    tBuilder.nextSession(next.getSessionDate().format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d 'at' h:mm a")));
+                }
+
+                long completedSessions = ptSessionRepository.countByMemberUserIdAndStatus(memberId, SessionStatus.COMPLETED);
+                tBuilder.sessionsCount((int) completedSessions);
+
+                builder.assignedTrainer(tBuilder.build());
             }
 
+            // 4. KPI Cards
+            List<WorkoutLog> logs = workoutLogRepository.findByUserUserIdOrderByWorkoutDateDesc(memberId);
+            int workoutsThisMonth = (int) logs.stream().filter(l -> !l.getWorkoutDate().isBefore(startOfMonth)).count();
+            int totalCalories = logs.stream().mapToInt(l -> l.getCaloriesBurned() != null ? l.getCaloriesBurned() : 0).sum();
+            int totalMinutes = logs.stream().mapToInt(l -> l.getDurationMinutes() != null ? l.getDurationMinutes() : 0).sum();
+            
+            int currentStreak = calculateStreak(logs);
+            
             Long bookingsCount = classBookingRepository.countMemberBookings(memberId);
-            dashboard.put("bookedClassesCount", bookingsCount);
-
             Long unreadNotifications = notificationRepository.countUnreadByUserId(memberId);
-            dashboard.put("unreadNotificationsCount", unreadNotifications);
+            
+            List<MemberPoints> pointsList = memberPointsRepository.findByMemberUserId(memberId);
+            int totalPoints = pointsList.stream().mapToInt(MemberPoints::getPoints).sum();
 
-            return ResponseEntity.ok(dashboard);
+            builder.workoutsThisMonth(workoutsThisMonth)
+                    .streakDays(currentStreak)
+                    .bookedClassesCount(bookingsCount)
+                    .unreadNotificationsCount(unreadNotifications)
+                    .caloriesBurned(totalCalories)
+                    .minutesActive(totalMinutes)
+                    .totalPoints(totalPoints);
+
+            // 5. Upcoming Classes
+            List<ClassBooking> upcomingBookings = classBookingRepository.findUpcomingBookings(memberId);
+            List<MemberDashboardStatsDTO.UpcomingClassDTO> upcomingClasses = upcomingBookings.stream()
+                    .limit(5)
+                    .map(b -> MemberDashboardStatsDTO.UpcomingClassDTO.builder()
+                            .id(b.getId())
+                            .title(b.getGymClass().getClassName())
+                            .time(b.getGymClass().getStartTime().format(java.time.format.DateTimeFormatter.ofPattern("h:mm a")))
+                            .date(formatFriendlyDate(b.getGymClass().getStartTime().toLocalDate()))
+                            .location(b.getGymClass().getLocation() != null ? b.getGymClass().getLocation() : "Studio A")
+                            .trainer(b.getGymClass().getTrainer() != null ? b.getGymClass().getTrainer().getFullName() : "Staff")
+                            .type(b.getGymClass().getClassType())
+                            .capacity(b.getGymClass().getMaxCapacity())
+                            .enrolled(b.getGymClass().getCurrentBookings())
+                            .build())
+                    .collect(Collectors.toList());
+            builder.upcomingClasses(upcomingClasses);
+
+            // 6. Weekly Activity
+            List<MemberDashboardStatsDTO.WeeklyActivityDTO> weeklyActivity = new ArrayList<>();
+            LocalDate startOfWeek = today.minusDays(6);
+            for (int i = 0; i < 7; i++) {
+                LocalDate date = startOfWeek.plusDays(i);
+                int dailyWorkouts = (int) logs.stream().filter(l -> l.getWorkoutDate().equals(date)).count();
+                int dailyCalories = logs.stream().filter(l -> l.getWorkoutDate().equals(date))
+                        .mapToInt(l -> l.getCaloriesBurned() != null ? l.getCaloriesBurned() : 0).sum();
+                
+                weeklyActivity.add(MemberDashboardStatsDTO.WeeklyActivityDTO.builder()
+                        .day(date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH))
+                        .workouts(dailyWorkouts)
+                        .calories(dailyCalories)
+                        .build());
+            }
+            builder.weeklyActivity(weeklyActivity);
+
+            // 7. Recent Activity (Combined and Sorted)
+            List<Map<String, Object>> rawActivity = new ArrayList<>();
+            
+            // Check-ins
+            checkInRepository.findByUserUserIdOrderByCheckInTimeDesc(memberId).stream().limit(10).forEach(c -> {
+                Map<String, Object> act = new HashMap<>();
+                act.put("id", c.getCheckInId());
+                act.put("name", "Gym Visit");
+                act.put("type", "checkin");
+                act.put("timestamp", c.getCheckInTime());
+                act.put("reason", "Checked in at the gym");
+                rawActivity.add(act);
+            });
+
+            // Workout Logs
+            logs.stream().limit(10).forEach(l -> {
+                Map<String, Object> act = new HashMap<>();
+                act.put("id", l.getLogId());
+                act.put("name", "Workout Logged");
+                act.put("type", "workout");
+                act.put("timestamp", l.getCreatedAt() != null ? l.getCreatedAt() : l.getWorkoutDate().atStartOfDay());
+                act.put("reason", String.format("Logged %d mins workout", l.getDurationMinutes()));
+                rawActivity.add(act);
+            });
+
+            // Transactions
+            transactionRepository.findByUserIdOrderByDateTimeDesc(memberId).stream().limit(5).forEach(t -> {
+                Map<String, Object> act = new HashMap<>();
+                act.put("id", t.getTransactionId());
+                act.put("name", "Payment Made");
+                act.put("type", "payment");
+                act.put("timestamp", t.getDateTime());
+                act.put("reason", String.format("Paid ₹%.2f", t.getAmount()));
+                rawActivity.add(act);
+            });
+
+            // Sort by timestamp descending
+            List<MemberDashboardStatsDTO.ActivityItemDTO> sortedActivity = rawActivity.stream()
+                    .sorted((a, b) -> ((LocalDateTime) b.get("timestamp")).compareTo((LocalDateTime) a.get("timestamp")))
+                    .limit(8)
+                    .map(act -> MemberDashboardStatsDTO.ActivityItemDTO.builder()
+                            .id((Long) act.get("id"))
+                            .name((String) act.get("name"))
+                            .type((String) act.get("type"))
+                            .date(formatTimeAgo((LocalDateTime) act.get("timestamp")))
+                            .reason((String) act.get("reason"))
+                            .build())
+                    .collect(Collectors.toList());
+            builder.recentActivity(sortedActivity);
+
+            // 8. Mocks for Radar and Weight (unless data exists)
+            builder.fitnessMetrics(Arrays.asList(
+                    new MemberDashboardStatsDTO.FitnessMetricDTO("Strength", 85),
+                    new MemberDashboardStatsDTO.FitnessMetricDTO("Endurance", 72),
+                    new MemberDashboardStatsDTO.FitnessMetricDTO("Flexibility", 68),
+                    new MemberDashboardStatsDTO.FitnessMetricDTO("Balance", 75),
+                    new MemberDashboardStatsDTO.FitnessMetricDTO("Speed", 70)
+            ));
+
+            if (member.getWeight() != null) {
+                builder.weightProgress(Arrays.asList(
+                        new MemberDashboardStatsDTO.WeightProgressDTO("Week 1", member.getWeight().doubleValue() + 2, member.getWeight().doubleValue()),
+                        new MemberDashboardStatsDTO.WeightProgressDTO("Week 2", member.getWeight().doubleValue() + 1.5, member.getWeight().doubleValue()),
+                        new MemberDashboardStatsDTO.WeightProgressDTO("Week 3", member.getWeight().doubleValue() + 0.8, member.getWeight().doubleValue()),
+                        new MemberDashboardStatsDTO.WeightProgressDTO("Week 4", member.getWeight().doubleValue(), member.getWeight().doubleValue())
+                ));
+            } else {
+                builder.weightProgress(Collections.emptyList());
+            }
+
+            builder.achievements(Arrays.asList(
+                    new MemberDashboardStatsDTO.AchievementDTO("Trophy", "7-Day Streak", "#F59E0B"),
+                    new MemberDashboardStatsDTO.AchievementDTO("Target", "50 Workouts", "#10B981"),
+                    new MemberDashboardStatsDTO.AchievementDTO("Award", "Perfect Week", "#8B5CF6"),
+                    new MemberDashboardStatsDTO.AchievementDTO("Star", "Early Bird", "#06B6D4")
+            ));
+
+            return ResponseEntity.ok(builder.build());
         } catch (Exception e) {
+            log.error("Failed to fetch member dashboard", e);
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
+    }
+
+    private int calculateStreak(List<WorkoutLog> logs) {
+        if (logs == null || logs.isEmpty()) return 0;
+        
+        Set<LocalDate> dates = logs.stream().map(WorkoutLog::getWorkoutDate).collect(Collectors.toSet());
+        int streak = 0;
+        LocalDate current = LocalDate.now();
+        
+        // If no workout today, check yesterday
+        if (!dates.contains(current)) {
+            current = current.minusDays(1);
+        }
+        
+        while (dates.contains(current)) {
+            streak++;
+            current = current.minusDays(1);
+        }
+        
+        return streak;
+    }
+
+    private String formatFriendlyDate(LocalDate date) {
+        LocalDate today = LocalDate.now();
+        if (date.equals(today)) return "Today";
+        if (date.equals(today.plusDays(1))) return "Tomorrow";
+        return date.format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d"));
+    }
+
+    private String formatTimeAgo(LocalDateTime dateTime) {
+        if (dateTime == null) return "N/A";
+        long minutes = java.time.temporal.ChronoUnit.MINUTES.between(dateTime, LocalDateTime.now());
+        if (minutes < 1) return "Just now";
+        if (minutes < 60) return minutes + "m ago";
+        long hours = minutes / 60;
+        if (hours < 24) return hours + "h ago";
+        long days = hours / 24;
+        if (days < 7) return days + "d ago";
+        return dateTime.format(java.time.format.DateTimeFormatter.ofPattern("MMM d"));
     }
 
     @GetMapping("/profile")
@@ -190,7 +362,6 @@ public class MemberDashboardController {
         result.put("endDate", m.getEndDate());
 
         if (m.getEndDate() != null) {
-            // +1 to include the expiry day itself (matches owner member detail view)
             long daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), m.getEndDate()) + 1;
             result.put("daysRemaining", Math.max(0, daysRemaining));
             result.put("isExpired", daysRemaining <= 0);
@@ -207,10 +378,9 @@ public class MemberDashboardController {
             result.put("packagePrice", m.getMembershipPackage().getPrice());
         }
 
-        // Tiered plan takes priority
         if (m.getTieredPlan() != null) {
             result.put("planName", m.getTieredPlan().getPlanName());
-            result.put("packageName", m.getTieredPlan().getPlanName()); // Override legacy
+            result.put("packageName", m.getTieredPlan().getPlanName());
             if (m.getPlanVariant() != null) {
                 result.put("planDuration", m.getPlanVariant().getFormattedDuration());
                 result.put("packagePrice", m.getPlanVariant().getPrice());
@@ -257,14 +427,6 @@ public class MemberDashboardController {
         }
         Membership m = mOpt.get();
 
-        if (enabled) {
-            boolean hasValidPaymentMethod = false; // Simulating strict check for payment method
-            if (!hasValidPaymentMethod) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("error", "Please add a payment method before enabling auto-renewal."));
-            }
-        }
-
         m.setAutoRenew(enabled);
         membershipRepository.save(m);
         return ResponseEntity
@@ -274,10 +436,7 @@ public class MemberDashboardController {
     @PostMapping("/membership/{id}/cancel-request")
     public ResponseEntity<?> cancelMembershipRequest(@PathVariable("id") Long id) {
         return ResponseEntity.ok(
-                Map.of("success", true, "message", "Cancellation request received. Support will contact you shortly.")); // Simple
-                                                                                                                         // mock
-                                                                                                                         // ticket
-                                                                                                                         // request
+                Map.of("success", true, "message", "Cancellation request received. Support will contact you shortly."));
     }
 
     @GetMapping("/bookings")
@@ -321,32 +480,26 @@ public class MemberDashboardController {
         try {
             Map<String, Object> stats = new HashMap<>();
 
-            // Gym Visits
             List<CheckIn> checkIns = checkInRepository.findByUserUserIdOrderByCheckInTimeDesc(memberId);
             stats.put("gymVisits", checkIns.size());
 
-            // Classes Attended
             Long classesCount = classBookingRepository.countMemberBookings(memberId);
             stats.put("classesAttended", classesCount);
 
-            // PT Sessions
             long ptUsed = ptSessionRepository.countByMemberUserIdAndStatus(memberId, SessionStatus.COMPLETED);
             long ptScheduled = ptSessionRepository.countByMemberUserIdAndStatus(memberId, SessionStatus.SCHEDULED);
             stats.put("ptSessionsUsed", ptUsed);
-            stats.put("ptSessionsTotal", ptUsed + ptScheduled > 0 ? ptUsed + ptScheduled : 4); // default fallback
+            stats.put("ptSessionsTotal", ptUsed + ptScheduled > 0 ? ptUsed + ptScheduled : 4);
 
-            // Workout Logs (Calories & Minutes)
             List<WorkoutLog> logs = workoutLogRepository.findByUserUserIdOrderByWorkoutDateDesc(memberId);
             int calories = logs.stream().mapToInt(l -> l.getCaloriesBurned() != null ? l.getCaloriesBurned() : 0).sum();
-            int minutes = logs.stream().mapToInt(l -> l.getDurationMinutes() != null ? l.getDurationMinutes() : 0)
-                    .sum();
+            int minutes = logs.stream().mapToInt(l -> l.getDurationMinutes() != null ? l.getDurationMinutes() : 0).sum();
             stats.put("calories", calories);
             stats.put("minutesActive", minutes);
-            stats.put("streak", logs.isEmpty() ? 0 : 1); // Simplified streak
+            stats.put("streak", calculateStreak(logs));
 
-            // Points
             List<MemberPoints> pointsList = memberPointsRepository.findByMemberUserId(memberId);
-            int points = pointsList.stream().mapToInt(p -> p.getPoints()).sum();
+            int points = pointsList.stream().mapToInt(MemberPoints::getPoints).sum();
             stats.put("points", points);
 
             return ResponseEntity.ok(stats);

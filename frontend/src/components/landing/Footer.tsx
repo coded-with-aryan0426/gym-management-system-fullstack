@@ -86,7 +86,7 @@ export default function Footer() {
                 sx={{ display: 'flex', alignItems: 'center', gap: 1.5, marginBottom: 3, cursor: 'pointer' }}
                 onClick={() => navigate('/')}
               >
-                <Logo size={48} showText={true} />
+                <Logo size={48} />
               </Box>
 
               <Typography

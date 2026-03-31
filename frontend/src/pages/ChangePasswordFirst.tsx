@@ -79,7 +79,7 @@ const ChangePasswordFirst: React.FC = () => {
             <div style={{ width: "100%", maxWidth: 420 }}>
                 <div style={{ marginBottom: 32, textAlign: 'center' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-                        <Logo size={48} showText={false} />
+                        <Logo size={64} />
                     </div>
                     <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 12 }}>
                         Secure Your Account

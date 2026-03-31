@@ -26,6 +26,7 @@ import {
   ClipboardList,
   CalendarPlus
 } from 'lucide-react';
+import { Logo } from '../ui/Logo';
 import { useTheme } from '../../contexts/ThemeContext';
 import './Navbar.css';
 
@@ -250,16 +251,15 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
         transition={{ type: 'spring', stiffness: 100, damping: 20 }}
       >
         {/* Logo */}
-        <motion.div
-          className="navbar-premium__logo"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <div className="navbar-premium__logo-icon">
-            <Dumbbell size={24} />
-          </div>
-          <span className="navbar-premium__logo-text">AthlonX</span>
-        </motion.div>
+        <NavLink to="/" className="navbar-premium__logo-link" style={{ textDecoration: 'none' }}>
+          <motion.div
+            className="navbar-premium__logo"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Logo size={32} />
+          </motion.div>
+        </NavLink>
 
         {/* Navigation Links */}
         <div className="navbar-premium__nav">
@@ -570,11 +570,12 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="mobile-menu__header">
-                    <div className="navbar-premium__logo">
-                      <div className="navbar-premium__logo-icon">
-                        <Dumbbell size={24} />
-                      </div>
-                      <span className="navbar-premium__logo-text">AthlonX</span>
+                    <div 
+                      className="navbar-premium__logo" 
+                      onClick={() => { navigate('/'); setMobileMenuOpen(false); }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <Logo size={32} />
                     </div>
                     <button onClick={() => setMobileMenuOpen(false)}>
                       <X size={24} />

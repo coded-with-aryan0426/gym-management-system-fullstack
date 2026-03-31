@@ -188,7 +188,7 @@ export default function SignupPage() {
                 <div style={{ position: "absolute", inset: 0, backgroundImage: "url('/login-sidebar.png')", backgroundSize: "cover", backgroundPosition: "center" }} />
                 <div style={{ position: "absolute", inset: 0, background: isDark ? `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(13,13,13,0.6) 50%, rgba(13,13,13,0.4) 100%)` : `linear-gradient(to top, ${colors.bgPrimary} 0%, rgba(248,250,252,0.6) 50%, rgba(248,250,252,0.4) 100%)` }} />
                 <div style={{ position: "absolute", bottom: 60, left: 60, maxWidth: 480 }}>
-                    <Logo size={48} showText={false} />
+                    <Logo size={48} />
                     <h1 style={{ fontSize: 42, fontWeight: 800, marginBottom: 16, lineHeight: 1.1, marginTop: 24 }}>Join <span style={{ color: colors.crimson }}>AthlonX</span></h1>
                     <p style={{ fontSize: 18, color: isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.6)", lineHeight: 1.6 }}>Start your fitness journey with the most powerful gym management platform.</p>
                 </div>
@@ -223,16 +223,7 @@ export default function SignupPage() {
                                 background: isDark ? 'rgba(220, 38, 38, 0.12)' : 'rgba(220, 38, 38, 0.08)',
                                 border: `1px solid ${isDark ? 'rgba(220, 38, 38, 0.3)' : 'rgba(220, 38, 38, 0.2)'}`,
                             }}>
-                                <Logo size={20} showText={false} />
-                                <span style={{
-                                    fontSize: 11,
-                                    fontWeight: 700,
-                                    letterSpacing: '0.14em',
-                                    textTransform: 'uppercase',
-                                    color: colors.crimson
-                                }}>
-                                    AthlonX
-                                </span>
+                                <Logo size={40} />
                             </div>
                         </div>
                         <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 6, letterSpacing: '-0.02em' }}>

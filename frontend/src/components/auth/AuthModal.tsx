@@ -584,16 +584,7 @@ export default function AuthModal() {
                                     ? '0 0 20px rgba(220, 38, 38, 0.1)'
                                     : '0 0 15px rgba(220, 38, 38, 0.06)',
                             }}>
-                                <Logo size={22} color="#DC2626" showText={false} />
-                                <span style={{
-                                    fontSize: 13,
-                                    fontWeight: 800,
-                                    color: colors.crimson,
-                                    letterSpacing: '0.12em',
-                                    textTransform: 'uppercase',
-                                }}>
-                                    AthlonX
-                                </span>
+                                <Logo size={40} />
                             </div>
 
                             {/* Title & Subtitle */}

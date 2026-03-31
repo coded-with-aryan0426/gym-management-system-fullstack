@@ -1,7 +1,10 @@
 /* ============================================================================
-   TRAINER DASHBOARD - AthlonX V3
+   TRAINER DASHBOARD - AthlonX Unified Design System
    ============================================================================ */
-@import './TrainerTheme.css';
+/* Trainer dashboard CSS is now unified with the dashboard-core system
+   and handles trainer-specific components alongside member/owner dashboards.
+   This file provides trainer-specific styling overrides if needed.
+ */
 
 .trainer-dashboard {
     min-height: 100vh;

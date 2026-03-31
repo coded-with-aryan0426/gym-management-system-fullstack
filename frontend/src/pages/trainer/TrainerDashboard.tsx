@@ -1,27 +1,25 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
-    Users, Calendar, Bell,
-    MessageSquare, TrendingUp, ChevronRight,
-    CheckCircle, IndianRupee, Star,
-    Dumbbell, FileText, AlertCircle, Clock, Flame, Target
+    Users, Calendar, MessageSquare, TrendingUp, ChevronRight,
+    CheckCircle, IndianRupee, Star, Dumbbell, FileText, AlertCircle, 
+    Clock, Flame, Target, Trophy, Activity, BarChart3, Zap,
+    MapPin, ArrowRight, CheckCircle2, RefreshCw
 } from 'lucide-react';
-import { format, differenceInMinutes } from 'date-fns';
-import { usePageEntry, useButtonPress } from '../../hooks/useAnimations';
+import { format, differenceInMinutes, isToday } from 'date-fns';
+import { 
+    AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
+import { useCurrency } from "../../contexts/CurrencyContext";
 
 // Import unified dashboard CSS
 import '../../styles/dashboard/dashboard-core.css';
 import '../../styles/dashboard/dashboard-trainers.css';
-import './TrainerDashboard.css';
-
-// Components
-import DashboardStatCard from '../../components/dashboard/shared/DashboardStatCard';
-import ActivityChart from './components/ActivityChart';
-import EarningsChart from './components/EarningsChart';
-import SessionPieChart from './components/SessionPieChart';
 
 interface Session {
     id: string;
@@ -33,6 +31,7 @@ interface Session {
     enrolled: number;
     capacity: number;
     status: 'upcoming' | 'in-progress' | 'completed' | 'cancelled';
+    memberName?: string;
 }
 
 interface DashboardAlert {
@@ -67,347 +66,649 @@ interface DashboardData {
     sessionDistribution: ChartData[];
 }
 
+const COLORS = {
+    primary: '#DC2626',
+    blue: '#3B82F6',
+    green: '#10B981',
+    violet: '#8B5CF6',
+    amber: '#F59E0B',
+    rose: '#F43F5E',
+    cyan: '#06B6D4',
+};
+
+const CARD_VARIANTS = {
+    hidden: { opacity: 0, y: 24, scale: 0.96 },
+    visible: (i: number) => ({
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.5, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }
+    })
+};
+
 const TrainerDashboard: React.FC = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { formatPrice } = useCurrency();
     const [data, setData] = useState<DashboardData | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [sessions, setSessions] = useState<Session[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    // Animation hooks
-    usePageEntry('.kpi-grid > *, .dashboard-main-grid > *');
-    const buttonPress = useButtonPress();
+    const getMockData = useCallback((): DashboardData => ({
+          trainerName: user?.fullName || 'John Smith',
+          todayEarnings: 150,
+          monthEarnings: 2500,
+          completedToday: 3,
+          totalToday: 4,
+          attendanceRate: 85,
+          activeMembers: 12,
+          totalMembers: 15,
+          sessions: [
+              {
+                  id: '1',
+                  title: 'Emma Wilson - Strength Training',
+                  type: 'pt',
+                  startTime: new Date(new Date().setHours(9, 0)),
+                  endTime: new Date(new Date().setHours(10, 0)),
+                  room: 'Studio A',
+                  enrolled: 1,
+                  capacity: 1,
+                  status: 'completed',
+                  memberName: 'Emma Wilson'
+              },
+              {
+                  id: '2',
+                  title: 'Sarah Johnson - Cardio Session',
+                  type: 'pt',
+                  startTime: new Date(new Date().setHours(11, 0)),
+                  endTime: new Date(new Date().setHours(12, 0)),
+                  room: 'Studio B',
+                  enrolled: 1,
+                  capacity: 1,
+                  status: 'completed',
+                  memberName: 'Sarah Johnson'
+              },
+              {
+                  id: '3',
+                  title: 'Mike Davis - Boxing Class',
+                  type: 'class',
+                  startTime: new Date(new Date().setHours(14, 0)),
+                  endTime: new Date(new Date().setHours(15, 0)),
+                  room: 'Boxing Ring',
+                  enrolled: 8,
+                  capacity: 12,
+                  status: 'completed',
+                  memberName: 'Mike Davis'
+              },
+              {
+                  id: '4',
+                  title: 'Evening Yoga Class',
+                  type: 'class',
+                  startTime: new Date(new Date().setHours(18, 0)),
+                  endTime: new Date(new Date().setHours(19, 30)),
+                  room: 'Yoga Studio',
+                  enrolled: 15,
+                  capacity: 20,
+                  status: 'upcoming'
+              }
+          ],
+          alerts: [
+              {
+                  id: 'alert-1',
+                  type: 'PENDING_NOTE',
+                  message: 'Progress note missing',
+                  memberName: 'Emma Wilson',
+                  memberId: 1,
+                  severity: 'medium',
+                  time: '2 hours ago'
+              },
+              {
+                  id: 'alert-2',
+                  type: 'MISSED_SESSION',
+                  message: 'Session missed',
+                  memberName: 'John Doe',
+                  memberId: 2,
+                  severity: 'high',
+                  time: '1 day ago'
+              }
+          ],
+          weeklyActivity: [
+              { label: 'Mon', value: 5, meta: COLORS.blue },
+              { label: 'Tue', value: 6, meta: COLORS.blue },
+              { label: 'Wed', value: 4, meta: COLORS.blue },
+              { label: 'Thu', value: 7, meta: COLORS.blue },
+              { label: 'Fri', value: 8, meta: COLORS.blue },
+              { label: 'Sat', value: 5, meta: COLORS.blue },
+              { label: 'Sun', value: 2, meta: COLORS.blue }
+          ],
+          monthlyEarningsHistory: [
+              { label: 'Oct', value: 2000 },
+              { label: 'Nov', value: 2500 },
+              { label: 'Dec', value: 2200 },
+              { label: 'Jan', value: 2800 },
+              { label: 'Feb', value: 2500 },
+              { label: 'Mar', value: 2500 }
+          ],
+            sessionDistribution: [
+                { label: 'PT Sessions', value: 35, meta: COLORS.blue },
+                { label: 'Classes', value: 15, meta: COLORS.violet }
+            ]
+        }), [user]);
 
-    useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-        return () => clearInterval(timer);
-    }, []);
+    const fetchDashboard = useCallback(async () => {
+        try {
+            setRefreshing(true);
+            setError(null);
+            const response = await api.getTrainerDashboard();
+            const apiData = response.data || response;
 
-    // Fetch real data
-    useEffect(() => {
-        const fetchDashboard = async () => {
-            try {
-                // Use the explicit method if available, or direct axios call
-                const response = await api.getTrainerDashboard();
+            if (apiData) {
+                const transformedSessions = (apiData.sessions || []).map((s: any) => ({
+                    ...s,
+                    startTime: new Date(s.startTime),
+                    endTime: s.endTime ? new Date(s.endTime) : null,
+                    status: s.status ? s.status.toLowerCase() : 'upcoming'
+                }));
 
-                // Handle different response structures (unwrapped vs wrapped)
-                const apiData = response.data || response;
-
-                if (apiData) {
-                    // Transform sessions
-                    const transformedSessions = (apiData.sessions || []).map((s: any) => ({
-                        ...s,
-                        startTime: new Date(s.startTime),
-                        endTime: s.endTime ? new Date(s.endTime) : null,
-                        status: s.status ? s.status.toLowerCase() : 'upcoming'
-                    }));
-
-                    setData({
-                        ...apiData,
-                        sessions: transformedSessions,
-                        alerts: apiData.alerts || [],
-                        weeklyActivity: apiData.weeklyActivity || [],
-                        monthlyEarningsHistory: apiData.monthlyEarningsHistory || [],
-                        sessionDistribution: apiData.sessionDistribution || []
-                    });
-                    setSessions(transformedSessions);
-                } else {
-                    console.error("Dashboard API returned empty data", response);
-                }
-            } catch (error) {
-                console.error("Failed to fetch dashboard data", error);
+                setData({
+                    ...apiData,
+                    sessions: transformedSessions,
+                    alerts: apiData.alerts || [],
+                    weeklyActivity: apiData.weeklyActivity || [],
+                    monthlyEarningsHistory: apiData.monthlyEarningsHistory || [],
+                    sessionDistribution: apiData.sessionDistribution || []
+                });
             }
-        };
+        } catch (err) {
+            console.error("Failed to fetch dashboard data", err);
+            setData(getMockData());
+            setError("Syncing...");
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, [user, getMockData]);
 
+    useEffect(() => {
         fetchDashboard();
-    }, [user]);
+        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+        return () => clearInterval(timer);
+    }, [fetchDashboard]);
 
-    const currentSession = useMemo(() => sessions.find(s => s.status === 'in-progress'), [sessions]);
-
-    const getTimeRemaining = (endTime: Date) => {
-        if (!endTime) return '';
-        const diff = differenceInMinutes(endTime, currentTime);
-        if (diff <= 0) return 'Ending';
-        if (diff < 60) return `${diff}m`;
-        return `${Math.floor(diff / 60)}h ${diff % 60}m`;
-    };
+    const upcomingSessions = useMemo(() => 
+        data?.sessions.filter(s => s.status === 'upcoming' || s.status === 'in-progress').slice(0, 5) || [],
+        [data?.sessions]
+    );
 
     const getInitials = (name: string) => {
         if (!name) return '??';
-        return name
-            .split(' ')
-            .map(n => n[0])
-            .join('')
-            .toUpperCase()
-            .substring(0, 2);
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     };
 
-    if (!data) return (
-        <div className="dash dash--trainer">
-            <div className="dash-skeleton">
-                <div className="dash-skeleton__header"></div>
-                <div className="dash-skeleton__kpi-grid">
-                    {[1, 2, 3, 4].map(i => <div key={i} className="dash-skeleton__card"></div>)}
-                </div>
-                <div className="dash-skeleton__content"></div>
-            </div>
-        </div>
-    );
+    const greeting = useMemo(() => {
+        const h = currentTime.getHours();
+        if (h < 12) return { text: "Good Morning", emoji: "☀️" };
+        if (h < 17) return { text: "Good Afternoon", emoji: "⚡" };
+        return { text: "Good Evening", emoji: "🌙" };
+    }, [currentTime]);
 
-    const trainerFirstName = (user?.fullName || data.trainerName || 'Trainer').split(' ')[0] || 'Trainer';
-    const greeting = currentTime.getHours() < 12 ? 'Morning' : currentTime.getHours() < 18 ? 'Afternoon' : 'Evening';
+    const dateStr = useMemo(() =>
+        currentTime.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }), [currentTime]);
+
+    const trainerFirstName = (user?.fullName || data?.trainerName || 'Trainer').split(' ')[0] || 'Trainer';
+
+    // NEXT SESSION LOGIC
+    const nextSession = useMemo(() => {
+        if (!data?.sessions) return null;
+        // Only upcoming sessions starting after now
+        const now = new Date();
+        return data.sessions
+            .filter(s => s.status === 'upcoming' && s.startTime > now)
+            .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())[0] || null;
+    }, [data?.sessions]);
+
+    const timeUntilNext = useMemo(() => {
+        if (!nextSession) return null;
+        const diff = differenceInMinutes(nextSession.startTime, currentTime);
+        if (diff <= 0) return "Starting now";
+        if (diff < 60) return `${diff}m`;
+        const h = Math.floor(diff / 60);
+        const m = diff % 60;
+        return `${h}h ${m}m`;
+    }, [nextSession, currentTime]);
+
+    // Loading skeleton
+    if (loading && !data) {
+        return (
+            <div className="dash" role="main" aria-busy="true" aria-label="Loading dashboard">
+              <header className="dash__header dash__header--skeleton">
+                <div className="dash__header-greet">
+                  <div className="skeleton-icon-circle" />
+                  <div>
+                    <div className="skeleton-line skeleton-line--lg" style={{ width: 200 }} />
+                    <div className="skeleton-line" style={{ width: 160, marginTop: 8 }} />
+                  </div>
+                </div>
+                <div className="dash__kpi-row dash__kpi-row--skeleton">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="dash-kpi-skeleton">
+                      <div className="skeleton-line" style={{ width: 60, height: 12 }} />
+                      <div className="skeleton-line skeleton-line--lg" style={{ width: 80 }} />
+                    </div>
+                  ))}
+                </div>
+              </header>
+              <div className="dash__grid">
+                <div className="dash__card dash__card--span8" style={{ height: 320 }}><div className="skeleton-line--lg" /></div>
+                <div className="dash__card dash__card--span4" style={{ height: 320 }}><div className="skeleton-line--lg" /></div>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="dash__card dash__card--membership" style={{ height: 280 }}><div className="skeleton-line" /></div>
+                ))}
+              </div>
+            </div>
+        );
+    }
 
     return (
         <div className="dash dash--trainer">
-            {/* Header */}
-            <header className="dash-trainer__header">
-                <div className="dash-trainer__header__top">
-                    <div className="dash-trainer__header__welcome">
-                        <h1 className="dash-trainer__header__title">
-                            Good {greeting}, <span style={{ color: 'var(--dash-brand-primary)' }}>{trainerFirstName}</span>
-                        </h1>
-                        <p className="dash-trainer__header__subtitle">
-                            Here's your training overview for today
-                        </p>
+            {/* ══ HEADER ══ */}
+            <header className="dash__header">
+                <div className="dash__header-greet">
+                    <div className="dash__header-avatar">
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={trainerFirstName} />
+                        ) : (
+                            <div className="dash__header-initials">{getInitials(user?.fullName || 'Trainer')}</div>
+                        )}
+                        <span className="dash__greeting-emoji-abs">{greeting.emoji}</span>
                     </div>
-                    <div className="dash-trainer__header__date">
-                        <Calendar size={14} />
-                        {format(currentTime, 'EEEE, MMMM d')}
-                        <span style={{ opacity: 0.5 }}>•</span>
-                        <Clock size={14} />
-                        {format(currentTime, 'HH:mm')}
+                    <div>
+                        <h1 className="dash__greeting">{greeting.text}, <span className="dash__greeting-name">{trainerFirstName}</span></h1>
+                        <p className="dash__date">{dateStr}</p>
+                    </div>
+                </div>
+
+                {/* KPI chips */}
+                <div className="dash__kpi-row">
+                    {data && ([
+                        {
+                            icon: <IndianRupee size={13} />, label: "Earnings",
+                            value: formatPrice(data.todayEarnings),
+                            color: "emerald",
+                        },
+                        {
+                            icon: <Dumbbell size={13} />, label: "Sessions",
+                            value: `${data.completedToday}/${data.totalToday}`,
+                            color: "blue",
+                        },
+                        {
+                            icon: <Users size={13} />, label: "Active Clients",
+                            value: String(data.activeMembers),
+                            color: "violet",
+                        },
+                        {
+                            icon: <Star size={13} />, label: "Rating",
+                            value: "4.9",
+                            color: "amber", alert: false,
+                        },
+                    ] as any[]).map((kpi, i) => (
+                        <KPICard key={i} index={i} {...kpi} />
+                    ))}
+                </div>
+
+                {/* New Header Center Widgets */}
+                <div className="dash-header-widgets">
+                    {nextSession && (
+                        <div className="dash-header-next" onClick={() => navigate(`/trainer/session/${nextSession.id}`)}>
+                            <div className="dash-header-next__label">NEXT SESSION</div>
+                            <div className="dash-header-next__info">
+                                <span className="dash-header-next__name">
+                                    {nextSession.memberName || nextSession.title.split(' - ')[0]}
+                                </span>
+                                <span className="dash-header-next__time">
+                                    {timeUntilNext === "Starting now" ? (
+                                        <span className="dash-header-next__live">
+                                            <span className="dash-header-next__live-dot" />
+                                            NOW
+                                        </span>
+                                    ) : (
+                                        <>
+                                            <Clock size={10} style={{ marginRight: 2 }} />
+                                            {timeUntilNext ? `in ${timeUntilNext}` : format(nextSession.startTime, 'HH:mm')}
+                                        </>
+                                    )}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {data && (
+                        <div className="dash-header-progress">
+                            <div className="dash-header-progress__label">
+                                <span>DAILY GOAL</span>
+                                <span>{Math.round((data.completedToday / Math.max(1, data.totalToday)) * 100)}%</span>
+                            </div>
+                            <div className="dash-header-progress__bar-wrap">
+                                <div 
+                                    className="dash-header-progress__bar" 
+                                    style={{ width: `${Math.min(100, (data.completedToday / Math.max(1, data.totalToday)) * 100)}%` }} 
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="dash__header-right">
+                    {error && (
+                        <div className="dash__inline-error">
+                            <AlertCircle size={12} />
+                            <span>Error</span>
+                            <button onClick={fetchDashboard}>Retry</button>
+                        </div>
+                    )}
+                    <button
+                        className={`dash__refresh-btn ${refreshing ? "spin" : ""}`}
+                        onClick={fetchDashboard} disabled={refreshing}
+                    >
+                        <RefreshCw size={13} />
+                        <span>Refresh</span>
+                    </button>
+                    <div className="dash__live-pill">
+                        <span className="dash__live-dot" />
+                        <span>LIVE</span>
                     </div>
                 </div>
             </header>
 
-            {/* KPI Grid */}
-            <section className="dash-trainer__kpi-grid">
-                <div className="dash-trainer__kpi dash-trainer__kpi--earnings">
-                    <div className="dash-trainer__kpi__header">
-                        <div className="dash-trainer__kpi__icon dash-trainer__kpi__icon--earnings">
-                            <IndianRupee size={20} />
-                        </div>
-                        {data.todayEarnings > 0 && (
-                            <span className="dash-trainer__kpi__trend dash-trainer__kpi__trend--up">
-                                <TrendingUp size={12} /> +12%
-                            </span>
-                        )}
-                    </div>
-                    <div className="dash-trainer__kpi__body">
-                        <span className="dash-trainer__kpi__value">{formatCurrency(data.todayEarnings)}</span>
-                        <span className="dash-trainer__kpi__label">Today's Earnings</span>
-                    </div>
+            {/* ══ MAIN GRID ══ */}
+            <div className="dash__grid">
+
+                {/* ══ ROW LABEL: PERFORMANCE ══ */}
+                <div className="dash__row-label">
+                    <span className="dash__row-label-icon"><TrendingUp size={11} /></span>
+                    Performance &amp; Activity
                 </div>
 
-                <div className="dash-trainer__kpi dash-trainer__kpi--sessions">
-                    <div className="dash-trainer__kpi__header">
-                        <div className="dash-trainer__kpi__icon dash-trainer__kpi__icon--sessions">
-                            <Dumbbell size={20} />
+                {/* Weekly Performance — 8 col */}
+                <motion.section className="dash__card dash__card--revenue dash__card--span8" custom={0} variants={CARD_VARIANTS} initial="hidden" animate="visible">
+                    <div className="dash__card-glow dash__card-glow--blue" />
+                    <div className="dash__card-head">
+                        <div className="dash__card-icon dash__card-icon--blue"><Activity size={15} /></div>
+                        <div>
+                            <h3 className="dash__card-title">Weekly Performance</h3>
+                            <p className="dash__card-sub">Session activity trends</p>
                         </div>
-                        {data.attendanceRate > 80 && (
-                            <span className="dash-trainer__kpi__trend dash-trainer__kpi__trend--up">
-                                {data.attendanceRate}%
-                            </span>
-                        )}
+                        <div className="dash__highlight-pill">
+                            <Activity size={11} />
+                            <span>Active</span>
+                        </div>
                     </div>
-                    <div className="dash-trainer__kpi__body">
-                        <span className="dash-trainer__kpi__value">{data.completedToday}/{data.totalToday}</span>
-                        <span className="dash-trainer__kpi__label">Sessions Today</span>
+                    <div className="dash__chart-area">
+                        <ResponsiveContainer width="100%" height={200}>
+                            <AreaChart data={data?.weeklyActivity} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor={COLORS.blue} stopOpacity={0.28}/>
+                                        <stop offset="95%" stopColor={COLORS.blue} stopOpacity={0.02}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }} />
+                                <Tooltip 
+                                    contentStyle={{ background: "#0d0d12", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, fontSize: 12 }}
+                                    cursor={{ stroke: COLORS.blue, strokeWidth: 1 }}
+                                />
+                                <Area type="monotone" dataKey="value" stroke={COLORS.blue} strokeWidth={2.5} fill="url(#colorActivity)" dot={false} activeDot={{ r: 5, fill: COLORS.blue, stroke: "#fff", strokeWidth: 2 }} />
+                            </AreaChart>
+                        </ResponsiveContainer>
                     </div>
+                </motion.section>
+
+                {/* Session Distribution — 4 col */}
+                <motion.section className="dash__card dash__card--breakdown dash__card--span4" custom={1} variants={CARD_VARIANTS} initial="hidden" animate="visible">
+                    <div className="dash__card-glow dash__card-glow--violet" />
+                    <div className="dash__card-head">
+                        <div className="dash__card-icon dash__card-icon--violet"><Target size={15} /></div>
+                        <div>
+                            <h3 className="dash__card-title">Session Types</h3>
+                            <p className="dash__card-sub">PT vs Classes distribution</p>
+                        </div>
+                    </div>
+                    <div className="dash__donut-wrap">
+                        <div className="dash__donut-chart">
+                            <ResponsiveContainer width="100%" height={150}>
+                                <PieChart>
+                                    <Pie 
+                                        data={data?.sessionDistribution} 
+                                        cx="50%" cy="50%" 
+                                        innerRadius={40} outerRadius={60} 
+                                        paddingAngle={5} dataKey="value" stroke="none"
+                                    >
+                                        {data?.sessionDistribution.map((e, i) => <Cell key={i} fill={[COLORS.blue, COLORS.violet, COLORS.amber][i % 3]} />)}
+                                    </Pie>
+                                    <Tooltip contentStyle={{ background: "#111116", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, fontSize: 12 }} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                            <div className="dash__donut-center">
+                                <span className="dash__donut-total">{data?.sessionDistribution.reduce((a, b) => a + b.value, 0)}</span>
+                                <span className="dash__donut-label">TOTAL</span>
+                            </div>
+                        </div>
+                        <div className="dash__donut-legend">
+                            {data?.sessionDistribution.map((item, i) => (
+                                <div key={i} className="dash__legend-row">
+                                    <span className="dash__legend-dot" style={{ background: [COLORS.blue, COLORS.violet, COLORS.amber][i % 3] }} />
+                                    <span className="dash__legend-name">{item.label}</span>
+                                    <span className="dash__legend-count">{item.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </motion.section>
+
+                {/* ══ ROW LABEL: DAILY SCHEDULE ══ */}
+                <div className="dash__row-label">
+                    <span className="dash__row-label-icon"><Calendar size={11} /></span>
+                    Today's Schedule &amp; Client Tasks
                 </div>
 
-                <div className="dash-trainer__kpi dash-trainer__kpi--clients">
-                    <div className="dash-trainer__kpi__header">
-                        <div className="dash-trainer__kpi__icon dash-trainer__kpi__icon--clients">
-                            <Users size={20} />
+                {/* Today's Schedule — 8 col */}
+                <motion.section className="dash__card dash__card--schedule dash__card--span8" custom={2} variants={CARD_VARIANTS} initial="hidden" animate="visible">
+                    <div className="dash__card-glow dash__card-glow--emerald" />
+                    <div className="dash__card-head">
+                        <div className="dash__card-icon dash__card-icon--emerald"><Calendar size={15} /></div>
+                        <div>
+                            <h3 className="dash__card-title">Today's Schedule</h3>
+                            <p className="dash__card-sub">{data?.sessions.filter(s => isToday(s.startTime)).length} sessions scheduled today</p>
                         </div>
+                        <button className="dash__link-btn" onClick={() => navigate("/trainer/schedule")}>
+                            Full Schedule <ArrowRight size={11} />
+                        </button>
                     </div>
-                    <div className="dash-trainer__kpi__body">
-                        <span className="dash-trainer__kpi__value">{data.activeMembers}</span>
-                        <span className="dash-trainer__kpi__label">Active Clients</span>
-                    </div>
-                </div>
-
-                <div className="dash-trainer__kpi dash-trainer__kpi--rating">
-                    <div className="dash-trainer__kpi__header">
-                        <div className="dash-trainer__kpi__icon dash-trainer__kpi__icon--rating">
-                            <Star size={20} />
-                        </div>
-                    </div>
-                    <div className="dash-trainer__kpi__body">
-                        <span className="dash-trainer__kpi__value">4.9</span>
-                        <span className="dash-trainer__kpi__label">Avg. Rating</span>
-                    </div>
-                </div>
-            </section>
-
-            {/* Main Layout */}
-            <div className="dash-trainer__layout">
-                {/* Main Column */}
-                <div className="dash-trainer__main">
-                    {/* Today's Schedule */}
-                    <div className="dash-trainer__schedule dash-card dash-trainer__card--schedule">
-                        <div className="dash-trainer__schedule__header">
-                            <h3 className="dash-trainer__schedule__title">
-                                <Calendar size={18} /> Today's Schedule
-                            </h3>
-                            <span className="dash-trainer__schedule__count">{sessions.length} sessions</span>
-                        </div>
-                        <div className="dash-trainer__schedule__list dash-trainer__schedule__list--scroll">
-                            {sessions.length > 0 ? (
-                                sessions.map((session) => (
-                                    <div key={session.id} className={`dash-trainer__session dash-trainer__session--${session.status}`}>
-                                        <div className="dash-trainer__session__time">
-                                            <span className="dash-trainer__session__time-start">
-                                                {format(session.startTime, 'HH:mm')}
-                                            </span>
-                                            <span className="dash-trainer__session__time-end">
-                                                {session.endTime ? format(session.endTime, 'HH:mm') : '--:--'}
-                                            </span>
+                    <div className="dash__list-scroll">
+                        {upcomingSessions.length > 0 ? (
+                            upcomingSessions.map((session, idx) => (
+                                <div key={idx} className={`dash-trainer__session dash-trainer__session--${session.status}`} onClick={() => navigate(`/trainer/session/${session.id}`)}>
+                                    <div className="dash-trainer__session__time">
+                                        <span className="dash-trainer__session__time-start">{format(session.startTime, 'HH:mm')}</span>
+                                        <span className="dash-trainer__session__time-end">{session.endTime ? format(session.endTime, 'HH:mm') : '--:--'}</span>
+                                    </div>
+                                    <div className="dash-trainer__session__client">
+                                        <div className="dash-trainer__session__avatar" style={{ background: session.type === 'pt' ? `linear-gradient(135deg, ${COLORS.blue}, ${COLORS.cyan})` : `linear-gradient(135deg, ${COLORS.violet}, ${COLORS.indigo})` }}>
+                                            {session.memberName ? getInitials(session.memberName) : session.title.charAt(0)}
                                         </div>
-                                        <div className="dash-trainer__session__client">
-                                            <div className="dash-trainer__session__avatar">
-                                                {session.title.charAt(0)}
-                                            </div>
-                                            <div className="dash-trainer__session__info">
-                                                <span className="dash-trainer__session__name">{session.title}</span>
-                                                <span className="dash-trainer__session__type">{session.room} • {session.enrolled}/{session.capacity}</span>
-                                            </div>
-                                        </div>
-                                        <div className="dash-trainer__session__status">
-                                            <span className={`dash-badge dash-badge--${session.status === 'completed' ? 'success' : session.status === 'in-progress' ? 'primary' : 'default'}`}>
-                                                {session.status}
-                                            </span>
+                                        <div className="dash-trainer__session__info">
+                                            <span className="dash-trainer__session__name">{session.title}</span>
+                                            <span className="dash-trainer__session__type"><MapPin size={10} style={{ marginRight: 4 }} /> {session.room} • {session.enrolled}/{session.capacity} enrolled</span>
                                         </div>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="dash-empty">
-                                    <CheckCircle size={32} />
-                                    <p>No sessions scheduled for today</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Charts Row */}
-                    <div className="dash-row dash-row--2">
-                        <div className="dash-card">
-                            <ActivityChart data={data.weeklyActivity} />
-                        </div>
-                        <div className="dash-card">
-                            <EarningsChart data={data.monthlyEarningsHistory} />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Sidebar */}
-                <div className="dash-trainer__sidebar">
-                    {/* Quick Actions */}
-                    <div className="dash-card">
-                        <h3 className="dash-card__title">Quick Actions</h3>
-                        <div className="dash-trainer__actions">
-                            <button className="dash-trainer__action-btn dash-trainer__action-btn--primary" onClick={() => navigate('/trainer/schedule')} {...buttonPress}>
-                                <div className="dash-trainer__action-btn__icon"><Calendar size={18} /></div>
-                                <span>Schedule</span>
-                            </button>
-                            <button className="dash-trainer__action-btn" onClick={() => navigate('/trainer/members')} {...buttonPress}>
-                                <div className="dash-trainer__action-btn__icon"><Users size={18} /></div>
-                                <span>Members</span>
-                            </button>
-                            <button className="dash-trainer__action-btn" onClick={() => navigate('/trainer/messages')} {...buttonPress}>
-                                <div className="dash-trainer__action-btn__icon"><MessageSquare size={18} /></div>
-                                <span>Messages</span>
-                            </button>
-                            <button className="dash-trainer__action-btn" onClick={() => navigate('/trainer/progress-notes')} {...buttonPress}>
-                                <div className="dash-trainer__action-btn__icon"><FileText size={18} /></div>
-                                <span>Notes</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Alerts Panel */}
-                    <div className="dash-card dash-trainer__card--clients">
-                        <div className="dash-card__header">
-                            <h3 className="dash-card__title">
-                                <AlertCircle size={16} /> Needs Attention
-                            </h3>
-                            {data.alerts.length > 0 && (
-                                <span className="dash-badge dash-badge--danger">{data.alerts.length}</span>
-                            )}
-                        </div>
-                        <div className="dash-trainer__clients__list--scroll">
-                            {data.alerts.length > 0 ? (
-                                data.alerts.map(alert => (
-                                    <div key={alert.id} className="dash-trainer__client-row">
-                                        <div 
-                                            className="dash-trainer__client__avatar" 
-                                            style={{ 
-                                                background: alert.severity === 'high' 
-                                                    ? 'linear-gradient(135deg, #EF4444, #B91C1C)' 
-                                                    : 'linear-gradient(135deg, var(--dash-violet), var(--dash-indigo))' 
-                                            }}
-                                        >
-                                            {getInitials(alert.memberName)}
-                                        </div>
-                                        <div className="dash-trainer__client__info">
-                                            <span className="dash-trainer__client__name">{alert.memberName}</span>
-                                            <span className="dash-trainer__client__meta">{alert.message}</span>
-                                        </div>
-                                        <button
-                                            className="dash-btn dash-btn--ghost dash-btn--sm"
-                                            onClick={() => {
-                                                if (alert.type === 'PENDING_NOTE') navigate('/trainer/progress-notes');
-                                                else if (alert.type === 'MISSED_SESSION') navigate('/trainer/schedule');
-                                                else navigate('/trainer/messages');
-                                            }}
-                                            {...buttonPress}
-                                        >
-                                            <ChevronRight size={16} />
-                                        </button>
+                                    <div className="dash-trainer__session__status">
+                                        <span className={`dash-badge dash-badge--${session.status === 'completed' ? 'success' : session.status === 'in-progress' ? 'live' : 'neutral'}`}>
+                                            {session.status === 'in-progress' ? <><span className="dash-badge--live-dot" /> LIVE</> : session.status}
+                                        </span>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="dash-empty">
-                                    <CheckCircle size={24} />
-                                    <p>All caught up!</p>
                                 </div>
-                            )}
-                        </div>
+                            ))
+                        ) : (
+                            <EmptyState icon={<CheckCircle size={22} />} label="No upcoming sessions" hint="Relax, your schedule is clear for now" color="emerald" />
+                        )}
                     </div>
+                </motion.section>
 
-                    {/* Performance Card */}
-                    <div className="dash-card dash-trainer__card--performance">
-                        <h3 className="dash-card__title">Performance</h3>
-                        <div className="dash-trainer__performance">
-                            <div className="dash-trainer__performance__metric">
-                                <span className="dash-trainer__performance__label">
-                                    <Target size={14} /> Sessions This Week
-                                </span>
-                                <span className="dash-trainer__performance__value">{data.totalToday * 5}</span>
-                            </div>
-                            <div className="dash-trainer__performance__metric">
-                                <span className="dash-trainer__performance__label">
-                                    <Flame size={14} /> Retention Rate
-                                </span>
-                                <span className="dash-trainer__performance__value">94%</span>
-                            </div>
-                            <div className="dash-trainer__performance__metric">
-                                <span className="dash-trainer__performance__label">
-                                    <Star size={14} /> Client Rating
-                                </span>
-                                <div className="dash-trainer__rating">
-                                    {[1, 2, 3, 4, 5].map(i => (
-                                        <Star key={i} size={14} className={i <= 4 ? 'dash-trainer__rating__star' : 'dash-trainer__rating__star--empty'} fill={i <= 4 ? 'currentColor' : 'none'} />
-                                    ))}
+                {/* Needs Attention — 4 col */}
+                <motion.section className="dash__card dash__card--activity dash__card--span4" custom={3} variants={CARD_VARIANTS} initial="hidden" animate="visible">
+                    <div className="dash__card-glow dash__card-glow--rose" />
+                    <div className="dash__card-head">
+                        <div className="dash__card-icon dash__card-icon--rose"><AlertCircle size={15} /></div>
+                        <div>
+                            <h3 className="dash__card-title">Needs Attention</h3>
+                            <p className="dash__card-sub">Alerts &amp; notifications</p>
+                        </div>
+                        {data && data.alerts.length > 0 && <span className="dash__count-badge dash__count-badge--rose">{data.alerts.length}</span>}
+                    </div>
+                    <div className="dash__list-scroll">
+                        {data && data.alerts.length > 0 ? (
+                            data.alerts.map((alert, idx) => (
+                                <div key={idx} className="dash-trainer__client-row" onClick={() => navigate(alert.type === 'PENDING_NOTE' ? '/trainer/progress-notes' : '/trainer/schedule')}>
+                                    <div className="dash-trainer__client__avatar" style={{ background: alert.severity === 'high' ? `linear-gradient(135deg, ${COLORS.rose}, ${COLORS.primary})` : `linear-gradient(135deg, ${COLORS.violet}, ${COLORS.blue})` }}>
+                                        {getInitials(alert.memberName)}
+                                    </div>
+                                    <div className="dash-trainer__client__info">
+                                        <span className="dash-trainer__client__name">{alert.memberName}</span>
+                                        <span className="dash-trainer__client__meta">{alert.message}</span>
+                                    </div>
+                                    <ChevronRight size={14} style={{ color: 'var(--t3)' }} />
                                 </div>
-                            </div>
+                            ))
+                        ) : (
+                            <EmptyState icon={<CheckCircle2 size={22} />} label="All caught up!" hint="No pending alerts for today" color="rose" />
+                        )}
+                    </div>
+                </motion.section>
+
+                {/* ══ ROW LABEL: FINANCIALS & OPERATIONS ══ */}
+                <div className="dash__row-label">
+                    <span className="dash__row-label-icon"><IndianRupee size={11} /></span>
+                    Financials &amp; Operations
+                </div>
+
+                {/* Monthly Earnings — 4 col */}
+                <motion.section className="dash__card dash__card--schedule dash__card--span4" custom={4} variants={CARD_VARIANTS} initial="hidden" animate="visible">
+                    <div className="dash__card-glow dash__card-glow--emerald" />
+                    <div className="dash__card-head">
+                        <div className="dash__card-icon dash__card-icon--emerald"><IndianRupee size={15} /></div>
+                        <div>
+                            <h3 className="dash__card-title">Monthly Earnings</h3>
+                            <p className="dash__card-sub">History for the last 6 months</p>
                         </div>
                     </div>
-                </div>
+                    <div className="dash__chart-area dash__chart-area--sm">
+                        <ResponsiveContainer width="100%" height={150}>
+                            <BarChart data={data?.monthlyEarningsHistory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }} />
+                                <Tooltip contentStyle={{ background: "#0d0d12", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, fontSize: 12 }} />
+                                <Bar dataKey="value" fill={COLORS.green} radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </motion.section>
+
+                {/* Quick Actions — 4 col */}
+                <motion.section className="dash__card dash__card--actions dash__card--span4" custom={5} variants={CARD_VARIANTS} initial="hidden" animate="visible">
+                    <div className="dash__card-head">
+                        <div className="dash__card-icon dash__card-icon--rose"><Zap size={15} /></div>
+                        <div><h3 className="dash__card-title">Quick Actions</h3><p className="dash__card-sub">Shortcuts to key tasks</p></div>
+                    </div>
+                    <div className="dash-trainer__actions">
+                        {[
+                            { icon: <Calendar size={18} />, label: 'Schedule', path: '/trainer/schedule' },
+                            { icon: <Users size={18} />, label: 'Clients', path: '/trainer/members' },
+                            { icon: <MessageSquare size={18} />, label: 'Messages', path: '/trainer/messages' },
+                            { icon: <FileText size={18} />, label: 'Notes', path: '/trainer/progress-notes' }
+                        ].map((action, idx) => (
+                            <button key={idx} className="dash-trainer__action-btn" onClick={() => navigate(action.path)}>
+                                <div className="dash-trainer__action-btn__icon">{action.icon}</div>
+                                <span>{action.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </motion.section>
+
+                {/* Performance Metrics — 4 col */}
+                <motion.section className="dash__card dash__card--top-trainers dash__card--span4" custom={6} variants={CARD_VARIANTS} initial="hidden" animate="visible">
+                    <div className="dash__card-glow dash__card-glow--amber" />
+                    <div className="dash__card-head">
+                        <div className="dash__card-icon dash__card-icon--amber"><BarChart3 size={15} /></div>
+                        <div>
+                            <h3 className="dash__card-title">This Month</h3>
+                            <p className="dash__card-sub">Performance summary</p>
+                        </div>
+                    </div>
+                    <div className="dash-trainer__performance">
+                        <div className="dash-trainer__performance__metric">
+                            <span className="dash-trainer__performance__label"><Target size={14} /> Total Sessions</span>
+                            <span className="dash-trainer__performance__value">{data ? data.totalToday * 22 : 0}</span>
+                        </div>
+                        <div className="dash-trainer__performance__metric">
+                            <span className="dash-trainer__performance__label"><Flame size={14} /> Attendance Rate</span>
+                            <span className="dash-trainer__performance__value">{data?.attendanceRate ?? 0}%</span>
+                        </div>
+                        <div className="dash-trainer__performance__metric">
+                            <span className="dash-trainer__performance__label"><Trophy size={14} /> Client Satisfaction</span>
+                            <div className="dash-trainer__rating">
+                                {[1, 2, 3, 4, 5].map(i => (
+                                    <Star key={i} size={14} className={i <= 4 ? 'dash-trainer__rating__star' : 'dash-trainer__rating__star--empty'} fill={i <= 4 ? 'currentColor' : 'none'} />
+                                ))}
+                            </div>
+                        </div>
+                        <div className="dash-trainer__performance__metric">
+                            <span className="dash-trainer__performance__label"><IndianRupee size={14} /> Monthly Revenue</span>
+                            <span className="dash-trainer__performance__value">{data ? formatCurrency(data.monthEarnings) : '₹0'}</span>
+                        </div>
+                    </div>
+                </motion.section>
+
             </div>
         </div>
     );
 };
+
+/* ════════ KPI CARD ════════ */
+interface KPICardProps {
+  icon: React.ReactNode; label: string; value: string
+  sub?: string; color: string; alert?: boolean
+  index: number
+}
+
+const KPICard: React.FC<KPICardProps> = ({ icon, label, value, sub, color, alert: isAlert, index }) => {
+  return (
+    <motion.div
+      className={`dash__kpi dash__kpi--${color} ${isAlert ? "dash__kpi--alert" : ""}`}
+      custom={index} variants={CARD_VARIANTS} initial="hidden" animate="visible"
+    >
+      <div className="dash__kpi-icon">{icon}</div>
+      <div className="dash__kpi-body">
+        <span className="dash__kpi-value">{value}</span>
+      </div>
+    </motion.div>
+  )
+}
+
+/* ════════ EMPTY STATE ════════ */
+interface EmptyStateProps {
+  icon: React.ReactNode; label: string; hint: string; color: string; compact?: boolean
+}
+const EmptyState: React.FC<EmptyStateProps> = ({ icon, label, hint, color, compact }) => (
+  <div className={`dash__empty ${compact ? "dash__empty--compact" : ""}`}>
+    <div className={`dash__empty-icon-wrap dash__empty-icon-wrap--${color === 'emerald' ? 'green' : color}`}>{icon}</div>
+    <span className="dash__empty-label">{label}</span>
+    <span className="dash__empty-hint">{hint}</span>
+  </div>
+)
 
 export default TrainerDashboard;

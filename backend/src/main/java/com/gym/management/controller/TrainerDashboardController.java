@@ -151,143 +151,214 @@ public class TrainerDashboardController {
     }
 
     @GetMapping("/dashboard")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<TrainerDashboardStatsDTO> getDashboard() {
         Long trainerId = getAuthenticatedTrainerId();
         User trainer = userRepository.findById(trainerId)
                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
 
-        List<PTSession> allSessions = ptSessionRepository.findByTrainerId(trainerId);
+        List<PTSession> allSessions;
+        try {
+            allSessions = ptSessionRepository.findByTrainerId(trainerId);
+        } catch (Exception e) {
+            log.error("Failed to fetch sessions for trainer {}", trainerId, e);
+            allSessions = new ArrayList<>();
+        }
+        
+        if (allSessions == null) allSessions = new ArrayList<>();
+        
         LocalDate today = LocalDate.now();
 
         // 1. Calculate Earnings (Mock Logic: Completed Session * $50)
-        double todayEarnings = allSessions.stream()
-                .filter(s -> s.getSessionDate().toLocalDate().equals(today) && "COMPLETED".equals(s.getStatus().name()))
-                .count() * 50.0;
+        double todayEarnings = 0;
+        double monthEarnings = 0;
+        try {
+            todayEarnings = allSessions.stream()
+                    .filter(s -> s != null && s.getSessionDate() != null && s.getStatus() != null && 
+                                 s.getSessionDate().toLocalDate().equals(today) && 
+                                 SessionStatus.COMPLETED.equals(s.getStatus()))
+                    .count() * 50.0;
 
-        double monthEarnings = allSessions.stream()
-                .filter(s -> s.getSessionDate().getMonth().equals(today.getMonth())
-                        && s.getSessionDate().getYear() == today.getYear()
-                        && "COMPLETED".equals(s.getStatus().name()))
-                .count() * 50.0;
+            monthEarnings = allSessions.stream()
+                    .filter(s -> s != null && s.getSessionDate() != null && s.getStatus() != null && 
+                                 s.getSessionDate().getMonth().equals(today.getMonth())
+                                 && s.getSessionDate().getYear() == today.getYear()
+                                 && SessionStatus.COMPLETED.equals(s.getStatus()))
+                    .count() * 50.0;
+        } catch (Exception e) {
+            log.error("Error calculating earnings for trainer {}", trainerId, e);
+        }
 
         // 2. Today's Stats
-        List<PTSession> todaySessions = allSessions.stream()
-                .filter(s -> s.getSessionDate().toLocalDate().equals(today))
-                .collect(Collectors.toList());
+        int totalToday = 0;
+        int completedToday = 0;
+        try {
+            List<PTSession> todaySessions = allSessions.stream()
+                    .filter(s -> s != null && s.getSessionDate() != null && s.getSessionDate().toLocalDate().equals(today))
+                    .collect(Collectors.toList());
 
-        int totalToday = todaySessions.size();
-        int completedToday = (int) todaySessions.stream()
-                .filter(s -> "COMPLETED".equals(s.getStatus().name()))
-                .count();
+            totalToday = todaySessions.size();
+            completedToday = (int) todaySessions.stream()
+                    .filter(s -> s.getStatus() != null && SessionStatus.COMPLETED.equals(s.getStatus()))
+                    .count();
+        } catch (Exception e) {
+            log.error("Error calculating today's stats for trainer {}", trainerId, e);
+        }
 
         // 3. Attendance Rate (Completed / (Completed + Cancelled + NoShow) * 100)
-        long totalForRate = allSessions.stream()
-                .filter(s -> Set.of("COMPLETED", "CANCELLED", "MISSED").contains(s.getStatus().name()))
-                .count();
-        long completedTotal = allSessions.stream()
-                .filter(s -> "COMPLETED".equals(s.getStatus().name()))
-                .count();
-        double attendanceRate = totalForRate > 0 ? ((double) completedTotal / totalForRate) * 100 : 0;
+        double attendanceRate = 0;
+        try {
+            long totalForRate = allSessions.stream()
+                    .filter(s -> s != null && s.getStatus() != null && 
+                                 Set.of("COMPLETED", "CANCELLED", "MISSED").contains(s.getStatus().name()))
+                    .count();
+            long completedTotal = allSessions.stream()
+                    .filter(s -> s != null && SessionStatus.COMPLETED.equals(s.getStatus()))
+                    .count();
+            attendanceRate = totalForRate > 0 ? ((double) completedTotal / totalForRate) * 100 : 0;
+        } catch (Exception e) {
+            log.error("Error calculating attendance rate for trainer {}", trainerId, e);
+        }
 
         // 4. Active Members
-        int activeMembers = trainer.getCustomers() != null ? trainer.getCustomers().size() : 0;
-        int totalMembers = activeMembers; // Assuming all assigned are 'total' for now
+        int activeMembers = 0;
+        try {
+            activeMembers = trainer.getCustomers() != null ? trainer.getCustomers().size() : 0;
+        } catch (Exception e) {
+            log.error("Failed to fetch customer size for trainer {}", trainerId, e);
+        }
+        int totalMembers = activeMembers;
 
         // 5. Map Sessions to DTO
-        List<TrainerSessionDTO> sessionDTOs = allSessions.stream()
-                .filter(s -> s.getSessionDate().isAfter(LocalDateTime.now().minusHours(24))) // Last 24h + Future
-                .sorted(Comparator.comparing(PTSession::getSessionDate))
-                .limit(10)
-                .map(this::mapToSessionDTO)
-                .collect(Collectors.toList());
+        List<TrainerSessionDTO> sessionDTOs = new ArrayList<>();
+        try {
+            sessionDTOs = allSessions.stream()
+                    .filter(s -> s != null && s.getSessionDate() != null && 
+                                 s.getSessionDate().isAfter(LocalDateTime.now().minusHours(24)))
+                    .sorted((s1, s2) -> {
+                        if (s1.getSessionDate() == null) return 1;
+                        if (s2.getSessionDate() == null) return -1;
+                        return s1.getSessionDate().compareTo(s2.getSessionDate());
+                    })
+                    .limit(10)
+                    .map(this::mapToSessionDTO)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error mapping sessions for trainer {}", trainerId, e);
+        }
 
         // 6. Generate Alerts
         List<DashboardAlertDTO> alerts = new ArrayList<>();
+        try {
+            // Pending Notes
+            allSessions.stream()
+                    .filter(s -> s != null && s.getStatus() == SessionStatus.COMPLETED &&
+                            (s.getProgressNotes() == null || s.getProgressNotes().trim().isEmpty()))
+                    .filter(s -> s.getMember() != null && s.getSessionDate() != null)
+                    .sorted((s1, s2) -> s2.getSessionDate().compareTo(s1.getSessionDate()))
+                    .limit(2)
+                    .forEach(s -> {
+                        try {
+                            alerts.add(DashboardAlertDTO.builder()
+                                .id("note-" + s.getSessionId())
+                                .type("PENDING_NOTE")
+                                .message("Progress note missing")
+                                .memberName(s.getMember().getFullName())
+                                .memberId(s.getMember().getUserId())
+                                .severity("medium")
+                                .time(formatTimeAgo(s.getSessionDate()))
+                                .build());
+                        } catch (Exception e) {
+                            log.warn("Failed to create alert for session {}", s.getSessionId());
+                        }
+                    });
 
-        // Pending Notes
-        allSessions.stream()
-                .filter(s -> s.getStatus() == SessionStatus.COMPLETED &&
-                        (s.getProgressNotes() == null || s.getProgressNotes().trim().isEmpty()))
-                .sorted(Comparator.comparing(PTSession::getSessionDate).reversed())
-                .limit(2)
-                .forEach(s -> alerts.add(DashboardAlertDTO.builder()
-                        .id("note-" + s.getSessionId())
-                        .type("PENDING_NOTE")
-                        .message("Progress note missing")
-                        .memberName(s.getMember().getFullName())
-                        .memberId(s.getMember().getUserId())
-                        .severity("medium")
-                        .time(formatTimeAgo(s.getSessionDate()))
-                        .build()));
+            // Missed Sessions
+            allSessions.stream()
+                    .filter(s -> s != null && s.getSessionDate() != null && (s.getStatus() == SessionStatus.MISSED ||
+                            (s.getStatus() == SessionStatus.SCHEDULED && s.getSessionDate().isBefore(LocalDateTime.now()))))
+                    .filter(s -> s.getSessionDate().isAfter(LocalDateTime.now().minusDays(7)))
+                    .filter(s -> s.getMember() != null)
+                    .sorted((s1, s2) -> s2.getSessionDate().compareTo(s1.getSessionDate()))
+                    .limit(2)
+                    .forEach(s -> {
+                        try {
+                            alerts.add(DashboardAlertDTO.builder()
+                                .id("missed-" + s.getSessionId())
+                                .type("MISSED_SESSION")
+                                .message("Session missed")
+                                .memberName(s.getMember().getFullName())
+                                .memberId(s.getMember().getUserId())
+                                .severity("high")
+                                .time(formatTimeAgo(s.getSessionDate()))
+                                .build());
+                        } catch (Exception e) {
+                            log.warn("Failed to create alert for missed session {}", s.getSessionId());
+                        }
+                    });
 
-        // Missed Sessions
-        allSessions.stream()
-                .filter(s -> s.getStatus() == SessionStatus.MISSED ||
-                        (s.getStatus() == SessionStatus.SCHEDULED && s.getSessionDate().isBefore(LocalDateTime.now())))
-                .filter(s -> s.getSessionDate().isAfter(LocalDateTime.now().minusDays(7))) // Last 7 days
-                .sorted(Comparator.comparing(PTSession::getSessionDate).reversed())
-                .limit(2)
-                .forEach(s -> alerts.add(DashboardAlertDTO.builder()
-                        .id("missed-" + s.getSessionId())
-                        .type("MISSED_SESSION")
-                        .message("Session missed")
-                        .memberName(s.getMember().getFullName())
-                        .memberId(s.getMember().getUserId())
-                        .severity("high")
-                        .time(formatTimeAgo(s.getSessionDate()))
-                        .build()));
-
-        // Sort alerts by severity (High first) then time
-        alerts.sort((a1, a2) -> {
-            if (a1.getSeverity().equals(a2.getSeverity()))
-                return 0;
-            return "high".equals(a1.getSeverity()) ? -1 : 1;
-        });
+            // Sort alerts by severity (High first) then time
+            alerts.sort((a1, a2) -> {
+                if (a1 == null || a2 == null) return 0;
+                if (a1.getSeverity() == null || a2.getSeverity() == null) return 0;
+                if (a1.getSeverity().equals(a2.getSeverity())) return 0;
+                return "high".equals(a1.getSeverity()) ? -1 : 1;
+            });
+        } catch (Exception e) {
+            log.error("Error generating alerts for trainer {}", trainerId, e);
+        }
 
         // 7. Generate Charts Data
-
-        // Weekly Activity (Last 7 days)
         List<ChartDataDTO> weeklyActivity = new ArrayList<>();
-        LocalDate weekStart = today.minusDays(6);
-        for (int i = 0; i < 7; i++) {
-            LocalDate date = weekStart.plusDays(i);
-            long count = allSessions.stream()
-                    .filter(s -> s.getSessionDate().toLocalDate().equals(date)
-                            && "COMPLETED".equals(s.getStatus().name()))
-                    .count();
-            String label = date.getDayOfWeek().name().substring(0, 3); // Mon, Tue...
-            weeklyActivity.add(ChartDataDTO.builder().label(label).value((double) count).build());
+        try {
+            LocalDate weekStart = today.minusDays(6);
+            for (int i = 0; i < 7; i++) {
+                LocalDate date = weekStart.plusDays(i);
+                final LocalDate fDate = date;
+                long count = allSessions.stream()
+                        .filter(s -> s != null && s.getSessionDate() != null && 
+                                     s.getSessionDate().toLocalDate().equals(fDate) && 
+                                     SessionStatus.COMPLETED.equals(s.getStatus()))
+                        .count();
+                String label = date.getDayOfWeek().name().substring(0, 3);
+                weeklyActivity.add(ChartDataDTO.builder().label(label).value((double) count).build());
+            }
+        } catch (Exception e) {
+            log.error("Error generating weekly activity chart for trainer {}", trainerId, e);
         }
 
-        // Monthly Earnings History (Last 6 months)
         List<ChartDataDTO> monthlyEarningsHistory = new ArrayList<>();
-        LocalDate monthStart = today.minusMonths(5).withDayOfMonth(1);
-        for (int i = 0; i < 6; i++) {
-            LocalDate date = monthStart.plusMonths(i);
-            double earnings = allSessions.stream()
-                    .filter(s -> s.getSessionDate().getMonth().equals(date.getMonth())
-                            && s.getSessionDate().getYear() == date.getYear()
-                            && "COMPLETED".equals(s.getStatus().name()))
-                    .count() * 50.0;
-            String label = date.getMonth().name().substring(0, 3);
-            monthlyEarningsHistory.add(ChartDataDTO.builder().label(label).value(earnings).build());
+        try {
+            LocalDate monthStart = today.minusMonths(5).withDayOfMonth(1);
+            for (int i = 0; i < 6; i++) {
+                LocalDate date = monthStart.plusMonths(i);
+                final LocalDate fDate = date;
+                double earnings = allSessions.stream()
+                        .filter(s -> s != null && s.getSessionDate() != null && 
+                                     s.getSessionDate().getMonth().equals(fDate.getMonth()) && 
+                                     s.getSessionDate().getYear() == fDate.getYear() && 
+                                     SessionStatus.COMPLETED.equals(s.getStatus()))
+                        .count() * 50.0;
+                String label = date.getMonth().name().substring(0, 3);
+                monthlyEarningsHistory.add(ChartDataDTO.builder().label(label).value(earnings).build());
+            }
+        } catch (Exception e) {
+            log.error("Error generating monthly earnings history for trainer {}", trainerId, e);
         }
-
-        // Session Distribution (PT vs Classes)
-        // Note: Currently we only fetch PTSessions in this controller logic.
-        // Ideally we should also count classes from TrainerClassRepository.
-        // For now, we will count PT sessions as "PT".
-        // Let's fetch classes to make it real.
-        List<com.gym.management.model.TrainerClass> classes = trainerClassRepository
-                .findByTrainerUserIdOrderByClassDateAscStartTimeAsc(trainerId);
-        long ptCount = allSessions.size();
-        long classCount = classes.size();
 
         List<ChartDataDTO> sessionDistribution = new ArrayList<>();
-        sessionDistribution
-                .add(ChartDataDTO.builder().label("PT Sessions").value((double) ptCount).meta("#06b6d4").build()); // Cyan
-        sessionDistribution
-                .add(ChartDataDTO.builder().label("Classes").value((double) classCount).meta("#8b5cf6").build()); // Purple
+        try {
+            List<com.gym.management.model.TrainerClass> trainerClasses = trainerClassRepository
+                    .findByTrainerUserIdOrderByClassDateAscStartTimeAsc(trainerId);
+            long ptCount = allSessions.size();
+            long classCount = trainerClasses != null ? trainerClasses.size() : 0;
+
+            sessionDistribution.add(ChartDataDTO.builder().label("PT Sessions").value((double) ptCount).meta("#06b6d4").build());
+            sessionDistribution.add(ChartDataDTO.builder().label("Classes").value((double) classCount).meta("#8b5cf6").build());
+        } catch (Exception e) {
+            log.error("Error generating session distribution chart for trainer {}", trainerId, e);
+        }
 
         TrainerDashboardStatsDTO stats = TrainerDashboardStatsDTO.builder()
                 .trainerName(trainer.getFullName())
@@ -295,7 +366,7 @@ public class TrainerDashboardController {
                 .monthEarnings(monthEarnings)
                 .completedToday(completedToday)
                 .totalToday(totalToday)
-                .attendanceRate(Math.round(attendanceRate * 10.0) / 10.0) // Round to 1 decimal
+                .attendanceRate(Math.round(attendanceRate * 10.0) / 10.0)
                 .activeMembers(activeMembers)
                 .totalMembers(totalMembers)
                 .sessions(sessionDTOs)
@@ -319,6 +390,7 @@ public class TrainerDashboardController {
     }
 
     @GetMapping("/profile")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<?> getProfile() {
         Long trainerId = getAuthenticatedTrainerId();
         User trainer = userRepository.findById(trainerId)
@@ -332,6 +404,7 @@ public class TrainerDashboardController {
     }
 
     @PutMapping("/profile")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> updateProfile(@RequestBody com.gym.management.dto.trainer.TrainerProfileDTO dto) {
         Long trainerId = getAuthenticatedTrainerId();
         User trainer = userRepository.findById(trainerId)
@@ -599,14 +672,23 @@ public class TrainerDashboardController {
     // Keeping other methods but ensuring they use standard response structure if
     // needed...
     @GetMapping("/my-members")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<?> getMyMembers(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(required = false) String q) {
         Long trainerId = getAuthenticatedTrainerId();
         User trainer = userRepository.findById(trainerId).orElseThrow();
 
+        if (trainer.getCustomers() == null) {
+            Map<String, Object> empty = new HashMap<>();
+            empty.put("items", Collections.emptyList());
+            empty.put("totalItems", 0);
+            empty.put("totalPages", 0);
+            return ResponseEntity.ok(apiResponse(true, empty, null));
+        }
+
         List<User> filtered = trainer.getCustomers().stream()
-                .filter(c -> q == null || c.getFullName().toLowerCase().contains(q.toLowerCase()))
+                .filter(c -> c != null && (q == null || (c.getFullName() != null && c.getFullName().toLowerCase().contains(q.toLowerCase()))))
                 .collect(Collectors.toList());
 
         // Transform to DTO to include stats and weight
@@ -640,16 +722,16 @@ public class TrainerDashboardController {
             }
 
             // Stats with weight
-            long classes = trainerClassAttendeeRepository.countByMemberIdAndStatus(member.getUserId(),
+            long classesCount = trainerClassAttendeeRepository.countByMemberIdAndStatus(member.getUserId(),
                     AttendeeStatus.CONFIRMED);
             long ptCompleted = ptSessionRepository.countByMemberUserIdAndStatus(member.getUserId(),
                     SessionStatus.COMPLETED);
-            String weight = member.getWeight() != null ? member.getWeight().toString() : "N/A";
-            dto.setStats(new TrainerMemberDTO.MemberStats((int) classes, weight, String.valueOf(ptCompleted)));
+            String weightValue = member.getWeight() != null ? member.getWeight().toString() : "N/A";
+            dto.setStats(new TrainerMemberDTO.MemberStats((int) classesCount, weightValue, String.valueOf(ptCompleted)));
 
             // Last Session
             PTSession lastSession = ptSessionRepository.findTopByMemberUserIdOrderBySessionDateDesc(member.getUserId());
-            if (lastSession != null) {
+            if (lastSession != null && lastSession.getSessionDate() != null) {
                 dto.setLastSession(lastSession.getSessionDate().toLocalDate().toString());
             } else {
                 dto.setLastSession("Never");
@@ -673,6 +755,7 @@ public class TrainerDashboardController {
     }
 
     @GetMapping("/schedule")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<?> getSchedule(@RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
         // Return List<TrainerSessionDTO> directly for cleanliness
@@ -746,6 +829,7 @@ public class TrainerDashboardController {
     }
 
     @GetMapping("/notes")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<?> getAllNotes() {
         Long trainerId = getAuthenticatedTrainerId();
         return ResponseEntity
@@ -990,16 +1074,25 @@ public class TrainerDashboardController {
     }
 
     private TrainerSessionDTO mapToSessionDTO(PTSession s) {
+        if (s == null) return null;
         try {
             // Safe null checks
-            String clientName = s.getMember() != null ? s.getMember().getFullName() : "Unknown Client";
+            String clientName = "Unknown Client";
+            try {
+                if (s.getMember() != null) {
+                    clientName = s.getMember().getFullName();
+                }
+            } catch (Exception e) {
+                log.warn("Failed to fetch member for session {}", s.getSessionId());
+            }
+
             LocalDateTime start = s.getSessionDate();
             int duration = s.getDurationMinutes() != null ? s.getDurationMinutes() : 60;
             LocalDateTime end = start != null ? start.plusMinutes(duration) : null;
 
             return TrainerSessionDTO.builder()
                     .id(String.valueOf(s.getSessionId()))
-                    .title("PT: " + clientName)
+                    .title("PT: " + (clientName != null ? clientName : "Unknown Client"))
                     .type("pt")
                     .startTime(start)
                     .endTime(end)
@@ -1009,16 +1102,21 @@ public class TrainerDashboardController {
                     .status(mapStatusForFrontend(s))
                     .build();
         } catch (Exception e) {
-            log.error("Failed to map session to DTO: session {}", s != null ? s.getSessionId() : "null", e);
+            log.error("Failed to map session to DTO: session {}", s.getSessionId(), e);
             return null;
         }
     }
 
     private String mapStatusForFrontend(PTSession s) {
-        if (s.getStatus() == null)
+        if (s == null || s.getStatus() == null)
             return "upcoming";
 
-        String status = s.getStatus().name();
+        String status;
+        try {
+            status = s.getStatus().name();
+        } catch (Exception e) {
+            return "upcoming";
+        }
 
         if ("COMPLETED".equals(status))
             return "completed";
@@ -1028,16 +1126,20 @@ public class TrainerDashboardController {
             return "cancelled"; // Treat missed as cancelled for now or add 'missed'
 
         // Time based check for upcoming/in-progress
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = s.getSessionDate();
-        int duration = s.getDurationMinutes() != null ? s.getDurationMinutes() : 60;
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime start = s.getSessionDate();
+            int duration = s.getDurationMinutes() != null ? s.getDurationMinutes() : 60;
 
-        if (start != null) {
-            LocalDateTime end = start.plusMinutes(duration);
-            if (now.isAfter(start) && now.isBefore(end))
-                return "in-progress";
-            if (now.isAfter(end) && !"COMPLETED".equals(status))
-                return "completed"; // Auto-complete logic or 'pending-review'
+            if (start != null) {
+                LocalDateTime end = start.plusMinutes(duration);
+                if (now.isAfter(start) && now.isBefore(end))
+                    return "in-progress";
+                if (now.isAfter(end) && !"COMPLETED".equals(status))
+                    return "completed"; // Auto-complete logic or 'pending-review'
+            }
+        } catch (Exception e) {
+            log.warn("Error calculating time-based status for session {}", s.getSessionId());
         }
 
         return "upcoming";

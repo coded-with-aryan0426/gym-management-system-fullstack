@@ -1,0 +1,356 @@
+# Gym Attendance System — Full Stack Improvement Plan
+
+> **Goal:** Transform the current prototype-grade attendance system into a bulletproof, production-ready, role-aware attendance platform covering Owner, Trainer, and Member portals — with real data, self-service check-in, and zero fake simulation fallbacks.
+
+---
+
+## 🔴 Critical Issues Found (Blockers)
+
+> [!CAUTION]
+> These must be fixed before any UI polish — they corrupt live data.
+
+| # | Issue | File | Impact |
+|---|-------|------|--------|
+| 1 | **Fake simulation data mixed with real data** | `AttendanceController.java` lines 134, 214–218 | KPIs show invented numbers. Analytics is unreliable. |
+| 2 | **Check-in/check-out lives in `DashboardController`**, not `AttendanceController` | `attendanceTaskApi.ts` lines 157–163 | Split architecture — attendance API touches two controllers |
+| 3 | **No duplicate check-in prevention** | `AttendanceController.java` | A member can check in 10x on the same day |
+| 4 | **`@PreAuthorize("OWNER/ADMIN")` only** | `AttendanceController.java` line 23 | Trainers & Members can't access any attendance endpoint |
+| 5 | **No gym-scoped queries** | `CheckInRepository.java` | Returns all gyms' data (multi-tenant breach) |
+| 6 | **No member portal attendance page** | `/frontend/src/pages/member/` | Members can never see their own history |
+| 7 | **No trainer portal attendance page** | `/frontend/src/pages/trainer/` | Trainers can't track assigned members' attendance |
+| 8 | **Status values inconsistent** | `CheckIn.java` line 34 | "check-in", "checked-out", "access denied" — mixed strings |
+
+---
+
+## 📊 Current Architecture Audit
+
+### Database Layer — `CheckIn` model
+```
+CHECK_INS table:
+  ✅ checkInId, userId, gymId, checkInTime, checkOutTime, status
+  ❌ MISSING: checkInMethod (MANUAL/QR/SELF/CLASS)
+  ❌ MISSING: deviceInfo / ipAddress (for audit)  
+  ❌ MISSING: notes (admin notes on visit)
+```
+
+### Repository Layer — `CheckInRepository`
+```
+✅ findActiveCheckIns()
+✅ findTodayCheckIns(startOfDay)
+✅ findCheckInsForDateRange(start, end)
+✅ findByUserUserIdOrderByCheckInTimeDesc(userId)
+❌ MISSING: findByGymIdAndDateRange(gymId, start, end)
+❌ MISSING: findActiveByUserId(userId) — to check if already checked in
+❌ MISSING: countByUserAndDate(userId, date) — duplicate prevention
+❌ MISSING: findByUserAndDateRange(userId, start, end) — member history
+❌ MISSING: Paginated queries
+```
+
+### Service Layer
+```
+❌ MISSING: AttendanceService.java (all logic is in controller — anti-pattern)
+❌ MISSING: Streak calculation
+❌ MISSING: Attendance validation
+```
+
+### Controller Layer — `AttendanceController`
+```
+✅ GET /api/attendance/today
+✅ GET /api/attendance/live
+✅ GET /api/attendance/trends
+✅ GET /api/attendance/heatmap
+✅ GET /api/attendance/stats
+❌ MISSING: POST /api/attendance/check-in
+❌ MISSING: PUT  /api/attendance/check-out/{id}
+❌ MISSING: POST /api/attendance/self-check-in (MEMBER role)
+❌ MISSING: GET  /api/attendance/my-history (MEMBER role)
+❌ MISSING: GET  /api/attendance/my-members (TRAINER role)
+❌ MISSING: GET  /api/attendance/date-range (with pagination)
+🔴 ALL ENDPOINTS: locked to OWNER/ADMIN only
+🔴 Simulation fallback corrupts real analytics
+```
+
+### Frontend Service — `attendanceTaskApi.ts`
+```
+✅ checkIn / checkOut (but calls wrong controller: /dashboard/*)
+✅ Stats, trends, heatmap, today, live endpoints
+❌ MISSING: selfCheckIn() for member self-service
+❌ MISSING: getMyHistory(memberId, from, to) 
+❌ MISSING: getMyMembersAttendance(trainerId)
+❌ MISSING: server-side paginated fetch
+```
+
+### Frontend Pages
+```
+✅ /attendance          → Owner/Admin analytics dashboard (1182 lines, solid base)
+❌ MISSING: /member/my-attendance   → Member personal attendance history
+❌ MISSING: /trainer/member-attendance → Trainer view of assigned members
+```
+
+---
+
+## 🏗️ Proposed Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    ATTENDANCE SYSTEM v2                         │
+├─────────────────┬───────────────────┬───────────────────────────┤
+│  OWNER PORTAL   │  TRAINER PORTAL   │    MEMBER PORTAL          │
+│  /attendance    │  /trainer/members │    /member/my-attendance  │
+│                 │  /attendance      │                           │
+│  Full analytics │  My members list  │    Personal history       │
+│  Manual check-in│  Attendance badge │    Streak counter         │
+│  Export reports │  Session insights │    Monthly calendar       │
+│  Floor live view│                   │    Visit frequency        │
+└────────┬────────┴────────┬──────────┴────────┬──────────────────┘
+         │                 │                    │
+         ▼                 ▼                    ▼
+┌──────────────────────────────────────────────────────────────────┐
+│               AttendanceController (role-split endpoints)        │
+│  OWNER/ADMIN: full read/write + bulk export                      │
+│  TRAINER:     read-only for assigned members                     │
+│  MEMBER:      read-only own history + self check-in             │
+└──────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌──────────────────────────────────────────────────────────────────┐
+│               AttendanceService (new — extracted logic)          │
+│  - validateAndCheckIn()  (duplicate prevention)                  │
+│  - checkOut()                                                    │
+│  - computeStreak(userId)                                         │
+│  - getHistoryPaginated()                                         │
+└──────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌──────────────────────────────────────────────────────────────────┐
+│               CheckIn Model + CheckInRepository                  │
+│  + checkInMethod field    + gym-scoped queries                   │
+│  + notes field            + duplicate-check query                │
+│                           + pagination support                   │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📋 Implementation Plan — Phase by Phase
+
+---
+
+### PHASE 1 — Database & Model Fixes (Foundation)
+
+> [!IMPORTANT]
+> All other phases depend on this. Must go first.
+
+#### [MODIFY] `CheckIn.java`
+- Add `checkInMethod` field → Enum: `MANUAL`, `QR`, `SELF`, `CLASS`
+- Add `notes` String field (optional admin notes)
+- Remove ambiguous status strings → use Enum: `ACTIVE`, `CHECKED_OUT`
+- Fix the conflicting `gymId` column mapping (currently has both `@Column(gym_id)` AND `@ManyToOne(gym_id)`)
+
+#### [NEW] `CheckInMethod.java` enum
+- Values: `MANUAL` (staff did it), `SELF` (member used app), `QR` (scanned code), `CLASS` (booked class)
+
+#### [MODIFY] `CheckInRepository.java`
+Add these queries:
+```java
+findActiveCheckInByUserId(Long userId)           // is user currently inside?
+countByUserIdAndDate(Long userId, LocalDate date) // duplicate prevention
+findByGymIdAndCheckInTimeBetween(gymId, start, end, Pageable) // paginated
+findByUserUserIdAndCheckInTimeBetween(userId, start, end)     // member history
+```
+
+#### DB Migration Script (Oracle)
+```sql
+ALTER TABLE CHECK_INS ADD check_in_method VARCHAR2(20) DEFAULT 'MANUAL';
+ALTER TABLE CHECK_INS ADD notes VARCHAR2(500);
+```
+
+---
+
+### PHASE 2 — Service Layer (Extract Business Logic)
+
+> [!IMPORTANT]
+> Currently all logic is crammed into the controller. Extract to a service.
+
+#### [NEW] `AttendanceService.java`
+Key methods:
+- `validateAndCheckIn(userId, gymId, method)` → prevents double check-in, returns `CheckIn`
+- `checkOut(checkInId, userId)` → validates ownership before checkout
+- `getTodayAttendance(gymId, role, pageRequest)` → gym-scoped, paginated
+- `getStats(gymId, role)` → **NO FAKE DATA** — returns real zeros if no data exists
+- `getTrends(gymId, from, to, role)` → real data only
+- `getHeatmap(gymId, weeks, role)` → real data only
+- `getMemberHistory(userId, from, to)` → member's own records
+- `getTrainerMembersAttendance(trainerId, from, to)` → assigned members only
+- `computeStreak(userId)` → consecutive days visited
+
+---
+
+### PHASE 3 — Controller Refactor
+
+#### [MODIFY] `AttendanceController.java`
+
+**Remove:**
+- All `simulateAttendance()` and `simulateHourlyAttendance()` methods
+- All fallback simulation logic from stats/trends/heatmap
+
+**Add/Fix:**
+
+```java
+// OWNER/ADMIN endpoints (existing - fix gym scoping)
+GET  /api/attendance/today         → gymId filtered, paginated
+GET  /api/attendance/live          → gymId filtered
+GET  /api/attendance/stats         → real data only
+GET  /api/attendance/trends        → real data only
+GET  /api/attendance/heatmap       → real data only
+POST /api/attendance/check-in      → validateAndCheckIn() call
+PUT  /api/attendance/check-out/{id}→ with ownership validation
+
+// NEW TRAINER endpoints
+GET  /api/attendance/trainer/members → @PreAuthorize TRAINER
+     Returns attendance for trainer's assigned members
+
+// NEW MEMBER endpoints  
+GET  /api/attendance/me/history    → @PreAuthorize MEMBER
+     Returns only that member's own history
+POST /api/attendance/me/check-in   → @PreAuthorize MEMBER
+     Self check-in with method=SELF
+GET  /api/attendance/me/streak     → returns currentStreak, longestStreak
+```
+
+---
+
+### PHASE 4 — Frontend Service Update
+
+#### [MODIFY] `attendanceTaskApi.ts`
+- Fix `checkIn()` to call `/api/attendance/check-in` (not `/dashboard/check-in/{id}`)
+- Fix `checkOut()` to call `/api/attendance/check-out/{id}` (not `/dashboard/check-out/{id}`)
+- Add `selfCheckIn()` → POST `/api/attendance/me/check-in`
+- Add `getMyHistory(from, to)` → GET `/api/attendance/me/history`
+- Add `getMyStreak()` → GET `/api/attendance/me/streak`
+- Add `getTrainerMembersAttendance(from, to)` → GET `/api/attendance/trainer/members`
+- Add proper TypeScript types: `AttendanceStreak`, `MemberAttendanceSummary`, `TrainerMemberAttendance`
+
+---
+
+### PHASE 5 — Owner Portal UI Improvements
+
+#### [MODIFY] `Attendance.tsx` + `Attendance.css`
+
+**Logic fixes:**
+- Remove frontend-only fallback simulation assumptions
+- Replace hardcoded `peakCapacity: 120/30` with real gym setting
+- Add date-range custom picker (not just 7D/14D/30D/90D tabs)
+- Server-side pagination (add `page`, `size` params to API call)
+- Show a clear "No data yet" state instead of zeros/N/A when DB is empty
+
+**UI improvements:**
+- **Live Floor Panel**: Real-time live count with user avatars in a sticky side panel
+- **Date Range Picker**: Custom `from` / `to` date picker replacing period tabs
+- **Export enhancement**: Export by custom date range, not just today
+- **Retention Rate KPI**: New card showing % of members who came back this week vs last
+- **Busiest Hour callout**: Highlight the peak hour from heatmap in a stat badge
+- **Empty state redesign**: When no data, show onboarding tip instead of blank zeros
+
+---
+
+### PHASE 6 — Member Portal: "My Attendance" Page
+
+#### [NEW] `/frontend/src/pages/member/MyAttendance.tsx`
+#### [NEW] `/frontend/src/pages/member/MyAttendance.css`
+
+**Sections:**
+1. **Streak Banner** — Current streak 🔥, Longest streak, Total visits this month
+2. **Monthly Calendar** — Heatmap-style calendar showing which days they visited (green = visited, red = missed, gray = future)
+3. **Recent Visits Table** — Date, check-in time, check-out time, session duration
+4. **Frequency Chart** — Bar chart: visits per week for last 12 weeks
+5. **Self Check-In Button** — If member doesn't have a check-in today, show a prominent "Check In Now" button
+
+**Backend dependency:** Phase 3 member endpoints
+
+---
+
+### PHASE 7 — Trainer Portal: Member Attendance View
+
+#### [NEW] `/frontend/src/pages/trainer/MemberAttendance.tsx`
+#### [NEW] `/frontend/src/pages/trainer/MemberAttendance.css`
+
+**Sections:**
+1. **My Members List** — Cards showing each assigned member with:
+   - Last visit date (color-coded: green <3 days, yellow 3–7 days, red >7 days)
+   - This month visit count
+   - Current streak
+   - "Absent Alert" badge if not seen in 7+ days
+2. **Member Detail Drill-down** — Click a member → see their attendance calendar for the last 30 days
+3. **Attendance Summary** — Which of my members are inside the gym right now (live)
+
+**Backend dependency:** Phase 3 trainer endpoints
+
+---
+
+### PHASE 8 — Routing & Navigation
+
+#### [MODIFY] `App.tsx`
+- Add route: `/member/my-attendance` → `<MyAttendance />`
+- No new trainer route needed if added to existing `MyMembers` page as a tab
+
+#### [MODIFY] Member Sidebar Navigation
+- Add "My Attendance" nav item with `Calendar` icon
+
+#### [MODIFY] Trainer Sidebar Navigation
+- Add "Member Attendance" tab inside `MyMembers` page
+
+---
+
+## ✅ Verification Plan
+
+### Backend
+```bash
+# After Phase 1-3:
+curl -X POST /api/attendance/check-in -d '{"userId": 1}'   # should check in
+curl -X POST /api/attendance/check-in -d '{"userId": 1}'   # should return 409 CONFLICT
+curl -X PUT  /api/attendance/check-out/1                   # should check out
+curl        /api/attendance/stats                           # should return real zeros if empty
+curl        /api/attendance/me/history  # with MEMBER JWT  # should return only own records
+```
+
+### Frontend
+- Owner: confirm no fake numbers appear when DB is empty
+- Member: "My Attendance" page loads, streak shows correctly
+- Trainer: Can see only their assigned members
+
+---
+
+## 📁 Files Changed Summary
+
+| Operation | File |
+|-----------|------|
+| ✏️ MODIFY | `CheckIn.java` — add fields, fix gym mapping |
+| 🆕 NEW | `CheckInMethod.java` — enum |
+| ✏️ MODIFY | `CheckInRepository.java` — add 4 new queries |
+| 🆕 NEW | `AttendanceService.java` — extract all logic |
+| ✏️ MODIFY | `AttendanceController.java` — role-split, add endpoints, remove fake data |
+| ✏️ MODIFY | `attendanceTaskApi.ts` — fix URLs, add new calls |
+| ✏️ MODIFY | `Attendance.tsx` — date-range picker, server pagination, live panel |
+| ✏️ MODIFY | `Attendance.css` — new component styles |
+| 🆕 NEW | `MyAttendance.tsx` + `MyAttendance.css` — member portal page |
+| 🆕 NEW | `MemberAttendance.tsx` + `MemberAttendance.css` — trainer portal page |
+| ✏️ MODIFY | `App.tsx` — add new route |
+| 📄 SQL | `V3__attendance_fields.sql` — Oracle migration |
+
+---
+
+## ⚠️ Open Questions for Your Approval
+
+> [!IMPORTANT]
+> Please confirm these design decisions before I start coding:
+
+1. **Self Check-In Flow**: Should members be able to check themselves in freely from the app, or only via admin/staff? (Gym might want physical presence only)
+
+2. **QR Code**: Do you want a QR-based check-in flow this sprint, or just `SELF` / `MANUAL` methods for now?
+
+3. **Fake Data Removal**: The simulation data will be removed from the backend. This means until real check-ins exist, the charts will show empty/zero state. Is this acceptable?
+
+4. **Trainer Scope**: Should trainers see ALL gym attendance, or only their directly assigned members?
+
+5. **Absence Alerts**: Should the system send in-app notifications to a trainer when a member hasn't checked in for 7+ consecutive days?

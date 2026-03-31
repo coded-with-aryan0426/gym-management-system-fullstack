@@ -163,7 +163,7 @@ const MultiRoleCommandRail: React.FC<MultiRoleCommandRailProps> = ({
   return (
     <aside className={`command-rail ${isCollapsed ? "command-rail--collapsed" : ""}`}>
       <NavLink to="/" className="command-rail__logo">
-        <Logo size={isCollapsed ? 28 : 32} showText={!isCollapsed} />
+        <Logo size={isCollapsed ? 28 : 36} showText={!isCollapsed} />
       </NavLink>
 
       <nav className="command-rail__nav">

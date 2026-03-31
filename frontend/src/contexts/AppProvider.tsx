@@ -73,6 +73,7 @@ export function AppProvider({ children }: AppProviderProps) {
                                                                     fontSize: '14px',
                                                                     fontWeight: 500,
                                                                     maxWidth: '380px',
+                                                                    zIndex: 10500, // Ensures toasts appear above all modals (modals are at 1040-1100)
                                                                 },
                                                                 success: {
                                                                     iconTheme: {

@@ -194,16 +194,7 @@ export default function ForgotPasswordPage() {
                             background: isDark ? 'rgba(220, 38, 38, 0.12)' : 'rgba(220, 38, 38, 0.08)',
                             border: `1px solid ${isDark ? 'rgba(220, 38, 38, 0.3)' : 'rgba(220, 38, 38, 0.2)'}`,
                         }}>
-                            <Logo size={20} showText={false} />
-                            <span style={{
-                                fontSize: 11,
-                                fontWeight: 700,
-                                letterSpacing: '0.14em',
-                                textTransform: 'uppercase',
-                                color: colors.crimson
-                            }}>
-                                AthlonX
-                            </span>
+                                <Logo size={40} />
                         </div>
                     </div>
                     <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8, letterSpacing: '-0.02em' }}>

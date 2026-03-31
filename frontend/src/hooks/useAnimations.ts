@@ -1,5 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react';
-import anime from 'animejs';
+import * as animeModule from 'animejs';
+
+// Handle both ESM and CJS module formats
+const anime = (animeModule as any).default || animeModule;
 
 // Check for reduced motion preference
 const prefersReducedMotion = () =>
