@@ -44,7 +44,23 @@
   --hover-bg: rgba(0, 0, 0, 0.04);
   --active-bg: rgba(0, 0, 0, 0.07);
   --panel-bg: #ffffff;
-  --panel-shadow: 0 20px 60px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --panel-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='light'] .command-rail__link--active::before {
+  box-shadow: 0 0 10px currentColor, 0 0 2px rgba(0,0,0,0.1);
+}
+
+[data-theme='light'] .command-rail__tooltip {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  color: #111827;
+}
+
+[data-theme='light'] .command-rail__tooltip::before {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 /* ─── Main Container ─── */
@@ -258,39 +274,65 @@
 }
 
 /* ─── Collapsed Tooltip ─── */
-.command-rail--collapsed .command-rail__link[data-tooltip] {
-  position: relative;
-}
-
 .command-rail__tooltip {
-  position: absolute;
-  left: calc(100% + 12px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--panel-bg);
+  position: fixed !important;
+  background: linear-gradient(
+    135deg,
+    var(--panel-bg) 0%,
+    color-mix(in srgb, var(--panel-bg) 95%, var(--sidebar-surface)) 100%
+  );
   color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px 10px;
-  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 12px;
   white-space: nowrap;
-  box-shadow: var(--panel-shadow);
-  z-index: 9999;
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.45),
+    0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 0 20px rgba(0, 0, 0, 0.2);
+  z-index: 99999;
   pointer-events: none;
   border: 1px solid var(--sidebar-border-strong);
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%);
+  transition: all 0.18s cubic-bezier(0.23, 1, 0.320, 1);
+  backdrop-filter: blur(12px);
+  letter-spacing: 0.4px;
+  text-transform: capitalize;
+  will-change: transform, opacity;
+  animation: tooltipPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes tooltipPop {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
 }
 
 .command-rail__tooltip::before {
   content: '';
   position: absolute;
-  left: -4px;
   top: 50%;
-  transform: translateY(-50%) rotate(45deg);
-  width: 8px;
-  height: 8px;
-  background: var(--panel-bg);
-  border-left: 1px solid var(--sidebar-border-strong);
-  border-bottom: 1px solid var(--sidebar-border-strong);
+  left: -8px;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(
+    135deg,
+    var(--panel-bg) 0%,
+    color-mix(in srgb, var(--panel-bg) 95%, var(--sidebar-surface)) 100%
+  );
+  border: 1px solid var(--sidebar-border-strong);
+  border-right: none;
+  border-bottom: none;
+  border-radius: 2px 0 0 0;
+  transform: translateY(-50%) rotate(-45deg);
 }
 
 /* ─── Separator ─── */

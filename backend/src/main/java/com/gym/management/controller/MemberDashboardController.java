@@ -215,7 +215,7 @@ public class MemberDashboardController {
             // Workout Logs
             logs.stream().limit(10).forEach(l -> {
                 Map<String, Object> act = new HashMap<>();
-                act.put("id", l.getLogId());
+                act.put("id", l.getId());
                 act.put("name", "Workout Logged");
                 act.put("type", "workout");
                 act.put("timestamp", l.getCreatedAt() != null ? l.getCreatedAt() : l.getWorkoutDate().atStartOfDay());

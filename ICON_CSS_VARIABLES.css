@@ -1,0 +1,219 @@
+/**
+ * AthlonX Icon Design System - CSS Custom Properties
+ * ====================================================
+ * Complete CSS variable library for icon styling, sizing, and animations.
+ * Import this file first in your stylesheet to define all icon design tokens.
+ */
+
+:root {
+  /* ========== STROKE WEIGHT SYSTEM ========== */
+  
+  /* Base stroke weights (for 24px viewBox) */
+  --icon-stroke-hairline: 0.75px;
+  --icon-stroke-light: 1.25px;
+  --icon-stroke-regular: 1.5px;
+  --icon-stroke-medium: 2px;
+  --icon-stroke-bold: 2.5px;
+
+  /* Size-specific stroke weights */
+  --icon-stroke-16: var(--icon-stroke-regular);   /* 1.5px */
+  --icon-stroke-20: var(--icon-stroke-regular);   /* 1.5px */
+  --icon-stroke-24: var(--icon-stroke-regular);   /* 1.5px */
+  --icon-stroke-32: var(--icon-stroke-medium);    /* 2px */
+  --icon-stroke-48: var(--icon-stroke-medium);    /* 2px */
+
+  /* ========== CORNER RADIUS SYSTEM ========== */
+  
+  --icon-radius-none: 0px;
+  --icon-radius-subtle: 0.5px;
+  --icon-radius-sm: 1px;
+  --icon-radius-md: 2px;
+  --icon-radius-lg: 4px;
+  --icon-radius-xl: 8px;
+
+  /* ========== SPACING & GRID ========== */
+  
+  --icon-grid: 4px;
+  --icon-grid-lg: 8px;
+  --icon-padding-xs: 2px;
+  --icon-padding-sm: 4px;
+  --icon-padding-md: 8px;
+  --icon-padding-lg: 12px;
+
+  /* ========== COLOR PALETTE - ADMIN ROLE ========== */
+  
+  --color-admin-primary: #F59E0B;
+  --color-admin-primary-dark: #D97706;
+  --color-admin-primary-light: #FCD34D;
+  --color-admin-secondary: #3B82F6;
+  --color-admin-secondary-dark: #1E40AF;
+  --color-admin-secondary-light: #93C5FD;
+  --color-admin-accent: #EF4444;
+  --color-admin-neutral: #6B7280;
+
+  /* ========== COLOR PALETTE - TRAINER ROLE ========== */
+  
+  --color-trainer-primary: #10B981;
+  --color-trainer-primary-dark: #059669;
+  --color-trainer-primary-light: #6EE7B7;
+  --color-trainer-secondary: #8B5CF6;
+  --color-trainer-secondary-dark: #6D28D9;
+  --color-trainer-secondary-light: #D8B4FE;
+  --color-trainer-accent: #F59E0B;
+  --color-trainer-neutral: #6B7280;
+
+  /* ========== COLOR PALETTE - MEMBER ROLE ========== */
+  
+  --color-member-primary: #3B82F6;
+  --color-member-primary-dark: #1D4ED8;
+  --color-member-primary-light: #93C5FD;
+  --color-member-secondary: #06B6D4;
+  --color-member-secondary-dark: #0891B2;
+  --color-member-secondary-light: #67E8F9;
+  --color-member-accent: #EC4899;
+  --color-member-neutral: #6B7280;
+
+  /* ========== OPACITY LEVELS ========== */
+  
+  --opacity-full: 1;
+  --opacity-high: 0.8;
+  --opacity-medium: 0.6;
+  --opacity-low: 0.4;
+  --opacity-subtle: 0.2;
+
+  /* ========== SHADOW SYSTEM ========== */
+  
+  /* Drop shadows */
+  --shadow-subtle: 0px 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0px 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-strong: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  --shadow-deep: 0px 6px 12px rgba(0, 0, 0, 0.25);
+
+  /* Glow shadows */
+  --glow-amber-soft: drop-shadow(0px 0px 4px rgba(245, 158, 11, 0.4));
+  --glow-amber-medium: drop-shadow(0px 0px 6px rgba(245, 158, 11, 0.5)) 
+                       drop-shadow(0px 0px 12px rgba(245, 158, 11, 0.2));
+  --glow-blue-medium: drop-shadow(0px 0px 6px rgba(59, 130, 246, 0.5)) 
+                      drop-shadow(0px 0px 12px rgba(59, 130, 246, 0.2));
+  --glow-green-bright: drop-shadow(0px 0px 8px rgba(34, 197, 94, 0.6)) 
+                       drop-shadow(0px 0px 16px rgba(34, 197, 94, 0.3));
+
+  /* ========== ANIMATION DURATIONS ========== */
+  
+  --anim-snappy: 0.3s;       /* Quick, responsive feedback */
+  --anim-standard: 0.6s;     /* Comfortable, natural pacing */
+  --anim-smooth: 1s;         /* Leisurely, elegant motion */
+  --anim-leisurely: 1.5s;    /* Slow, emphasized motion */
+
+  /* ========== EASING FUNCTIONS ========== */
+  
+  --ease-in: cubic-bezier(0.42, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.58, 1);
+  --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-smooth-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-smooth-in-out: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+
+  /* ========== RESPONSIVE SIZE ADJUSTMENTS ========== */
+  
+  --icon-size-current: 24px;
+}
+
+/* ========== MOBILE BREAKPOINT ========== */
+
+@media (max-width: 640px) {
+  :root {
+    --icon-size-current: 20px;
+    --icon-stroke-current: var(--icon-stroke-regular);
+  }
+}
+
+/* ========== TABLET/DESKTOP BREAKPOINT ========== */
+
+@media (min-width: 641px) and (max-width: 1280px) {
+  :root {
+    --icon-size-current: 24px;
+    --icon-stroke-current: var(--icon-stroke-regular);
+  }
+}
+
+/* ========== LARGE DISPLAYS BREAKPOINT ========== */
+
+@media (min-width: 1281px) {
+  :root {
+    --icon-size-current: 32px;
+    --icon-stroke-current: var(--icon-stroke-medium);
+  }
+}
+
+/* ========== UTILITY CLASSES ========== */
+
+/* Icon container base styles */
+.axi-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  vertical-align: middle;
+}
+
+/* Size utilities */
+.axi-icon-xs { width: 16px; height: 16px; }
+.axi-icon-sm { width: 20px; height: 20px; }
+.axi-icon-base { width: 24px; height: 24px; }
+.axi-icon-md { width: 32px; height: 32px; }
+.axi-icon-lg { width: 48px; height: 48px; }
+
+/* Color utilities */
+.axi-text-admin { color: var(--color-admin-primary); }
+.axi-text-trainer { color: var(--color-trainer-primary); }
+.axi-text-member { color: var(--color-member-primary); }
+
+/* Animation triggers */
+.axi-animate-hover:hover svg {
+  filter: var(--glow-amber-soft);
+}
+
+.axi-animate-active:active svg {
+  transform: scale(0.95);
+  transition: transform var(--anim-snappy) var(--ease-out);
+}
+
+/* ========== STAGGER ANIMATION HELPERS ========== */
+
+.anim-stagger-1 { animation-delay: 0s; }
+.anim-stagger-2 { animation-delay: 0.15s; }
+.anim-stagger-3 { animation-delay: 0.30s; }
+.anim-stagger-4 { animation-delay: 0.45s; }
+.anim-stagger-5 { animation-delay: 0.60s; }
+.anim-stagger-6 { animation-delay: 0.75s; }
+
+/* ========== FILTER UTILITIES ========== */
+
+.filter-shadow-subtle { filter: var(--shadow-subtle); }
+.filter-shadow-medium { filter: var(--shadow-medium); }
+.filter-shadow-strong { filter: var(--shadow-strong); }
+.filter-shadow-deep { filter: var(--shadow-deep); }
+
+.filter-glow-amber { filter: var(--glow-amber-soft); }
+.filter-glow-blue { filter: var(--glow-blue-medium); }
+.filter-glow-green { filter: var(--glow-green-bright); }
+
+/* ========== ACCESSIBILITY ========== */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  :root {
+    --icon-stroke-regular: 2px;
+    --icon-stroke-medium: 2.5px;
+  }
+}

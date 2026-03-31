@@ -1,3 +1,5 @@
+@import './TrainerTheme.css';
+
 /* ============================================================================
    TRAINER DASHBOARD - AthlonX Unified Design System
    ============================================================================ */
@@ -23,7 +25,7 @@
     align-items: flex-end;
     margin-bottom: 24px;
     padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--t-border);
 }
 
 .welcome-text {
@@ -31,11 +33,11 @@
     font-weight: 700;
     margin: 0 0 4px 0;
     letter-spacing: -0.5px;
-    color: #fff;
+    color: var(--t-text-primary);
 }
 
 .highlight-text {
-    color: #DC2626;
+    color: var(--t-primary);
     /* AthlonX Red */
     background: none;
     -webkit-text-fill-color: initial;
@@ -45,13 +47,13 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #a1a1aa;
+    color: var(--t-text-tertiary);
     font-size: 13px;
     font-weight: 500;
 }
 
 .time-separator {
-    color: #3f3f46;
+    color: var(--t-border);
 }
 
 .header-actions {
@@ -64,10 +66,10 @@
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    background: #18181b;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
     border-radius: 8px;
-    color: #e2e8f0;
+    color: var(--t-text-secondary);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -76,21 +78,21 @@
 }
 
 .action-btn:hover {
-    background: #27272a;
-    border-color: rgba(255, 255, 255, 0.15);
-    color: #fff;
+    background: var(--t-bg-card-hover);
+    border-color: var(--t-border-hover);
+    color: var(--t-text-primary);
 }
 
 .action-btn.primary {
-    background: #DC2626;
+    background: var(--t-primary);
     border: none;
     color: #fff;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    box-shadow: 0 4px 12px var(--t-primary-glow);
 }
 
 .action-btn.primary:hover {
-    background: #B91C1C;
-    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+    background: var(--t-primary-hover);
+    box-shadow: 0 6px 16px var(--t-primary-glow);
 }
 
 /* ==================== KPI GRID (Compact) ==================== */
@@ -105,9 +107,8 @@
     position: relative;
     padding: 16px;
     /* Compact padding */
-    background: #09090b;
-    /* Darker card */
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
     border-radius: 12px;
     overflow: hidden;
     transition: all 0.2s ease;
@@ -117,7 +118,7 @@
     transform: translateY(-2px);
     border-color: rgba(220, 38, 38, 0.3);
     /* Red hover hint */
-    background: #0c0c0e;
+    background: var(--t-bg-card-hover);
 }
 
 .stat-card__header {
@@ -132,7 +133,7 @@
 .stat-card__title {
     font-size: 11px;
     font-weight: 600;
-    color: #71717a;
+    color: var(--t-text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -144,15 +145,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.03);
-    color: #a1a1aa;
+    background: var(--t-bg-subtle);
+    color: var(--t-text-secondary);
 }
 
 .stat-card__value {
     font-size: 24px;
     font-weight: 700;
     margin: 0;
-    color: #fff;
+    color: var(--t-text-primary);
     position: relative;
     z-index: 2;
     line-height: 1.2;
@@ -206,11 +207,10 @@
 .chart-container,
 .widget-panel {
     padding: 20px;
-    background: #18181b;
-    /* Zinc 900 */
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--t-bg-card);
+    border: 1px solid var(--t-border);
     border-radius: 12px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .chart-header,
@@ -226,7 +226,7 @@
     margin: 0;
     font-size: 15px;
     font-weight: 700;
-    color: #fff;
+    color: var(--t-text-primary);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -234,7 +234,7 @@
 
 .chart-subtitle {
     font-size: 12px;
-    color: #71717a;
+    color: var(--t-text-tertiary);
 }
 
 .charts-row {
@@ -247,7 +247,7 @@
 .view-all-link {
     background: none;
     border: none;
-    color: #DC2626;
+    color: var(--t-primary);
     /* Red Link */
     font-size: 12px;
     font-weight: 600;
@@ -256,13 +256,12 @@
 }
 
 .view-all-link:hover {
-    color: #ec4899;
-    /* Pinkish hover or just lighter red */
+    color: var(--t-primary-hover);
     text-decoration: underline;
 }
 
 .badge-count {
-    background: #DC2626;
+    background: var(--t-primary);
     color: white;
     font-size: 10px;
     font-weight: 700;
@@ -281,23 +280,20 @@
     display: flex;
     align-items: center;
     padding: 10px 12px;
-    background: #09090b;
-    /* Darker inner bg */
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    background: var(--t-bg-surface-2);
+    border: 1px solid var(--t-border);
     border-radius: 8px;
     transition: all 0.2s;
 }
 
 .agenda-item:hover {
-    border-color: rgba(255, 255, 255, 0.1);
-    background: #101012;
+    border-color: var(--t-border-hover);
+    background: var(--t-bg-card-hover);
 }
 
 .agenda-item.in-progress {
-    border-left: 2px solid #DC2626;
-    /* Red Active */
-    background: rgba(220, 38, 38, 0.05);
-    /* Red Tint */
+    border-left: 2px solid var(--t-primary);
+    background: var(--t-primary-light);
 }
 
 .agenda-time {
@@ -306,31 +302,31 @@
     align-items: flex-start;
     min-width: 50px;
     padding-right: 10px;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid var(--t-border);
     margin-right: 10px;
 }
 
 .start-time {
     font-size: 13px;
     font-weight: 700;
-    color: #fff;
+    color: var(--t-text-primary);
 }
 
 .duration {
     font-size: 10px;
-    color: #71717a;
+    color: var(--t-text-tertiary);
 }
 
 .agenda-details h4 {
     margin: 0 0 2px 0;
     font-size: 13px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--t-text-primary);
 }
 
 .agenda-meta {
     font-size: 11px;
-    color: #71717a;
+    color: var(--t-text-tertiary);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -347,19 +343,19 @@
 }
 
 .status-badge.upcoming {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: var(--t-blue-light);
+    color: var(--t-blue);
 }
 
 .status-badge.in-progress {
-    background: #DC2626;
+    background: var(--t-primary);
     color: #fff;
 }
 
 .status-badge.completed {
     background: transparent;
-    color: #52525b;
-    border: 1px solid #27272a;
+    color: var(--t-text-muted);
+    border: 1px solid var(--t-border);
 }
 
 /* Alerts - Compact */
@@ -374,8 +370,8 @@
     align-items: flex-start;
     gap: 10px;
     padding: 10px;
-    background: #09090b;
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    background: var(--t-bg-surface-2);
+    border: 1px solid var(--t-border);
     border-radius: 8px;
 }
 
@@ -383,8 +379,8 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: #27272a;
-    color: #fff;
+    background: var(--t-bg-subtle);
+    color: var(--t-text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -396,19 +392,19 @@
     font-size: 13px;
     font-weight: 600;
     margin: 0 0 2px 0;
-    color: #fff;
+    color: var(--t-text-primary);
 }
 
 .alert-content p {
     font-size: 11px;
-    color: #a1a1aa;
+    color: var(--t-text-secondary);
     margin: 0 0 2px 0;
     line-height: 1.4;
 }
 
 .alert-time {
     font-size: 10px;
-    color: #52525b;
+    color: var(--t-text-tertiary);
 }
 
 .alert-action-btn {
@@ -419,15 +415,15 @@
     align-items: center;
     justify-content: center;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--t-border);
     border-radius: 6px;
-    color: #71717a;
+    color: var(--t-text-tertiary);
     cursor: pointer;
 }
 
 .alert-action-btn:hover {
-    background: #27272a;
-    color: #fff;
+    background: var(--t-bg-card-hover);
+    color: var(--t-text-primary);
 }
 
 /* Empty States */
@@ -437,7 +433,7 @@
     align-items: center;
     justify-content: center;
     padding: 32px;
-    color: #52525b;
+    color: var(--t-text-muted);
     text-align: center;
 }
 
@@ -486,143 +482,14 @@
 }
 
 /* ==================== LIGHT THEME SUPPORT ==================== */
-.theme-light .trainer-dashboard {
-    background: #f8fafc;
-    /* Slate 50 */
-    color: #0f172a;
-}
-
-.theme-light .dashboard-header {
-    border-bottom-color: #e2e8f0;
-}
-
-.theme-light .welcome-text {
-    color: #0f172a;
-}
-
-.theme-light .date-display {
-    color: #64748b;
-}
-
-.theme-light .action-btn {
-    background: #ffffff;
-    border-color: #e2e8f0;
-    color: #334155;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.theme-light .action-btn:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-}
-
-.theme-light .action-btn.primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    /* Revert to original primary color for light theme */
-    color: #fff;
-    border-color: transparent;
-}
-
-/* Cards (Light) */
-.theme-light .stat-card,
-.theme-light .chart-container,
-.theme-light .widget-panel,
-.theme-light .alert-card,
-.theme-light .agenda-item {
-    background: #ffffff;
-    border-color: #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.theme-light .stat-card:hover,
-.theme-light .agenda-item:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
-}
-
-.theme-light .stat-card__value {
-    color: #0f172a;
-}
-
-.theme-light .stat-card__title,
-.theme-light .chart-subtitle,
-.theme-light .duration,
-.theme-light .alert-time,
-.theme-light .agenda-meta,
-.theme-light .alert-content p {
-    color: #64748b;
-}
-
-.theme-light .stat-card__icon-wrapper {
-    background: #f1f5f9;
-    color: #64748b;
-}
-
-.theme-light .chart-header h3,
-.theme-light .widget-header h3,
-.theme-light .start-time,
-.theme-light .agenda-details h4,
-.theme-light .alert-content h4 {
-    color: #0f172a;
-}
-
-.theme-light .agenda-time {
-    border-right-color: #e2e8f0;
-}
-
-.theme-light .agenda-item.in-progress {
-    background: #fef2f2;
-    /* Red 50 */
-    border-color: #fee2e2;
-}
-
-.theme-light .alert-avatar {
-    background: #e2e8f0;
-    color: #475569;
-}
-
-.theme-light .alert-action-btn,
-.theme-light .check-in-btn {
-    border-color: #e2e8f0;
-    color: #64748b;
-}
-
-.theme-light .alert-action-btn:hover,
-.theme-light .check-in-btn:hover {
-    background: #f1f5f9;
-    color: #0f172a;
-}
-
-.theme-light .empty-state {
-    color: #94a3b8;
-}
-
-/* Status Badges Light */
-.theme-light .status-badge.upcoming {
-    background: #eff6ff;
-    color: #3b82f6;
-}
-
-/* Blue 50 */
-.theme-light .status-badge.in-progress {
-    background: #fef2f2;
-    color: #dc2626;
-}
-
-/* Red 50 */
-.theme-light .status-badge.completed {
-    background: #f1f5f9;
-    color: #64748b;
-    border-color: #e2e8f0;
-}
-
+/* Now handled by unified variables above */
 
 /* ── Glass panel utility ── */
 .glass-panel {
-    background: rgba(18, 18, 22, 0.72);
+    background: var(--t-bg-card);
     backdrop-filter: blur(12px);
     border: 1px solid var(--t-border);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.30);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 /* ── Full-page loader ── */
@@ -640,7 +507,7 @@
 .tp-spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid rgba(255, 255, 255, 0.08);
+    border: 3px solid var(--t-border);
     border-top-color: var(--t-indigo);
     border-radius: 50%;
     animation: spin 1s linear infinite;

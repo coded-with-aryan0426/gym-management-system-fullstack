@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AthlonX Icon Design System - SVG Defs Library
+  =============================================
+  
+  Reusable SVG gradients, filters, and patterns.
+  
+  Usage:
+  1. Include this defs block in your SVG root element:
+     <svg ...>
+       <defs>
+         <!-- Include content from this file -->
+       </defs>
+       <!-- Your icon content -->
+     </svg>
+  
+  2. Reference in your icons:
+     <circle fill="url(#grad-admin-gold)" cx="12" cy="12" r="10" />
+     <path filter="url(#filter-shadow-medium)" ... />
+-->
+
+<defs>
+
+  <!-- ========== LINEAR GRADIENTS (45°) ========== -->
+  
+  <!-- Premium Gold Gradient (Admin Primary) -->
+  <linearGradient id="grad-premium-45-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color: #FCD34D; stop-opacity: 1;" />
+    <stop offset="50%" style="stop-color: #F59E0B; stop-opacity: 1;" />
+    <stop offset="100%" style="stop-color: #D97706; stop-opacity: 1;" />
+  </linearGradient>
+
+  <!-- Premium Green Gradient (Trainer Primary) -->
+  <linearGradient id="grad-premium-45-green" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color: #6EE7B7; stop-opacity: 1;" />
+    <stop offset="50%" style="stop-color: #10B981; stop-opacity: 1;" />
+    <stop offset="100%" style="stop-color: #059669; stop-opacity: 1;" />
+  </linearGradient>
+
+  <!-- Premium Blue Gradient (Member Primary) -->
+  <linearGradient id="grad-premium-45-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color: #93C5FD; stop-opacity: 1;" />
+    <stop offset="50%" style="stop-color: #3B82F6; stop-opacity: 1;" />
+    <stop offset="100%" style="stop-color: #1D4ED8; stop-opacity: 1;" />
+  </linearGradient>
+
+  <!-- ========== VERTICAL LINEAR GRADIENTS (Depth) ========== -->
+  
+  <!-- Subtle Depth (Light to Dark) -->
+  <linearGradient id="grad-depth-vertical-subtle" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" style="stop-color: #FFFFFF; stop-opacity: 0.4;" />
+    <stop offset="100%" style="stop-color: #000000; stop-opacity: 0.1;" />
+  </linearGradient>
+
+  <!-- Medium Depth (Enhanced Shading) -->
+  <linearGradient id="grad-depth-vertical-medium" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" style="stop-color: #FFFFFF; stop-opacity: 0.6;" />
+    <stop offset="100%" style="stop-color: #000000; stop-opacity: 0.2;" />
+  </linearGradient>
+
+  <!-- Strong Depth (3D Effect) -->
+  <linearGradient id="grad-depth-vertical-strong" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" style="stop-color: #FFFFFF; stop-opacity: 0.8;" />
+    <stop offset="100%" style="stop-color: #000000; stop-opacity: 0.3;" />
+  </linearGradient>
+
+  <!-- ========== RADIAL GRADIENTS (Glow Effects) ========== -->
+  
+  <!-- Glow Center - Amber -->
+  <radialGradient id="grad-glow-center-amber" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" style="stop-color: #FCD34D; stop-opacity: 0.8;" />
+    <stop offset="50%" style="stop-color: #F59E0B; stop-opacity: 0.4;" />
+    <stop offset="100%" style="stop-color: #D97706; stop-opacity: 0.1;" />
+  </radialGradient>
+
+  <!-- Glow Center - Green -->
+  <radialGradient id="grad-glow-center-green" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" style="stop-color: #6EE7B7; stop-opacity: 0.8;" />
+    <stop offset="50%" style="stop-color: #10B981; stop-opacity: 0.4;" />
+    <stop offset="100%" style="stop-color: #059669; stop-opacity: 0.1;" />
+  </radialGradient>
+
+  <!-- Glow Center - Blue -->
+  <radialGradient id="grad-glow-center-blue" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" style="stop-color: #93C5FD; stop-opacity: 0.8;" />
+    <stop offset="50%" style="stop-color: #3B82F6; stop-opacity: 0.4;" />
+    <stop offset="100%" style="stop-color: #1D4ED8; stop-opacity: 0.1;" />
+  </radialGradient>
+
+  <!-- Soft Glow Halo (Generic) -->
+  <radialGradient id="grad-glow-halo" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" style="stop-color: #FFFFFF; stop-opacity: 0.6;" />
+    <stop offset="100%" style="stop-color: #000000; stop-opacity: 0;" />
+  </radialGradient>
+
+  <!-- ========== SHIMMER GRADIENTS ========== -->
+  
+  <!-- Shimmer Effect (Left to Right) -->
+  <linearGradient id="grad-shimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%" style="stop-color: #FFFFFF; stop-opacity: 0;" />
+    <stop offset="50%" style="stop-color: #FFFFFF; stop-opacity: 0.75;" />
+    <stop offset="100%" style="stop-color: #FFFFFF; stop-opacity: 0;" />
+  </linearGradient>
+
+  <!-- Metallic Shine (Curved) -->
+  <linearGradient id="grad-metallic-shine" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color: #FFFFFF; stop-opacity: 0.4;" />
+    <stop offset="50%" style="stop-color: #FFFFFF; stop-opacity: 0.1;" />
+    <stop offset="100%" style="stop-color: #000000; stop-opacity: 0.2;" />
+  </linearGradient>
+
+  <!-- ========== DROP SHADOW FILTERS ========== -->
+  
+  <!-- Subtle Shadow (Background Details) -->
+  <filter id="filter-shadow-subtle">
+    <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000000" flood-opacity="0.1"/>
+  </filter>
+
+  <!-- Medium Shadow (Standard Icons) -->
+  <filter id="filter-shadow-medium">
+    <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.15"/>
+  </filter>
+
+  <!-- Strong Shadow (Elevated Elements) -->
+  <filter id="filter-shadow-strong">
+    <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.2"/>
+  </filter>
+
+  <!-- Deep Shadow (Heavy Elements) -->
+  <filter id="filter-shadow-deep">
+    <feDropShadow dx="0" dy="6" stdDeviation="4" flood-color="#000000" flood-opacity="0.25"/>
+  </filter>
+
+  <!-- ========== GLOW FILTERS ========== -->
+  
+  <!-- Soft Glow - Amber -->
+  <filter id="filter-glow-amber-soft">
+    <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#F59E0B" flood-opacity="0.4"/>
+  </filter>
+
+  <!-- Medium Glow - Amber -->
+  <filter id="filter-glow-amber-medium">
+    <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#F59E0B" flood-opacity="0.5"/>
+    <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#F59E0B" flood-opacity="0.2"/>
+  </filter>
+
+  <!-- Bright Glow - Amber -->
+  <filter id="filter-glow-amber-bright">
+    <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#F59E0B" flood-opacity="0.6"/>
+    <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#F59E0B" flood-opacity="0.3"/>
+  </filter>
+
+  <!-- Soft Glow - Green -->
+  <filter id="filter-glow-green-soft">
+    <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#10B981" flood-opacity="0.4"/>
+  </filter>
+
+  <!-- Bright Glow - Green -->
+  <filter id="filter-glow-green-bright">
+    <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#10B981" flood-opacity="0.6"/>
+    <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#10B981" flood-opacity="0.3"/>
+  </filter>
+
+  <!-- Medium Glow - Blue -->
+  <filter id="filter-glow-blue-medium">
+    <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#3B82F6" flood-opacity="0.5"/>
+    <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#3B82F6" flood-opacity="0.2"/>
+  </filter>
+
+  <!-- ========== BLUR FILTERS ========== -->
+  
+  <!-- Light Blur -->
+  <filter id="filter-blur-light">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
+  </filter>
+
+  <!-- Medium Blur -->
+  <filter id="filter-blur-medium">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+  </filter>
+
+  <!-- Strong Blur -->
+  <filter id="filter-blur-strong">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+  </filter>
+
+  <!-- ========== INNER SHADOW FILTERS ========== -->
+  
+  <!-- Inner Shadow - Subtle (Inset 3D Effect) -->
+  <filter id="filter-inner-shadow-subtle">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
+    <feOffset in="SourceGraphic" dx="0" dy="1" result="offsetblur" />
+    <feFlood flood-color="#000000" flood-opacity="0.1" result="offsetcolor" />
+    <feComposite in="offsetcolor" in2="offsetblur" operator="in" result="offsetblur" />
+    <feComposite in="offsetblur" in2="SourceGraphic" operator="in" result="offsetblur" />
+    <feComposite in="offsetblur" in2="SourceGraphic" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
+  </filter>
+
+  <!-- Inner Shadow - Medium (Enhanced Depth) -->
+  <filter id="filter-inner-shadow-medium">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+    <feOffset in="SourceGraphic" dx="0" dy="2" result="offsetblur" />
+    <feFlood flood-color="#000000" flood-opacity="0.15" result="offsetcolor" />
+    <feComposite in="offsetcolor" in2="offsetblur" operator="in" result="offsetblur" />
+    <feComposite in="offsetblur" in2="SourceGraphic" operator="in" result="offsetblur" />
+    <feComposite in="offsetblur" in2="SourceGraphic" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
+  </filter>
+
+  <!-- ========== COMBINATION FILTERS ========== -->
+  
+  <!-- Shadow + Glow (Amber) -->
+  <filter id="filter-shadow-glow-amber">
+    <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.15"/>
+    <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#F59E0B" flood-opacity="0.4"/>
+  </filter>
+
+  <!-- Shadow + Glow (Green) -->
+  <filter id="filter-shadow-glow-green">
+    <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.15"/>
+    <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#10B981" flood-opacity="0.4"/>
+  </filter>
+
+  <!-- Shadow + Glow (Blue) -->
+  <filter id="filter-shadow-glow-blue">
+    <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.15"/>
+    <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#3B82F6" flood-opacity="0.4"/>
+  </filter>
+
+  <!-- ========== PATTERNS ========== -->
+  
+  <!-- Diagonal Stripe Pattern -->
+  <pattern id="pattern-stripes-diagonal" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+    <line x1="0" y1="0" x2="4" y2="4" stroke="#FFFFFF" stroke-width="1" opacity="0.2"/>
+  </pattern>
+
+  <!-- Horizontal Line Pattern -->
+  <pattern id="pattern-lines-horizontal" x="0" y="0" width="24" height="2" patternUnits="userSpaceOnUse">
+    <line x1="0" y1="1" x2="24" y2="1" stroke="#000000" stroke-width="0.5" opacity="0.1"/>
+  </pattern>
+
+  <!-- Dot Grid Pattern -->
+  <pattern id="pattern-dots-grid" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+    <circle cx="2" cy="2" r="0.5" fill="#000000" opacity="0.15"/>
+  </pattern>
+
+  <!-- ========== MASKS ========== -->
+  
+  <!-- Vignette Mask (Darkens Edges) -->
+  <radialGradient id="mask-vignette" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" style="stop-color: #FFFFFF; stop-opacity: 1;" />
+    <stop offset="100%" style="stop-color: #FFFFFF; stop-opacity: 0;" />
+  </radialGradient>
+
+  <!-- ========== CLIP PATHS ========== -->
+  
+  <!-- Rounded Rectangle 2px -->
+  <clipPath id="clip-rounded-2px">
+    <rect x="2" y="2" width="20" height="20" rx="2" ry="2"/>
+  </clipPath>
+
+  <!-- Rounded Rectangle 4px -->
+  <clipPath id="clip-rounded-4px">
+    <rect x="2" y="2" width="20" height="20" rx="4" ry="4"/>
+  </clipPath>
+
+  <!-- Circle -->
+  <clipPath id="clip-circle">
+    <circle cx="12" cy="12" r="10"/>
+  </clipPath>
+
+</defs>

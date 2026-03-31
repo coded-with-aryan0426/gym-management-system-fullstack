@@ -21,10 +21,10 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children }) => {
 
     useEffect(() => {
         if (isPortalAuth) {
-            document.documentElement.setAttribute('data-theme', 'superadmin');
+            document.documentElement.setAttribute('data-dashboard', 'superadmin');
         }
         return () => {
-            document.documentElement.removeAttribute('data-theme');
+            document.documentElement.removeAttribute('data-dashboard');
         };
     }, [isPortalAuth]);
 

@@ -602,25 +602,35 @@
    LIGHT THEME OVERRIDES  (add .theme-light to <html> or root container)
 ────────────────────────────────────────────────────────────────────────── */
 .theme-light {
-  --t-bg-page: #f4f5f8;
+  --t-bg-page: #f8fafc;
   --t-bg-card: #ffffff;
-  --t-bg-card-hover: #f9fafb;
+  --t-bg-card-hover: #f1f5f9;
   --t-bg-input: #ffffff;
   --t-bg-modal: #ffffff;
-  --t-bg-overlay: rgba(0, 0, 0, 0.45);
+  --t-bg-overlay: rgba(0, 0, 0, 0.40);
   --t-bg-dropdown: #ffffff;
   --t-bg-header: #ffffff;
 
-  --t-border: rgba(0, 0, 0, 0.07);
-  --t-border-hover: rgba(0, 0, 0, 0.14);
-  --t-border-modal: rgba(0, 0, 0, 0.10);
+  /* Surfaces with subtle separation */
+  --t-bg-subtle: #f1f5f9;
+  --t-bg-surface-2: #f8fafc;
+
+  --t-border: rgba(0, 0, 0, 0.08);
+  --t-border-hover: rgba(0, 0, 0, 0.15);
+  --t-border-modal: rgba(0, 0, 0, 0.12);
 
   --t-text-primary: #0f172a;
   --t-text-secondary: #475569;
-  --t-text-tertiary: #94a3b8;
-  --t-text-muted: #cbd5e1;
+  --t-text-tertiary: #64748b;
+  --t-text-muted: #94a3b8;
   --t-text-label: #64748b;
 
-  --t-card-shadow-hover: 0 6px 24px rgba(0, 0, 0, 0.09);
-  --t-dropdown-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  --t-card-shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.06);
+  --t-modal-shadow: 0 32px 80px rgba(0, 0, 0, 0.14);
+  --t-dropdown-shadow: 0 12px 32px rgba(0, 0, 0, 0.10);
+
+  /* Button overrides for light mode visibility */
+  --t-btn-ghost-bg: rgba(0, 0, 0, 0.03);
+  --t-btn-ghost-border: rgba(0, 0, 0, 0.08);
+  --t-btn-ghost-color: var(--t-text-secondary);
 }

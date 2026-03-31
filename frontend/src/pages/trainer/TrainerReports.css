@@ -6,7 +6,7 @@
 
 .trainer-reports {
   min-height: 100%;
-  background-color: var(--bg-primary, #0a0a0a);
+  background-color: var(--t-bg-page);
 }
 
 /* ============================================
@@ -14,8 +14,8 @@
    ============================================ */
 .trainer-reports__header {
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
-  background: var(--bg-secondary, rgba(12, 12, 14, 0.95));
+  border-bottom: 1px solid var(--t-border);
+  background: var(--t-bg-card);
 }
 
 .trainer-reports__header-content {
@@ -31,14 +31,14 @@
 .trainer-reports__title-section h1 {
   font-size: 22px;
   font-weight: 700;
-  color: var(--text-primary, #fff);
+  color: var(--t-text-primary);
   margin: 0 0 4px 0;
   letter-spacing: -0.02em;
 }
 
 .trainer-reports__title-section p {
   font-size: 13px;
-  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+  color: var(--t-text-tertiary);
   margin: 0;
 }
 
@@ -57,18 +57,18 @@
 .trainer-reports__period-select > svg:first-child {
   position: absolute;
   left: 12px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
   pointer-events: none;
 }
 
 .trainer-reports__period-select select {
   height: 38px;
   padding: 9px 32px 9px 34px;
-  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  background: var(--t-bg-subtle);
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   font-size: 13px;
-  color: var(--text-primary, #fff);
+  color: var(--t-text-primary);
   cursor: pointer;
   appearance: none;
 }
@@ -77,7 +77,7 @@
   position: absolute;
   right: 10px;
   pointer-events: none;
-  color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
+  color: var(--t-text-muted);
 }
 
 .trainer-reports__custom-range {
@@ -89,21 +89,21 @@
 .trainer-reports__date-input {
   height: 38px;
   padding: 0 12px;
-  background: var(--sidebar-bg, rgba(12, 12, 14, 0.95));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  background: var(--t-bg-subtle);
+  border: 1px solid var(--t-border);
   border-radius: 8px;
-  color: var(--text-primary, #fff);
+  color: var(--t-text-primary);
   font-size: 13px;
   outline: none;
   transition: border-color 0.15s ease;
 }
 
 .trainer-reports__date-input:focus {
-  border-color: var(--accent-color, #6C63FF);
+  border-color: var(--t-indigo);
 }
 
 .trainer-reports__date-separator {
-  color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
+  color: var(--t-text-muted);
   font-size: 12px;
 }
 
@@ -111,9 +111,9 @@
   width: 38px;
   height: 38px;
   background: transparent;
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--t-border);
   border-radius: 8px;
-  color: var(--text-secondary);
+  color: var(--t-text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -122,8 +122,8 @@
 }
 
 .trainer-reports__refresh-btn:hover {
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: var(--t-bg-subtle);
+  color: var(--t-text-primary);
 }
 
 .trainer-reports__export-btn {
@@ -132,7 +132,7 @@
   gap: 6px;
   height: 38px;
   padding: 9px 16px;
-  background: #DC2626;
+  background: var(--t-primary);
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -143,7 +143,7 @@
 }
 
 .trainer-reports__export-btn:hover {
-  background: #B91C1C;
+  background: var(--t-primary-hover);
 }
 
 /* ============================================
@@ -153,8 +153,8 @@
   display: flex;
   gap: 4px;
   padding: 12px 24px;
-  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
-  background: var(--bg-secondary, rgba(12, 12, 14, 0.95));
+  border-bottom: 1px solid var(--t-border);
+  background: var(--t-bg-card);
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -167,7 +167,7 @@
   background: transparent;
   border: none;
   border-radius: 8px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -175,13 +175,13 @@
 }
 
 .trainer-reports__tabs button:hover {
-  background: var(--bg-primary, rgba(255, 255, 255, 0.03));
-  color: var(--text-secondary);
+  background: var(--t-bg-subtle);
+  color: var(--t-text-secondary);
 }
 
 .trainer-reports__tabs button.active {
-  background: rgba(220, 38, 38, 0.15);
-  color: #DC2626;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
 }
 
 /* ============================================
@@ -216,8 +216,8 @@
 }
 
 .trainer-reports__stat-card {
-  background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--t-bg-card);
+  border: 1px solid var(--t-border);
   border-radius: 12px;
   padding: 16px 18px;
 }
@@ -266,20 +266,20 @@
 .trainer-reports__stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: var(--text-primary, #fff);
+  color: var(--t-text-primary);
   line-height: 1;
   margin-bottom: 4px;
 }
 
 .trainer-reports__stat-label {
   font-size: 13px;
-  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  color: var(--t-text-secondary);
   margin-bottom: 4px;
 }
 
 .trainer-reports__stat-subtext {
   font-size: 11px;
-  color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
+  color: var(--t-text-muted);
 }
 
 /* ============================================
@@ -298,8 +298,8 @@
 }
 
 .trainer-reports__card {
-  background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--t-bg-card);
+  border: 1px solid var(--t-border);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -313,7 +313,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 18px;
-  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-bottom: 1px solid var(--t-border);
 }
 
 .trainer-reports__card-header h2 {
@@ -322,12 +322,12 @@
   gap: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary, #fff);
+  color: var(--t-text-primary);
   margin: 0;
 }
 
 .trainer-reports__card-header h2 svg {
-  color: #DC2626;
+  color: var(--t-primary);
 }
 
 .trainer-reports__chart-legend {
@@ -340,7 +340,7 @@
   align-items: center;
   gap: 5px;
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
 }
 
 .trainer-reports__legend-dot {
@@ -350,11 +350,11 @@
 }
 
 .trainer-reports__legend-dot--actual {
-  background: #DC2626;
+  background: var(--t-primary);
 }
 
 .trainer-reports__legend-dot--target {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--t-border);
 }
 
 .trainer-reports__info-btn {
@@ -363,7 +363,7 @@
   background: transparent;
   border: none;
   border-radius: 6px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -372,8 +372,8 @@
 }
 
 .trainer-reports__info-btn:hover {
-  background: var(--bg-primary);
-  color: var(--text-secondary);
+  background: var(--t-bg-subtle);
+  color: var(--t-text-secondary);
 }
 
 .trainer-reports__card-content {
@@ -383,7 +383,7 @@
 .trainer-reports__view-all {
   background: none;
   border: none;
-  color: #DC2626;
+  color: var(--t-primary);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -427,11 +427,11 @@
 }
 
 .trainer-reports__bar--target {
-  background: var(--border-color, rgba(255, 255, 255, 0.1));
+  background: var(--t-border);
 }
 
 .trainer-reports__bar--actual {
-  background: linear-gradient(180deg, #DC2626, #B91C1C);
+  background: linear-gradient(180deg, var(--t-primary), var(--t-primary-hover));
   position: relative;
 }
 
@@ -442,12 +442,12 @@
   transform: translateX(-50%);
   font-size: 10px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--t-text-secondary);
 }
 
 .trainer-reports__bar-label {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
   margin-top: 8px;
 }
 
@@ -455,7 +455,7 @@
   display: flex;
   justify-content: space-around;
   padding-top: 14px;
-  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-top: 1px solid var(--t-border);
 }
 
 .trainer-reports__summary-item {
@@ -466,7 +466,7 @@
   display: block;
   font-size: 18px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--t-text-primary);
 }
 
 .trainer-reports__summary-value--positive {
@@ -475,7 +475,7 @@
 
 .trainer-reports__summary-label {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
 }
 
 /* ============================================
@@ -512,13 +512,13 @@
 .trainer-reports__donut-value {
   font-size: 22px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--t-text-primary);
   line-height: 1;
 }
 
 .trainer-reports__donut-label {
   font-size: 10px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
 }
 
 .trainer-reports__breakdown-list {
@@ -544,19 +544,19 @@
 .trainer-reports__breakdown-type {
   flex: 1;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--t-text-secondary);
 }
 
 .trainer-reports__breakdown-count {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--t-text-primary);
   min-width: 24px;
 }
 
 .trainer-reports__breakdown-percent {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
   min-width: 32px;
   text-align: right;
 }
@@ -590,17 +590,18 @@
 
 .trainer-reports__metric-label {
   font-size: 12px;
-  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  color: var(--t-text-secondary);
 }
 
 .trainer-reports__metric-value {
   font-size: 12px;
   font-weight: 700;
+  color: var(--t-text-primary);
 }
 
 .trainer-reports__metric-bar {
   height: 6px;
-  background: var(--border-color, rgba(255, 255, 255, 0.08));
+  background: var(--t-bg-subtle);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -625,7 +626,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px;
-  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  background: var(--t-bg-surface-2);
   border-radius: 8px;
 }
 
@@ -648,12 +649,12 @@
 .trainer-reports__achievement-label {
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--t-text-primary);
 }
 
 .trainer-reports__achievement-date {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--t-text-muted);
 }
 
 /* ============================================
@@ -671,8 +672,8 @@
   flex-direction: column;
   align-items: center;
   padding: 14px 24px;
-  background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--t-bg-card);
+  border: 1px solid var(--t-border);
   border-radius: 10px;
   min-width: 100px;
 }
@@ -680,13 +681,13 @@
 .trainer-reports__session-stat-value {
   font-size: 24px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--t-text-primary);
   line-height: 1;
 }
 
 .trainer-reports__session-stat-label {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
   margin-top: 4px;
 }
 
@@ -708,7 +709,7 @@
 
 .trainer-reports__sessions-filter {
   display: inline-flex;
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -717,8 +718,8 @@
   padding: 8px 16px;
   background: transparent;
   border: none;
-  border-right: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-  color: var(--text-tertiary);
+  border-right: 1px solid var(--t-border);
+  color: var(--t-text-tertiary);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -730,13 +731,13 @@
 }
 
 .trainer-reports__sessions-filter button:hover {
-  background: var(--bg-primary);
-  color: var(--text-secondary);
+  background: var(--t-bg-subtle);
+  color: var(--t-text-secondary);
 }
 
 .trainer-reports__sessions-filter button.active {
-  background: rgba(220, 38, 38, 0.15);
-  color: #DC2626;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
 }
 
 .trainer-reports__sessions-table {
@@ -754,24 +755,24 @@
 }
 
 .trainer-reports__table-header {
-  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-bottom: 1px solid var(--t-border);
 }
 
 .trainer-reports__table-header span {
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .trainer-reports__table-row {
-  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.04));
+  border-bottom: 1px solid var(--t-border);
   transition: background 0.15s ease;
 }
 
 .trainer-reports__table-row:hover {
-  background: var(--bg-primary, rgba(255, 255, 255, 0.02));
+  background: var(--t-bg-subtle);
 }
 
 .trainer-reports__table-row:last-child {
@@ -780,7 +781,7 @@
 
 .trainer-reports__table-row > span {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--t-text-secondary);
 }
 
 .trainer-reports__session-member {
@@ -793,7 +794,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  background: linear-gradient(135deg, var(--t-primary), var(--t-primary-hover));
   color: #fff;
   font-size: 10px;
   font-weight: 600;
@@ -805,7 +806,7 @@
 
 .trainer-reports__session-member span {
   font-weight: 500;
-  color: var(--text-primary) !important;
+  color: var(--t-text-primary) !important;
 }
 
 .trainer-reports__session-status {
@@ -856,13 +857,13 @@
 .trainer-reports__members-header h2 {
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--t-text-primary);
   margin: 0 0 4px 0;
 }
 
 .trainer-reports__members-header p {
   font-size: 13px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
   margin: 0;
 }
 
@@ -873,8 +874,8 @@
 }
 
 .trainer-reports__member-card {
-  background: var(--bg-secondary, rgba(255, 255, 255, 0.03));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  background: var(--t-bg-card);
+  border: 1px solid var(--t-border);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -883,7 +884,7 @@
   position: relative;
   padding: 20px 16px;
   text-align: center;
-  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
+  border-bottom: 1px solid var(--t-border);
 }
 
 .trainer-reports__member-badge {
@@ -925,14 +926,14 @@
 .trainer-reports__member-card-header h3 {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--t-text-primary);
   margin: 0 0 4px 0;
 }
 
 .trainer-reports__member-goal {
   font-size: 12px;
-  color: var(--text-tertiary);
-  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  color: var(--t-text-tertiary);
+  background: var(--t-bg-surface-2);
   padding: 3px 10px;
   border-radius: 10px;
   display: inline-block;
@@ -955,7 +956,7 @@
   gap: 3px;
   font-size: 16px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--t-text-primary);
   line-height: 1;
 }
 
@@ -969,7 +970,7 @@
 
 .trainer-reports__member-stat-label {
   font-size: 10px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
   margin-top: 3px;
 }
 
@@ -979,14 +980,14 @@
 
 .trainer-reports__member-progress-track {
   height: 6px;
-  background: var(--border-color, rgba(255, 255, 255, 0.08));
+  background: var(--t-bg-subtle);
   border-radius: 3px;
   overflow: hidden;
 }
 
 .trainer-reports__member-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #DC2626, #EF4444);
+  background: linear-gradient(90deg, var(--t-primary), var(--t-primary-hover));
   border-radius: 3px;
   transition: width 0.3s ease;
 }
@@ -996,12 +997,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  background: var(--t-bg-surface-2);
 }
 
 .trainer-reports__member-footer > span {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--t-text-muted);
 }
 
 .trainer-reports__view-member-btn {
@@ -1010,9 +1011,9 @@
   gap: 4px;
   padding: 6px 10px;
   background: transparent;
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--t-border);
   border-radius: 6px;
-  color: var(--text-secondary);
+  color: var(--t-text-secondary);
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
@@ -1020,9 +1021,9 @@
 }
 
 .trainer-reports__view-member-btn:hover {
-  background: var(--bg-secondary);
-  border-color: rgba(220, 38, 38, 0.3);
-  color: #DC2626;
+  background: var(--t-bg-card-hover);
+  border-color: var(--t-primary);
+  color: var(--t-primary);
 }
 
 /* ============================================
@@ -1034,7 +1035,7 @@
   align-items: center;
   padding: 24px;
   background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(139, 92, 246, 0.15));
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  border: 1px solid var(--t-primary);
   border-radius: 12px;
   margin-bottom: 20px;
 }
@@ -1046,20 +1047,20 @@
 
 .trainer-reports__earnings-label {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
   margin-bottom: 4px;
 }
 
 .trainer-reports__earnings-value {
   font-size: 36px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--t-text-primary);
   line-height: 1;
 }
 
 .trainer-reports__earnings-period {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--t-text-secondary);
   margin-top: 6px;
 }
 
@@ -1113,7 +1114,7 @@
 
 .trainer-reports__earnings-category {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--t-text-secondary);
 }
 
 .trainer-reports__earnings-item-details {
@@ -1125,17 +1126,17 @@
 .trainer-reports__earnings-amount {
   font-size: 20px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--t-text-primary);
 }
 
 .trainer-reports__earnings-sessions {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--t-text-muted);
 }
 
 .trainer-reports__earnings-bar {
   height: 6px;
-  background: var(--border-color, rgba(255, 255, 255, 0.08));
+  background: var(--t-bg-subtle);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -1157,7 +1158,7 @@
   flex-direction: column;
   align-items: center;
   padding: 16px;
-  background: var(--bg-primary, rgba(0, 0, 0, 0.2));
+  background: var(--t-bg-surface-2);
   border-radius: 10px;
   text-align: center;
 }
@@ -1165,194 +1166,113 @@
 .trainer-reports__rate-value {
   font-size: 22px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--t-text-primary);
   line-height: 1;
 }
 
 .trainer-reports__rate-label {
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: var(--t-text-tertiary);
   margin-top: 6px;
 }
 
 /* ============================================
-   LIGHT MODE
+   LIGHT MODE (LEGACY - NOW HANDLED BY VARIABLES BUT KEPT FOR REMOVAL)
    ============================================ */
-:root.theme-light .trainer-reports {
-  background-color: #ffffff;
+/* Light mode is now fully unified via variables. 
+   Removing legacy light mode blocks to prevent conflicts. */
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .trainer-reports__header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .trainer-reports__header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .trainer-reports__tabs {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .trainer-reports__tabs button {
+    white-space: nowrap;
+  }
+
+  .trainer-reports__table-header,
+  .trainer-reports__table-row {
+    grid-template-columns: 2fr 1.5fr 1fr 1fr;
+  }
+
+  .trainer-reports__table-header span:nth-child(4),
+  .trainer-reports__table-header span:nth-child(5),
+  .trainer-reports__table-row span:nth-child(4),
+  .trainer-reports__table-row span:nth-child(5) {
+    display: none;
+  }
+
+  .trainer-reports__earnings-summary {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .trainer-reports__earnings-total {
+    align-items: center;
+  }
+
+  .trainer-reports__rate-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .trainer-reports__donut-chart {
+    flex-direction: column;
+  }
 }
 
-:root.theme-light .trainer-reports__header {
-  background: #fff;
-  border-color: rgba(0, 0, 0, 0.06);
+/* Apply / PDF buttons */
+.trainer-reports__apply-btn {
+    padding: 0 14px;
+    height: 36px;
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.35);
+    border-radius: 8px;
+    color: #34d399;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+.trainer-reports__apply-btn:hover:not(:disabled) {
+    background: rgba(16,185,129,0.25);
+    border-color: rgba(16,185,129,0.5);
+}
+.trainer-reports__apply-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
-:root.theme-light .trainer-reports__title-section h1 {
-  color: #111;
+.trainer-reports__export-btn--pdf {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.25);
+    color: #f87171;
+}
+.trainer-reports__export-btn--pdf:hover {
+    background: rgba(239,68,68,0.2);
+    border-color: rgba(239,68,68,0.45);
 }
 
-:root.theme-light .trainer-reports__tabs {
-  background: #fff;
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .trainer-reports__tabs button:hover {
-  background: #f9fafb;
-}
-
-:root.theme-light .trainer-reports__period-select select {
-  background: #f9fafb;
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__date-input {
-  background: #f9fafb;
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__refresh-btn {
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #666;
-}
-
-:root.theme-light .trainer-reports__stat-card {
-  background: #fff;
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .trainer-reports__stat-value {
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__card {
-  background: #fff;
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .trainer-reports__card-header {
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .trainer-reports__card-header h2 {
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__bar--target {
-  background: rgba(0, 0, 0, 0.08);
-}
-
-:root.theme-light .trainer-reports__donut-value {
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__summary-value {
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__metric-bar {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .trainer-reports__achievement {
-  background: #f9fafb;
-}
-
-:root.theme-light .trainer-reports__achievement-label {
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__session-stat {
-  background: #fff;
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .trainer-reports__sessions-filter {
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:root.theme-light .trainer-reports__sessions-filter button {
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #666;
-}
-
-:root.theme-light .trainer-reports__table-header {
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .trainer-reports__table-row {
-  border-color: rgba(0, 0, 0, 0.04);
-}
-
-:root.theme-light .trainer-reports__table-row:hover {
-  background: #f9fafb;
-}
-
-:root.theme-light .trainer-reports__session-member span {
-  color: #111 !important;
-}
-
-:root.theme-light .trainer-reports__members-header h2 {
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__member-card {
-  background: #fff;
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .trainer-reports__member-card-header {
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .trainer-reports__member-card-header h3 {
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__member-goal {
-  background: #f9fafb;
-}
-
-:root.theme-light .trainer-reports__member-stat-value {
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__member-progress-track {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .trainer-reports__member-footer {
-  background: #f9fafb;
-}
-
-:root.theme-light .trainer-reports__view-member-btn {
-  border-color: rgba(0, 0, 0, 0.1);
-  color: #666;
-}
-
-:root.theme-light .trainer-reports__earnings-summary {
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.08), rgba(139, 92, 246, 0.08));
-}
-
-:root.theme-light .trainer-reports__earnings-value {
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__earnings-amount {
-  color: #111;
-}
-
-:root.theme-light .trainer-reports__earnings-bar {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-:root.theme-light .trainer-reports__rate-card {
-  background: #f9fafb;
-}
-
-:root.theme-light .trainer-reports__rate-value {
-  color: #111;
+.trainer-reports__export-dropdown {
+    display: flex;
+    gap: 6px;
 }
 
 /* ============================================

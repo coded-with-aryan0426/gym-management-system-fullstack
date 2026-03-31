@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import DashboardLayout from '../../components/shared/DashboardLayout';
-import { Home, User, Users, BookOpen, Calendar, ClipboardList, MessageSquare, TrendingUp } from 'lucide-react';
 import type { NavItem } from '../../components/Layout/CommandRail';
 import '../../styles/unified-design-system.css';
 
@@ -10,21 +9,22 @@ interface TrainerLayoutProps {
 
 const TrainerLayout: React.FC<TrainerLayoutProps> = ({ children }) => {
     useEffect(() => {
-        document.documentElement.setAttribute('data-theme', 'trainer');
+        document.documentElement.setAttribute('data-dashboard', 'trainer');
         return () => {
-            document.documentElement.removeAttribute('data-theme');
+            document.documentElement.removeAttribute('data-dashboard');
         };
     }, []);
 
     const navItems: NavItem[] = [
-        { path: '/trainer', icon: <Home size={20} />, label: 'Dashboard', color: '#EF4444', end: true },
-        { path: '/trainer/profile', icon: <User size={20} />, label: 'My Profile', color: '#3B82F6' },
-        { path: '/trainer/members', icon: <Users size={20} />, label: 'My Members', color: '#8B5CF6' },
-        { path: '/trainer/classes', icon: <BookOpen size={20} />, label: 'My Classes', color: '#10B981' },
-        { path: '/trainer/schedule', icon: <Calendar size={20} />, label: 'My Schedule', color: '#F59E0B' },
-        { path: '/trainer/progress-notes', icon: <ClipboardList size={20} />, label: 'Progress Notes', color: '#EC4899' },
-        { path: '/trainer/messages', icon: <MessageSquare size={20} />, label: 'Messages', color: '#06B6D4' },
-        { path: '/trainer/reports', icon: <TrendingUp size={20} />, label: 'Reports', color: '#6366F1' },
+        { path: '/trainer', label: 'Dashboard', key: 'dashboard', color: '#EF4444', end: true },
+        { path: '/trainer/profile', label: 'My Profile', key: 'profile', color: '#3B82F6' },
+        { path: '/trainer/members', label: 'My Members', key: 'my-members', color: '#8B5CF6' },
+        { path: '/trainer/member-attendance', label: 'Member Attendance', key: 'myprogress', color: '#10B981' },
+        { path: '/trainer/classes', label: 'My Classes', key: 'my-classes', color: '#10B981' },
+        { path: '/trainer/schedule', label: 'My Schedule', key: 'my-schedule', color: '#F59E0B' },
+        { path: '/trainer/progress-notes', label: 'Progress Notes', key: 'progress-notes', color: '#EC4899' },
+        { path: '/trainer/messages', label: 'Messages', key: 'notifications', color: '#06B6D4' },
+        { path: '/trainer/reports', label: 'Reports', key: 'reports', color: '#6366F1' },
     ];
 
     return (

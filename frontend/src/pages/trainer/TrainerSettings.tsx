@@ -184,25 +184,26 @@ const TrainerSettings: React.FC = () => {
   }, [maxClients, sessionDuration, autoAcceptBookings, allowGroupSessions, maxGroupSize, restBetweenSessions, autoNoteTemplate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── API calls ── */
-  const fetchProfile = async () => {
-    try {
-      const response = await api.get("/api/trainer/profile")
-      if (response.data) {
-        setProfile({
-          name: response.data.name || user?.fullName || "",
-          email: response.data.email || user?.email || "",
-          phone: response.data.phone || "",
-          specialization: response.data.specialization || "",
-          experience: response.data.experience || "",
-          bio: response.data.bio || "",
-          certifications: response.data.certifications || "",
-          profileImage: response.data.profileImage,
-        })
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get("/api/trainer/profile")
+        if (response.data) {
+          setProfile({
+            name: response.data.name || user?.fullName || "",
+            email: response.data.email || user?.email || "",
+            phone: response.data.phone || "",
+            specialization: response.data.specialization || "",
+            experience: response.data.experience || "",
+            bio: response.data.bio || "",
+            certifications: response.data.certifications || "",
+            profileImage: response.data.profileImage,
+          })
+        }
+      } catch (error) {
+        console.error("[TrainerSettings] Fetch profile error:", error)
+        setProfile(prev => ({ ...prev, name: user?.fullName || "", email: user?.email || "" }))
       }
-    } catch {
-      setProfile(prev => ({ ...prev, name: user?.fullName || "", email: user?.email || "" }))
     }
-  }
 
   const fetchNotificationSettings = async () => {
     try {
@@ -218,22 +219,44 @@ const TrainerSettings: React.FC = () => {
     } catch { /* defaults */ }
   }
 
-  const handleSaveProfile = async () => {
-    setSaving(true)
-    try {
-      await api.put("/api/trainer/profile", profile)
-      toast.success("Profile updated successfully")
-    } catch { toast.error("Failed to update profile") }
-    finally { setSaving(false) }
-  }
+    const handleSaveProfile = async () => {
+      setSaving(true)
+      try {
+        const response = await api.put("/api/trainer/profile", {
+          name: profile.name,
+          email: profile.email,
+          phone: profile.phone,
+          specialization: profile.specialization,
+          experience: profile.experience,
+          bio: profile.bio,
+          certifications: profile.certifications,
+        })
+        if (response.status === 200 || response.status === 201) {
+          toast.success("Profile updated successfully")
+          setSavedSection('profile')
+          setTimeout(() => setSavedSection(s => s === 'profile' ? null : s), 2000)
+        }
+      } catch (error: any) {
+        const message = error?.response?.data?.message || error?.message || "Failed to update profile"
+        console.error("[TrainerSettings] Profile update error:", { status: error?.response?.status, message, error })
+        toast.error(message)
+      } finally { setSaving(false) }
+    }
 
   const handleSaveNotifications = async () => {
     setSaving(true)
     try {
-      await api.put("/api/trainer/settings/notifications", notifications)
-      toast.success("Notification preferences saved")
-    } catch { toast.error("Failed to save notification preferences") }
-    finally { setSaving(false) }
+      const response = await api.put("/api/trainer/settings/notifications", notifications)
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Notification preferences saved")
+        setSavedSection('notifications')
+        setTimeout(() => setSavedSection(s => s === 'notifications' ? null : s), 2000)
+      }
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Failed to save notification preferences"
+      console.error("[TrainerSettings] Notifications save error:", { status: error?.response?.status, message, error })
+      toast.error(message)
+    } finally { setSaving(false) }
   }
 
   const handleChangePassword = async () => {
@@ -248,26 +271,40 @@ const TrainerSettings: React.FC = () => {
     finally { setSaving(false) }
   }
 
-  const handleSaveAvailability = async () => {
-    setSaving(true)
-    try {
-      await api.put("/api/trainer/settings/availability", { slots: availability })
-      toast.success("Availability updated")
-    } catch { toast.error("Failed to update availability") }
-    finally { setSaving(false) }
-  }
+    const handleSaveAvailability = async () => {
+      setSaving(true)
+      try {
+        const response = await api.put("/api/trainer/settings/availability", { slots: availability })
+        if (response.status === 200 || response.status === 201) {
+          toast.success("Availability updated")
+          setSavedSection('availability')
+          setTimeout(() => setSavedSection(s => s === 'availability' ? null : s), 2000)
+        }
+      } catch (error: any) {
+        const message = error?.response?.data?.message || "Failed to update availability"
+        console.error("[TrainerSettings] Availability save error:", { status: error?.response?.status, message, error })
+        toast.error(message)
+      } finally { setSaving(false) }
+    }
 
   const handleSaveClientPreferences = async () => {
     setSaving(true)
     try {
-      await api.put("/api/trainer/settings/client-preferences", {
+      const response = await api.put("/api/trainer/settings/client-preferences", {
         maxClients: Number(maxClients), sessionDuration: Number(sessionDuration),
         autoAcceptBookings, allowGroupSessions, maxGroupSize: Number(maxGroupSize),
         restBetweenSessions: Number(restBetweenSessions), autoNoteTemplate,
       })
-      toast.success("Client preferences saved")
-    } catch { toast.error("Failed to save client preferences") }
-    finally { setSaving(false) }
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Client preferences saved")
+        setSavedSection('clients')
+        setTimeout(() => setSavedSection(s => s === 'clients' ? null : s), 2000)
+      }
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Failed to save client preferences"
+      console.error("[TrainerSettings] Client preferences save error:", { status: error?.response?.status, message, error })
+      toast.error(message)
+    } finally { setSaving(false) }
   }
 
   /* ═══════════════════════════════════  SECTIONS  ═══════════════════════════════════ */

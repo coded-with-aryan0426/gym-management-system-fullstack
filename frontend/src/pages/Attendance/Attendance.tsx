@@ -427,6 +427,14 @@ const AttendancePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'checked-out'>('all');
   const [chartType, setChartType] = useState<'area' | 'bar'>('area');
+  const [methodFilter, setMethodFilter] = useState<'all' | 'MANUAL' | 'SELF' | 'QR' | 'CLASS'>('all');
+  const [dateRangeMode, setDateRangeMode] = useState<'tabs' | 'custom'>('tabs');
+  const [customFrom, setCustomFrom] = useState(() => {
+    const d = new Date(); d.setDate(d.getDate() - 30);
+    return d.toISOString().split('T')[0];
+  });
+  const [customTo, setCustomTo] = useState(() => new Date().toISOString().split('T')[0]);
+  const [exportLoading, setExportLoading] = useState(false);
 
   
   // Pagination state
@@ -451,15 +459,16 @@ const AttendancePage: React.FC = () => {
     else setRefreshing(true);
 
     const today = new Date();
-    const from = new Date(today.getTime() - period * 86400000).toISOString().split('T')[0];
-    const to = today.toISOString().split('T')[0];
+    const fromDate = dateRangeMode === 'custom'
+      ? customFrom
+      : new Date(today.getTime() - period * 86400000).toISOString().split('T')[0];
+    const toDate = dateRangeMode === 'custom' ? customTo : today.toISOString().split('T')[0];
     const roleParam = activeRole === 'all' ? undefined : activeRole;
 
     try {
-      // Parallel data fetching (Vercel best practice)
       const [statsRes, trendsRes, heatmapRes, todayRes] = await Promise.all([
         attendanceApi.getStats(roleParam).catch(() => null),
-        attendanceApi.getTrends(from, to, roleParam).catch(() => []),
+        attendanceApi.getTrends(fromDate, toDate, roleParam).catch(() => []),
         attendanceApi.getHeatmap(Math.ceil(period / 7), roleParam).catch(() => []),
         attendanceApi.getToday(roleParam).catch(() => []),
       ]);
@@ -474,9 +483,7 @@ const AttendancePage: React.FC = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [period, activeRole]);
-
-  useEffect(() => { loadData(); }, [loadData]);
+  }, [period, activeRole, dateRangeMode, customFrom, customTo]);
 
   // Auto-refresh effect
   useEffect(() => {
@@ -537,7 +544,10 @@ const AttendancePage: React.FC = () => {
       const matchStatus = statusFilter === 'all' ||
         (statusFilter === 'active' && !c.checkOutTime) ||
         (statusFilter === 'checked-out' && c.checkOutTime);
-      return matchSearch && matchStatus;
+      const matchMethod = methodFilter === 'all' ||
+        (c as any).checkInMethod === methodFilter ||
+        (c as any).method === methodFilter;
+      return matchSearch && matchStatus && matchMethod;
     });
 
     // Sorting
@@ -612,7 +622,13 @@ const AttendancePage: React.FC = () => {
     {
       label: 'Avg Duration', value: fmtDuration(stats.avgSessionMinutes),
       icon: <Clock size={18} />, color: '#F59E0B',
-      sub: `Capacity: ${stats.peakCapacity}`, trend: null,
+      sub: stats.busiestHour ? `Peak: ${stats.busiestHour}:00` : `Capacity: ${stats.peakCapacity}`, trend: null,
+      highlight: stats.busiestHour ? `🔥 Busiest ${stats.busiestHour}:00` : null,
+    },
+    {
+      label: 'Retention', value: stats.retentionRate != null ? `${Math.round(stats.retentionRate)}%` : '—',
+      icon: <TrendingUp size={18} />, color: '#10B981',
+      sub: 'vs last week', trend: null,
     },
   ] : [];
 
@@ -692,6 +708,23 @@ const AttendancePage: React.FC = () => {
         </nav>
 
         <div className="att-header__right">
+          <div className="att-date-range-toggle" role="group" aria-label="Date range mode">
+            <button
+              className={`att-range-mode-btn ${dateRangeMode === 'tabs' ? 'active' : ''}`}
+              onClick={() => { setDateRangeMode('tabs'); setPeriod(30); }}
+              aria-pressed={dateRangeMode === 'tabs'}
+            >
+              Quick
+            </button>
+            <button
+              className={`att-range-mode-btn ${dateRangeMode === 'custom' ? 'active' : ''}`}
+              onClick={() => setDateRangeMode('custom')}
+              aria-pressed={dateRangeMode === 'custom'}
+            >
+              Custom
+            </button>
+          </div>
+          {dateRangeMode === 'tabs' ? (
           <div className="att-period-tabs" role="group" aria-label="Period filter">
             {PERIOD_OPTIONS.map(opt => (
               <button
@@ -704,6 +737,33 @@ const AttendancePage: React.FC = () => {
               </button>
             ))}
           </div>
+          ) : (
+          <div className="att-custom-range" role="group" aria-label="Custom date range">
+            <label className="att-custom-range__label">
+              <span>From</span>
+              <input
+                type="date"
+                className="att-custom-range__input"
+                value={customFrom}
+                max={customTo}
+                onChange={e => setCustomFrom(e.target.value)}
+                aria-label="From date"
+              />
+            </label>
+            <label className="att-custom-range__label">
+              <span>To</span>
+              <input
+                type="date"
+                className="att-custom-range__input"
+                value={customTo}
+                min={customFrom}
+                max={new Date().toISOString().split('T')[0]}
+                onChange={e => setCustomTo(e.target.value)}
+                aria-label="To date"
+              />
+            </label>
+          </div>
+          )}
           <div className="att-header__actions">
             <button
               className={`att-action-btn att-action-btn--refresh ${autoRefresh ? 'att-action-btn--active' : ''}`}
@@ -757,6 +817,9 @@ const AttendancePage: React.FC = () => {
               <div className="att-kpi-card__value">{kpi.value}</div>
               <div className="att-kpi-card__bottom">
                 <span className="att-kpi-card__sub">{kpi.sub}</span>
+                {kpi.highlight && (
+                  <span className="att-kpi-highlight-badge">{kpi.highlight}</span>
+                )}
                 {kpi.trend !== null && (
                   <span className={`att-kpi-card__trend ${kpi.trend >= 0 ? 'att-kpi-card__trend--up' : 'att-kpi-card__trend--down'}`}>
                     {kpi.trend >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
@@ -981,6 +1044,19 @@ const AttendancePage: React.FC = () => {
                 </button>
               ))}
             </div>
+            <div className="att-filter-chips" role="group" aria-label="Method filter">
+              <span className="att-filter-group__label">Method</span>
+              {(['all', 'MANUAL', 'SELF', 'CLASS'] as const).map(m => (
+                <button
+                  key={m}
+                  className={`att-filter-chip ${methodFilter === m ? 'active' : ''}`}
+                  onClick={() => setMethodFilter(m)}
+                  aria-pressed={methodFilter === m}
+                >
+                  {m === 'all' ? 'All' : m}
+                </button>
+              ))}
+            </div>
             <div className="att-page-size">
               <label htmlFor="page-size" className="att-page-size__label">Show:</label>
               <select
@@ -1003,9 +1079,11 @@ const AttendancePage: React.FC = () => {
               <tr>
                 <SortableHeader field="memberName" label="User Identity" />
                 <SortableHeader field="role" label="Role" />
+                <th>Method</th>
                 <SortableHeader field="checkInTime" label="Check-in" />
                 <SortableHeader field="checkOutTime" label="Check-out" />
                 <SortableHeader field="durationMinutes" label="Duration" />
+                <th>Operator</th>
                 <SortableHeader field="status" label="Status" />
                 <th>Actions</th>
               </tr>
@@ -1045,11 +1123,23 @@ const AttendancePage: React.FC = () => {
                         {c.role}
                       </span>
                     </td>
+                    <td>
+                      <span className={`att-method-badge att-method-badge--${(c as any).checkInMethod || (c as any).method || 'MANUAL'}`}>
+                        {(c as any).checkInMethod || (c as any).method || 'MANUAL'}
+                      </span>
+                    </td>
                     <td className="att-table__time">{fmtTime(c.checkInTime)}</td>
                     <td className="att-table__time text-dim">
                       {c.checkOutTime ? fmtTime(c.checkOutTime) : <span className="att-pulse">Current</span>}
                     </td>
                     <td className="att-table__duration">{fmtDuration(c.durationMinutes)}</td>
+                    <td className="att-table__operator">
+                      {(c as any).operatorUserId ? (
+                        <span className="att-operator-badge">Staff #{ (c as any).operatorUserId}</span>
+                      ) : (
+                        <span className="att-operator-badge att-operator-badge--self">Self</span>
+                      )}
+                    </td>
                     <td>
                       <div className={`att-status-indicator ${c.checkOutTime ? 'is-out' : 'is-in'}`}>
                         <span className="att-status-indicator__dot" aria-hidden="true" />

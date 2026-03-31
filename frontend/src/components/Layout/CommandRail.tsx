@@ -31,7 +31,9 @@ import {
   Sparkles,
   HelpCircle,
   Activity,
-  CheckSquare
+  CheckSquare,
+  BadgeCheck,
+  UserCheck
 } from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext"
 import { useTheme } from "../../contexts/ThemeContext"
@@ -39,6 +41,7 @@ import { useClickOutside } from "../../hooks"
 import { superAdminApi } from "../../services/superAdminApi"
 import { Logo } from "../ui/Logo"
 import Avatar from "../ui/Avatar"
+import { ADMIN_ICONS, TRAINER_ICONS, MEMBER_ICONS } from "../icons"
 import "./CommandRail.css"
 import { useFeatureContext } from "../../contexts/FeatureContext"
 import { prefetchOnHover, cancelPrefetch } from "../../services/prefetchService"
@@ -47,21 +50,22 @@ export interface NavItem {
   path: string;
   label: string;
   icon?: React.ReactNode;
+  key?: string;
   color?: string;
   id?: string;
   end?: boolean;
 }
 
 const defaultNavItems: NavItem[] = [
-  { path: "/dashboard", label: "Dashboard", id: "dashboard", icon: <LayoutDashboard size={18} />, color: "#f87171", end: true },
-  { path: "/members", label: "Members", id: "members", icon: <Users size={18} />, color: "#60a5fa" },
-  { path: "/trainers", label: "Trainers", id: "trainers", icon: <Dumbbell size={18} />, color: "#22d3ee" },
-  { path: "/staff", label: "Staff", id: "staff", icon: <Shield size={18} />, color: "#14b8a6" },
-  { path: "/equipment", label: "Equipment", id: "equipment", icon: <Wrench size={18} />, color: "#fbbf24" },
-  { path: "/classes", label: "Classes", id: "classes", icon: <Calendar size={18} />, color: "#34d399" },
-  { path: "/financials", label: "Finance", id: "billing", icon: <CreditCard size={18} />, color: "#a78bfa" },
-  { path: "/attendance", label: "Attendance", id: "attendance", icon: <Activity size={18} />, color: "#f472b6" },
-  { path: "/tasks", label: "Tasks", id: "tasks", icon: <CheckSquare size={18} />, color: "#38bdf8" },
+  { path: "/dashboard", label: "Dashboard", id: "dashboard", key: "dashboard", color: "#f87171", end: true },
+  { path: "/members", label: "Members", id: "members", key: "members", color: "#60a5fa" },
+  { path: "/trainers", label: "Trainers", id: "trainers", key: "trainers", color: "#22d3ee" },
+  { path: "/staff", label: "Staff", id: "staff", key: "staff", color: "#14b8a6" },
+  { path: "/equipment", label: "Equipment", id: "equipment", key: "equipment", color: "#fbbf24" },
+  { path: "/classes", label: "Classes", id: "classes", key: "classes", color: "#34d399" },
+  { path: "/financials", label: "Finance", id: "billing", key: "financials", color: "#a78bfa" },
+  { path: "/attendance", label: "Attendance", id: "attendance", key: "attendance", color: "#f472b6" },
+  { path: "/tasks", label: "Tasks", id: "tasks", key: "tasks", color: "#38bdf8" },
 ];
 
 interface CommandRailProps {
@@ -79,9 +83,15 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
   const role = isSuperAdmin ? 'SUPER ADMIN' : (user?.role || 'MEMBER').toUpperCase();
   const [isSlideUpOpen, setIsSlideUpOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
+  const [logoTooltipPos, setLogoTooltipPos] = useState<{ top: number; left: number } | null>(null);
+  const [avatarTooltipPos, setAvatarTooltipPos] = useState<{ top: number; left: number } | null>(null);
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLAnchorElement>(null);
+  const avatarButtonRef = useRef<HTMLButtonElement>(null);
   useClickOutside(profileMenuRef, () => setIsSlideUpOpen(false), isSlideUpOpen);
 
   useEffect(() => {
@@ -117,6 +127,12 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
     if (role === 'ADMIN') return <Shield size={10} />;
     if (role === 'TRAINER') return <Dumbbell size={10} />;
     return <User size={10} />;
+  };
+
+  const getIconMap = () => {
+    if (role === 'TRAINER' || role === 'PERSONAL TRAINER') return TRAINER_ICONS;
+    if (role === 'MEMBER' || role === 'CUSTOMER') return MEMBER_ICONS;
+    return ADMIN_ICONS; // Default for OWNER, ADMIN, SUPER_ADMIN
   };
 
   const getGreeting = () => {
@@ -158,9 +174,15 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
   };
 
   // Prefetch handler for link hover - Stage 2 optimization
-  const handleLinkHover = useCallback((path: string) => {
+  const handleLinkHover = useCallback((path: string, event: React.MouseEvent<HTMLAnchorElement>) => {
     if (isCollapsed) {
       setHoveredLink(path);
+      // Calculate tooltip position - position it to the right of the icon
+      const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+      setTooltipPos({
+        top: rect.top + rect.height / 2,
+        left: rect.right + 12
+      });
     }
     // Prefetch data for the route being hovered
     prefetchOnHover(path);
@@ -168,12 +190,47 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
 
   const handleLinkLeave = useCallback(() => {
     setHoveredLink(null);
+    setTooltipPos(null);
     cancelPrefetch();
+  }, []);
+
+  const handleLogoHover = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isCollapsed) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      setLogoTooltipPos({
+        top: rect.top + rect.height / 2,
+        left: rect.right + 12
+      });
+    }
+  }, [isCollapsed]);
+
+  const handleLogoLeave = useCallback(() => {
+    setLogoTooltipPos(null);
+  }, []);
+
+  const handleAvatarHover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    if (isCollapsed) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      setAvatarTooltipPos({
+        top: rect.top + rect.height / 2,
+        left: rect.right + 12
+      });
+    }
+  }, [isCollapsed]);
+
+  const handleAvatarLeave = useCallback(() => {
+    setAvatarTooltipPos(null);
   }, []);
 
   return (
     <aside className={`command-rail ${isCollapsed ? "command-rail--collapsed" : ""}`}>
-      <NavLink to="/" className="command-rail__logo">
+      <NavLink
+        ref={logoRef}
+        to="/"
+        className="command-rail__logo"
+        onMouseEnter={handleLogoHover}
+        onMouseLeave={handleLogoLeave}
+      >
         <Logo size={isCollapsed ? 28 : 36} showText={!isCollapsed} />
       </NavLink>
 
@@ -188,20 +245,33 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
                 end={item.end}
                 className={({ isActive }) => `command-rail__link ${isActive ? "command-rail__link--active" : ""}`}
                 style={{ color: isActive ? item.color : undefined } as React.CSSProperties}
-                onMouseEnter={() => handleLinkHover(item.path)}
+                onMouseEnter={(e) => handleLinkHover(item.path, e as React.MouseEvent<HTMLAnchorElement>)}
                 onMouseLeave={handleLinkLeave}
               >
                 <span className="command-rail__icon">
-                  {item.icon && React.cloneElement(item.icon as React.ReactElement<any>, {
-                    size: isActive ? 20 : 18,
-                    strokeWidth: isActive ? 2.4 : 2
-                  })}
+                  {item.key ? (
+                    (() => {
+                      const iconMap = getIconMap();
+                      const IconComponent = iconMap[item.key];
+                      return IconComponent ? (
+                        <IconComponent 
+                          size={isActive ? 20 : 18}
+                          className={isActive ? "opacity-100" : "opacity-80"}
+                          style={{ color: item.color }}
+                        />
+                      ) : (
+                        <div />
+                      );
+                    })()
+                  ) : item.icon ? (
+                    React.cloneElement(item.icon as React.ReactElement<any>, {
+                      size: isActive ? 20 : 18,
+                      strokeWidth: isActive ? 2.4 : 2,
+                    })
+                  ) : null}
                 </span>
                 {!isCollapsed && (
                   <span className="command-rail__label">{item.label}</span>
-                )}
-                {isCollapsed && hoveredLink === item.path && (
-                  <div className="command-rail__tooltip">{item.label}</div>
                 )}
               </NavLink>
             );
@@ -209,11 +279,54 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
         </div>
       </nav>
 
+      {isCollapsed && hoveredLink && tooltipPos && (
+        <div
+          ref={tooltipRef}
+          className="command-rail__tooltip"
+          style={{
+            top: `${tooltipPos.top}px`,
+            left: `${tooltipPos.left}px`,
+            color: itemsToRender.find(item => item.path === hoveredLink)?.color
+          }}
+        >
+          {itemsToRender.find(item => item.path === hoveredLink)?.label}
+        </div>
+      )}
+
+      {isCollapsed && logoTooltipPos && (
+        <div
+          className="command-rail__tooltip"
+          style={{
+            top: `${logoTooltipPos.top}px`,
+            left: `${logoTooltipPos.left}px`,
+            color: "#64b5f6"
+          }}
+        >
+          Home
+        </div>
+      )}
+
+      {isCollapsed && avatarTooltipPos && (
+        <div
+          className="command-rail__tooltip"
+          style={{
+            top: `${avatarTooltipPos.top}px`,
+            left: `${avatarTooltipPos.left}px`,
+            color: "#ec407a"
+          }}
+        >
+          Profile
+        </div>
+      )}
+
       <div className="command-rail__footer">
         <div className="command-rail__user-menu" ref={profileMenuRef}>
           <button
+            ref={avatarButtonRef}
             className={`command-rail__user-trigger ${isSlideUpOpen ? 'active' : ''}`}
             onClick={() => setIsSlideUpOpen(!isSlideUpOpen)}
+            onMouseEnter={handleAvatarHover}
+            onMouseLeave={handleAvatarLeave}
           >
             <div className="command-rail__user-avatar">
               <Avatar name={displayName} size="sm" />

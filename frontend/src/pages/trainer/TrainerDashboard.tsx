@@ -12,6 +12,8 @@ import {
     AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+import { Avatar } from '../../components/shared/UnifiedComponents';
+import { getAvatarUrl } from '../../components/ui/Avatar';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
@@ -317,11 +319,11 @@ const TrainerDashboard: React.FC = () => {
             <header className="dash__header">
                 <div className="dash__header-greet">
                     <div className="dash__header-avatar">
-                        {user?.avatarUrl ? (
-                            <img src={user.avatarUrl} alt={trainerFirstName} />
-                        ) : (
-                            <div className="dash__header-initials">{getInitials(user?.fullName || 'Trainer')}</div>
-                        )}
+                        <Avatar 
+                            name={user?.fullName || 'Trainer'} 
+                            src={getAvatarUrl(user?.avatarId) || undefined}
+                            size="md"
+                        />
                         <span className="dash__greeting-emoji-abs">{greeting.emoji}</span>
                     </div>
                     <div>
@@ -455,10 +457,11 @@ const TrainerDashboard: React.FC = () => {
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }} />
+                                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "var(--t3)", fontSize: 10 }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--t3)", fontSize: 10 }} />
                                 <Tooltip 
-                                    contentStyle={{ background: "#0d0d12", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, fontSize: 12 }}
+                                    contentStyle={{ background: "var(--s1)", border: "1px solid var(--border2)", borderRadius: 10, fontSize: 12, color: "var(--text)" }}
+                                    itemStyle={{ color: "var(--text)" }}
                                     cursor={{ stroke: COLORS.blue, strokeWidth: 1 }}
                                 />
                                 <Area type="monotone" dataKey="value" stroke={COLORS.blue} strokeWidth={2.5} fill="url(#colorActivity)" dot={false} activeDot={{ r: 5, fill: COLORS.blue, stroke: "#fff", strokeWidth: 2 }} />
@@ -489,7 +492,7 @@ const TrainerDashboard: React.FC = () => {
                                     >
                                         {data?.sessionDistribution.map((e, i) => <Cell key={i} fill={[COLORS.blue, COLORS.violet, COLORS.amber][i % 3]} />)}
                                     </Pie>
-                                    <Tooltip contentStyle={{ background: "#111116", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, fontSize: 12 }} />
+                                    <Tooltip contentStyle={{ background: "var(--s1)", border: "1px solid var(--border2)", borderRadius: 10, fontSize: 12, color: "var(--text)" }} itemStyle={{ color: "var(--text)" }} />
                                 </PieChart>
                             </ResponsiveContainer>
                             <div className="dash__donut-center">
@@ -609,9 +612,9 @@ const TrainerDashboard: React.FC = () => {
                         <ResponsiveContainer width="100%" height={150}>
                             <BarChart data={data?.monthlyEarningsHistory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10 }} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }} />
-                                <Tooltip contentStyle={{ background: "#0d0d12", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, fontSize: 12 }} />
+                                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "var(--t3)", fontSize: 10 }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--t3)", fontSize: 10 }} />
+                                <Tooltip contentStyle={{ background: "var(--s1)", border: "1px solid var(--border2)", borderRadius: 10, fontSize: 12, color: "var(--text)" }} itemStyle={{ color: "var(--text)" }} />
                                 <Bar dataKey="value" fill={COLORS.green} radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>

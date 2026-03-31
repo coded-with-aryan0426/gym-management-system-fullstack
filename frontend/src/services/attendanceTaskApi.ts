@@ -60,14 +60,24 @@ export interface AttendanceStats {
   liveNow: number;
   avgSessionMinutes: number;
   peakCapacity: number;
+  busiestHour?: number;
+  retentionRate?: number;
 }
 
 export interface CheckInRecord {
   checkInId: number;
   userId: number;
+  gymId?: number;
   checkInTime: string;
   checkOutTime: string | null;
   status: string;
+  checkInMethod?: 'MANUAL' | 'SELF' | 'QR' | 'CLASS';
+  method?: string;
+  deviceInfo?: string;
+  ipAddress?: string;
+  operatorUserId?: number;
+  notes?: string;
+  durationMinutes?: number;
 }
 
 export interface MemberSearchResult {
@@ -117,6 +127,25 @@ export interface TaskStats {
   overdue: number;
 }
 
+export interface AttendanceStreak {
+  currentStreak: number;
+  longestStreak: number;
+  visitsThisMonth: number;
+  totalVisits: number;
+}
+
+export interface TrainerMemberSummary {
+  memberId: number;
+  memberName: string;
+  email: string;
+  avatarUrl?: string;
+  lastVisit?: string;
+  visitsThisMonth: number;
+  currentStreak: number;
+  isInside: boolean;
+  checkInTime?: string;
+}
+
 // ─── Attendance API ───────────────────────────────────────────────────────────
 
 export const attendanceApi = {
@@ -154,25 +183,23 @@ export const attendanceApi = {
 
   // Manual check-in/check-out operations
   async checkIn(userId: number): Promise<CheckInRecord> {
-    const r = await client.post<CheckInRecord>(`/dashboard/check-in/${userId}`);
+    const r = await client.post<CheckInRecord>('/attendance/check-in', { userId });
     return r.data;
   },
 
   async checkOut(checkInId: number): Promise<CheckInRecord> {
-    const r = await client.post<CheckInRecord>(`/dashboard/check-out/${checkInId}`);
+    const r = await client.put<CheckInRecord>(`/attendance/check-out/${checkInId}`, {});
     return r.data;
   },
 
   // Search members for check-in
   async searchMembers(query: string, role?: string): Promise<MemberSearchResult[]> {
-    // Try CUSTOMER role first (common alias for MEMBER)
     const searchRole = role || 'CUSTOMER';
-    const r = await client.get<User[]>('/users/search', { 
-      params: { q: query, role: searchRole } 
+    const r = await client.get<User[]>('/users/search', {
+      params: { q: query, role: searchRole }
     });
-    // Transform User to MemberSearchResult
     return r.data.map(user => ({
-      userId: user.userId || user.id,
+      userId: user.userId ?? user.id ?? 0,
       fullName: user.fullName || user.name || 'Unknown',
       email: user.email,
       phone: user.phone,
@@ -181,21 +208,46 @@ export const attendanceApi = {
       membershipStatus: user.membershipStatus
     }));
   },
-
-  // Get member attendance history
-  async getMemberAttendance(memberId: number): Promise<CheckInRecord[]> {
-    const r = await client.get<CheckInRecord[]>(`/members/${memberId}/attendance`);
-    return r.data;
-  },
-
   // Export attendance data
   async exportAttendance(from: string, to: string, role?: string, format: 'csv' | 'json' = 'csv'): Promise<Blob | TodayCheckIn[]> {
     if (format === 'json') {
       const r = await client.get<TodayCheckIn[]>('/attendance/today', { params: { role } });
       return r.data;
     }
-    // For CSV, we'll handle it client-side since backend might not support it
     const r = await client.get<TodayCheckIn[]>('/attendance/today', { params: { role } });
+    return r.data;
+  },
+
+  // ── Member self-service endpoints ──────────────────────────────────────────
+  async selfCheckIn(): Promise<CheckInRecord> {
+    const r = await client.post<CheckInRecord>('/attendance/me/check-in');
+    return r.data;
+  },
+
+  async getMyHistory(from?: string, to?: string): Promise<CheckInRecord[]> {
+    const r = await client.get<CheckInRecord[]>('/attendance/me/history', {
+      params: { from, to },
+    });
+    return r.data;
+  },
+
+  async getMyStreak(): Promise<AttendanceStreak> {
+    const r = await client.get<AttendanceStreak>('/attendance/me/streak');
+    return r.data;
+  },
+
+  // ── Trainer member attendance endpoint ──────────────────────────────────────
+  async getTrainerMembersAttendance(from?: string, to?: string): Promise<TrainerMemberSummary[]> {
+    const r = await client.get<TrainerMemberSummary[]>('/attendance/trainer/members', {
+      params: { from, to },
+    });
+    return r.data;
+  },
+
+  async getMemberAttendance(memberId: number, from?: string, to?: string): Promise<CheckInRecord[]> {
+    const r = await client.get<CheckInRecord[]>(`/attendance/trainer/member/${memberId}/history`, {
+      params: { from, to },
+    });
     return r.data;
   },
 };

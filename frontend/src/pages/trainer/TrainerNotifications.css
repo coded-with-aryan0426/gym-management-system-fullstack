@@ -910,6 +910,78 @@
 [data-theme="light"] .tn-tag--muted   { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.5); }
 [data-theme="light"] .tn-loading p    { color: rgba(0,0,0,0.5); }
 
+/* ── TRAINER REQUEST PANEL (LIGHT) ── */
+[data-theme="light"] .trm-modal {
+    background: #ffffff;
+    border-color: rgba(0,0,0,0.1);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.12);
+}
+
+[data-theme="light"] .trm-header {
+    border-bottom-color: rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .trm-header__name {
+    color: #1a1a2e;
+}
+
+[data-theme="light"] .trm-header__meta {
+    color: rgba(0,0,0,0.45);
+}
+
+[data-theme="light"] .trm-header__badge--time {
+    background: rgba(0,0,0,0.05);
+    color: rgba(0,0,0,0.45);
+}
+
+[data-theme="light"] .trm-close {
+    background: rgba(0,0,0,0.04);
+    border-color: rgba(0,0,0,0.08);
+    color: rgba(0,0,0,0.45);
+}
+
+[data-theme="light"] .trm-close:hover {
+    background: rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] .trm-message-section {
+    border-bottom-color: rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .trm-message-label,
+[data-theme="light"] .trm-note-label {
+    color: rgba(0,0,0,0.35);
+}
+
+[data-theme="light"] .trm-message-bubble {
+    background: rgba(0,122,255,0.05);
+    border-color: rgba(0,122,255,0.15);
+    color: rgba(0,0,0,0.7);
+}
+
+[data-theme="light"] .trm-no-message {
+    color: rgba(0,0,0,0.35);
+}
+
+[data-theme="light"] .trm-note-textarea {
+    background: #f8fafc;
+    border-color: rgba(0,0,0,0.1);
+    color: #1a1a2e;
+}
+
+[data-theme="light"] .trm-note-textarea::placeholder {
+    color: rgba(0,0,0,0.3);
+}
+
+[data-theme="light"] .trm-footer {
+    border-top-color: rgba(0,0,0,0.06);
+    background: #fafafa;
+}
+
+[data-theme="light"] .trm-btn-decline {
+    background: rgba(255,59,48,0.06);
+}
+
 /* ── RESPONSIVE ─────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
     .tn-list.has-detail { flex: 0 0 42%; max-width: 42%; }

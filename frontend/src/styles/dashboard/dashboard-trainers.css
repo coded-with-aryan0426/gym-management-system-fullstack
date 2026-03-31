@@ -53,6 +53,82 @@
   --r-sm: 7px;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   LIGHT MODE OVERRIDES
+   ───────────────────────────────────────────────────────────────────────── */
+.theme-light .dash--trainer {
+  --bg:      #f8fafc; /* Slate 50 */
+  --bg2:     #ffffff; 
+  --s1:      #ffffff;
+  --s2:      #f1f5f9; /* Slate 100 */
+  --s3:      #e2e8f0; /* Slate 200 */
+  --border:  rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+
+  /* text */
+  --text:  #0f172a; /* Slate 900 */
+  --t2:    #475569; /* Slate 600 */
+  --t3:    #64748b; /* Slate 500 */
+
+  background-image:
+    radial-gradient(ellipse 50% 30% at 10% 0%, rgba(220, 38, 38, 0.04) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 25% at 90% 0%, rgba(59, 130, 246, 0.03) 0%, transparent 55%);
+}
+
+.theme-light .dash--trainer .dash__header {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 4px 20px -1px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+}
+
+.theme-light .dash--trainer .dash__header::before {
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.04) 50%, transparent);
+}
+
+.theme-light .dash--trainer .dash__greeting-name {
+  background: linear-gradient(135deg, #1e293b, #64748b);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.theme-light .dash--trainer .dash__kpi {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.theme-light .dash--trainer .dash__refresh-btn {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.theme-light .dash--trainer .dash-header-next {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(59, 130, 246, 0.15);
+}
+
+.theme-light .dash--trainer .dash-header-progress__bar-wrap {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.02);
+}
+
+.theme-light .dash--trainer .dash__card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.theme-light .dash--trainer .dash__card:hover {
+  box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.1), 0 4px 12px -8px rgba(0, 0, 0, 0.05);
+}
+
+.theme-light .dash--trainer .dash__card::after {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.01) 0%, transparent 60%);
+}
+
+.theme-light .dash--trainer .dash-trainer__action-btn__icon {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.theme-light .dash--trainer .dash-badge--neutral {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 /* ══════════════════════
    HEADER
    ══════════════════════ */

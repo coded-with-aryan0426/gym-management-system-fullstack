@@ -24,6 +24,42 @@
     radial-gradient(ellipse 40% 25% at 90% 0%, rgba(99, 102, 241, 0.04) 0%, transparent 55%);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   LIGHT MODE OVERRIDES — Member Specific
+   ───────────────────────────────────────────────────────────────────────── */
+[data-theme="light"] .dash--member {
+  background-image:
+    radial-gradient(ellipse 50% 30% at 10% 0%, rgba(59, 130, 246, 0.04) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 25% at 90% 0%, rgba(99, 102, 241, 0.03) 0%, transparent 55%);
+}
+
+[data-theme="light"] .dash--member .dash-member__stat {
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .dash--member .dash-member__stat:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .dash--member .dash-member__class-row,
+[data-theme="light"] .dash--member .dash-member__activity-item,
+[data-theme="light"] .dash--member .dash-member__trainer-card__stat {
+  background: #f8fafc;
+}
+
+[data-theme="light"] .dash--member .dash-member__membership__expiry {
+  background: #f1f5f9;
+}
+
+[data-theme="light"] .dash--member .dash-member__action-btn {
+  background: #ffffff;
+}
+
+[data-theme="light"] .dash--member .dash-member__action-btn__icon {
+  background: #f8fafc;
+}
+
 /* ════════════════════════════════════════════════════════════════════════════
    2. MEMBER HEADER COMPONENT
    ════════════════════════════════════════════════════════════════════════════ */

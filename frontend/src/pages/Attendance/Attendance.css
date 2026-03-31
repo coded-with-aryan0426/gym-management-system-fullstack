@@ -391,20 +391,18 @@
 /* ─── Premium KPI Grid ────────────────────────────────────────────────────── */
 .att-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: var(--att-space-md);
 }
 
-@media (max-width: 1100px) {
-  .att-kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+@media (max-width: 1400px) {
+  .att-kpi-grid { grid-template-columns: repeat(3, 1fr); }
 }
-
+@media (max-width: 1100px) {
+  .att-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 600px) {
-  .att-kpi-grid {
-    grid-template-columns: 1fr;
-  }
+  .att-kpi-grid { grid-template-columns: 1fr; }
 }
 
 .att-kpi-card {
@@ -1713,6 +1711,174 @@
 .att-pagination__btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
+}
+
+/* ─── Date Range Toggle ─────────────────────────────────────────────────── */
+.att-date-range-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--att-glass-bg-elevated);
+  border: 1px solid var(--att-glass-border);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.att-range-mode-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--att-transition-fast);
+}
+
+.att-range-mode-btn:hover { color: var(--text-primary); }
+
+.att-range-mode-btn.active {
+  background: var(--att-gradient-emerald);
+  color: #fff;
+}
+
+/* ─── Custom Date Range ───────────────────────────────────────────────────── */
+.att-custom-range {
+  display: flex;
+  align-items: center;
+  gap: var(--att-space-sm);
+}
+
+.att-custom-range__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.att-custom-range__input {
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--att-glass-border);
+  border-radius: 8px;
+  background: var(--att-glass-bg-elevated);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--att-transition-fast);
+  color-scheme: dark;
+}
+
+.att-custom-range__input:focus {
+  border-color: var(--att-glass-border-hover);
+}
+
+/* ─── KPI Highlight Badge ────────────────────────────────────────────────── */
+.att-kpi-highlight-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+  white-space: nowrap;
+}
+
+/* ─── Method Badge ────────────────────────────────────────────────────────── */
+.att-method-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.03em;
+}
+
+.att-method-badge--MANUAL {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3B82F6;
+}
+
+.att-method-badge--SELF {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+}
+
+.att-method-badge--QR {
+  background: rgba(167, 139, 250, 0.15);
+  color: #A78BFA;
+}
+
+.att-method-badge--CLASS {
+  background: rgba(249, 115, 22, 0.15);
+  color: #F97316;
+}
+
+/* ─── Operator Badge ─────────────────────────────────────────────────────── */
+.att-table__operator { vertical-align: middle; }
+
+.att-operator-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+
+.att-operator-badge--self {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+/* ─── Filter Group Label ─────────────────────────────────────────────────── */
+.att-filter-group__label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+/* ─── Filter Chips ────────────────────────────────────────────────────────── */
+.att-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.att-filter-chip {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid var(--att-glass-border);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--att-transition-fast);
+}
+
+.att-filter-chip:hover {
+  color: var(--text-primary);
+  border-color: var(--att-glass-border-hover);
+}
+
+.att-filter-chip.active {
+  background: var(--att-gradient-emerald);
+  border-color: transparent;
+  color: #fff;
 }
 
 .att-pagination__pages {

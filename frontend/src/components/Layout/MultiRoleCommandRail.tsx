@@ -34,6 +34,7 @@ import { Logo } from "../ui/Logo"
 import { usePermissionBasedNavigation } from '../../contexts/MultiRoleAuthContext'
 import { useMultiRoleAuth } from '../../contexts/MultiRoleAuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
+import { TRAINER_ICONS, MEMBER_ICONS } from "../icons"
 import "./CommandRail.css"
 
 interface MultiRoleCommandRailProps {
@@ -108,16 +109,33 @@ const MultiRoleCommandRail: React.FC<MultiRoleCommandRailProps> = ({
       return '/notifications';
     };
   
+    const getIconMap = () => {
+      if (role === 'TRAINER') return TRAINER_ICONS;
+      if (role === 'MEMBER' || role === 'CUSTOMER') return MEMBER_ICONS;
+      return iconMap; // Fallback to Lucide icons
+    };
+
     const getIcon = (id: string, color: string, isActive: boolean) => {
-    const IconComponent = iconMap[id] || Settings
-    return (
-      <IconComponent 
-        size={isActive ? 20 : 18} 
-        strokeWidth={isActive ? 2.5 : 2}
-        style={{ color: isActive ? color : 'inherit' }} 
-      />
-    )
-  }
+      const icons = getIconMap();
+      const IconComponent = icons[id] || iconMap[id] || Settings;
+      
+      // Check if it's a custom animated icon (function) or Lucide icon (class)
+      if (typeof IconComponent === 'function') {
+        return React.createElement(IconComponent, {
+          size: isActive ? 20 : 18,
+          className: isActive ? "opacity-100" : "opacity-80",
+          style: { color }
+        });
+      }
+      
+      return (
+        <IconComponent 
+          size={isActive ? 20 : 18} 
+          strokeWidth={isActive ? 2.5 : 2}
+          style={{ color: isActive ? color : 'inherit' }} 
+        />
+      );
+    }
 
   const renderNavItems = (items: any[]) => {
     return items.map((item) => {
