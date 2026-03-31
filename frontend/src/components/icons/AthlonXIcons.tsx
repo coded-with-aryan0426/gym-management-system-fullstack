@@ -366,59 +366,62 @@ function Icon({
 // ADMIN / OWNER  (12 icons)
 // ═══════════════════════════════════════════════════════════════
 
-/** Admin Dashboard — bar chart with trend line. Bars pump up on hover. Premium styling with enhanced geometry. */
+/** Admin Dashboard — bar chart with trend line. Bars pump up on hover. PREMIUM with gradients & shadow effects. */
 export function AdminDashIcon(p: IconProps) {
   return (
     <Icon {...p} label={p.label ?? 'Dashboard'}>
-      {/* Baseline with subtle thickness for premium feel */}
-      <line x1="2" y1="20" x2="22" y2="20" strokeWidth="1.75" opacity="0.85" />
+      {/* Baseline with drop shadow for depth */}
+      <line x1="2" y1="20" x2="22" y2="20" strokeWidth="1.75" opacity="0.9" filter="url(#filter-shadow)" />
       
-      {/* Bars with rounded corners for premium appearance */}
-      <rect className="axi-bar1" x="3"  y="13" width="4" height="7"  rx="1" />
-      <rect className="axi-bar2" x="10" y="8"  width="4" height="12" rx="1" />
-      <rect className="axi-bar3" x="17" y="11" width="4" height="9"  rx="1" />
+      {/* Bars with gradient fill + shadow for 3D effect */}
+      <rect className="axi-bar1" x="3"  y="13" width="4" height="7"  rx="1" fill="url(#grad-dash-bar)" filter="url(#filter-shadow)" />
+      <rect className="axi-bar2" x="10" y="8"  width="4" height="12" rx="1" fill="url(#grad-dash-bar)" filter="url(#filter-shadow)" />
+      <rect className="axi-bar3" x="17" y="11" width="4" height="9"  rx="1" fill="url(#grad-dash-bar)" filter="url(#filter-shadow)" />
       
-      {/* Trend line with enhanced stroke and styling */}
+      {/* Trend line with glow effect */}
       <polyline 
         className="axi-trend" 
         points="5,11 12,6 21,9" 
-        strokeWidth="1.75"
+        strokeWidth="2"
         fill="none"
+        filter="url(#filter-glow)"
       />
       
-      {/* Accent dot on trend endpoint */}
-      <circle cx="21" cy="9" r="1.5" opacity="0.9" />
+      {/* Accent dot with glow */}
+      <circle cx="21" cy="9" r="1.5" fill="currentColor" opacity="1" filter="url(#filter-glow)" />
     </Icon>
   );
 }
 
-/** Members — group of people with pulse ring. Ring expands on hover. Premium layering. */
+/** Members — group of people with pulse ring. Ring expands on hover. PREMIUM with gradient avatars & glow. */
 export function MembersIcon(p: IconProps) {
   return (
     <Icon {...p} label={p.label ?? 'Members'}>
-      {/* Primary member circle - enhanced with better proportions */}
-      <circle cx="9" cy="7" r="3.5" strokeWidth="1.5" opacity="0.95" />
+      {/* Primary member circle - filled with gradient + shadow */}
+      <circle cx="9" cy="7" r="3.5" fill="url(#grad-member)" filter="url(#filter-shadow)" strokeWidth="1.2" opacity="1" />
       
-      {/* Primary member lower body path - refined geometry */}
-      <path d="M3 21v-2a5 5 0 0 1 5-5h2" strokeWidth="1.5" opacity="0.9" />
+      {/* Primary member lower body path - refined */}
+      <path d="M3 21v-2a5 5 0 0 1 5-5h2" strokeWidth="1.5" opacity="0.9" filter="url(#filter-shadow)" />
       
-      {/* Secondary member circle - softer visual weight */}
-      <circle cx="18" cy="8" r="2.5" strokeWidth="1.4" opacity="0.8" />
+      {/* Secondary member circle - filled gradient, softer */}
+      <circle cx="18" cy="8" r="2.5" fill="url(#grad-radial)" filter="url(#filter-shadow)" strokeWidth="1.2" opacity="0.9" />
       
       {/* Secondary member lower body - refined */}
-      <path d="M22 21v-1a3.5 3.5 0 0 0-3.5-3.5H17" strokeWidth="1.4" opacity="0.75" />
+      <path d="M22 21v-1a3.5 3.5 0 0 0-3.5-3.5H17" strokeWidth="1.4" opacity="0.8" />
       
-      {/* Tertiary member connection - subtle linking */}
+      {/* Tertiary member connection - subtle */}
       <path d="M9 14h2a5 5 0 0 1 5 5v2" strokeWidth="1.4" opacity="0.75" />
       
-      {/* Pulse ring - animated expansion on hover with glow */}
+      {/* Pulse ring - animated expansion with glow */}
       <circle 
         className="axi-pulse" 
         cx="9" 
         cy="7" 
         r="5.5" 
-        strokeOpacity="0.45"
+        strokeOpacity="0.6"
         strokeWidth="1.3"
+        fill="none"
+        filter="url(#filter-glow)"
       />
     </Icon>
   );
