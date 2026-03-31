@@ -69,7 +69,8 @@ public class AuthController {
     }
 
     @PostMapping("/owner/register")
-    public ResponseEntity<?> ownerRegister(@RequestBody OwnerRegisterRequest request) {
+    @Transactional
+    public ResponseEntity<?> ownerRegister(@RequestBody OwnerRegisterRequest request, HttpServletRequest httpRequest) {
         // Verify OTP first
         boolean isOtpValid = otpService.verifyOtp(request.getEmail(), request.getOtp(), OtpPurpose.SIGNUP);
         if (!isOtpValid) {
@@ -90,22 +91,72 @@ public class AuthController {
 
         // Assign OWNER role
         Role ownerRole = roleRepository.findByRoleName("OWNER");
-        if (ownerRole != null) {
-            user.setRoles(new HashSet<>(Collections.singletonList(ownerRole)));
+        if (ownerRole == null) {
+            return ResponseEntity.status(500).body(Map.of("error", "OWNER role is not configured. Please contact support."));
         }
+        user.setRoles(new HashSet<>(Collections.singletonList(ownerRole)));
 
         user = userRepository.save(user);
 
+        Gym createdGym = null;
         // Create gym record from registration data
         if (request.getGymName() != null && !request.getGymName().trim().isEmpty()) {
             Gym gym = new Gym();
             gym.setName(request.getGymName().trim());
             gym.setOwner(user);
             gym.setCreatedBy(user.getUserId());
-            gymRepository.save(gym);
+            createdGym = gymRepository.save(gym);
         }
 
-        return ResponseEntity.ok(Map.of("message", "Registration successful. Please login."));
+        AuthResponse response = new AuthResponse();
+        response.setId(user.getUserId());
+        response.setUsername(user.getUsername());
+        response.setFullName(user.getFullName());
+        response.setEmail(user.getEmail());
+        response.setPhone(user.getPhone());
+        response.setContext("STAFF");
+        response.setStaffRole("OWNER");
+        response.setHasStaffAccess(true);
+        response.setHasMemberAccess(true);
+        response.setIsFirstLogin(false);
+        response.setOtpSent(false);
+
+        if (createdGym != null) {
+            response.setActiveGymId(createdGym.getGymId());
+            response.setActiveGymName(createdGym.getName());
+        } else {
+            gymRepository.findFirstByOwnerUserIdOrderByCreatedAtDesc(user.getUserId())
+                    .ifPresent(gym -> {
+                        response.setActiveGymId(gym.getGymId());
+                        response.setActiveGymName(gym.getName());
+                    });
+        }
+
+        String token = tokenProvider.generateTokenFromUser(
+                user,
+                "STAFF",
+                response.getActiveGymId(),
+                "OWNER",
+                null,
+                null,
+                null,
+                null);
+        response.setToken(token);
+
+        try {
+            String ip = getClientIP(httpRequest);
+            String userAgent = httpRequest.getHeader("User-Agent");
+            String deviceType = userAgent != null && (userAgent.contains("Mobile") || userAgent.contains("Android"))
+                    ? "mobile"
+                    : "desktop";
+            String browser = extractBrowser(userAgent);
+            String os = extractOS(userAgent);
+            auditLogService.logLogin(user.getUserId(), response.getActiveGymId(), ip, deviceType, browser, os, null);
+            auditLogService.createSession(user.getUserId(), response.getActiveGymId(), ip, deviceType, browser, os);
+        } catch (Exception ignored) {
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     /**

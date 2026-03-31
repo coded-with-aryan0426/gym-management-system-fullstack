@@ -5,6 +5,7 @@ import { Logo } from '../components/ui/Logo';
 import OtpInput from '../components/auth/OtpInput';
 import SocialLoginButtons from '../components/auth/SocialLoginButtons';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const getColors = (isDark: boolean) => ({
     bgPrimary: isDark ? "#0D0D0D" : "#F8FAFC",
@@ -35,6 +36,7 @@ const getPasswordStrength = (password: string) => {
 export default function SignupPage() {
     const navigate = useNavigate();
     const { theme } = useTheme();
+    const { login: authLogin } = useAuth();
     const isDark = theme === 'dark';
     const colors = getColors(isDark);
 
@@ -127,6 +129,7 @@ export default function SignupPage() {
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setApiError("");
+        setSuccessMessage("");
 
         if (otp.length !== 6) {
             setApiError("Please enter a valid 6-digit code");
@@ -142,17 +145,35 @@ export default function SignupPage() {
                 otp: otp
             });
 
-            if (response && response.token) {
-                localStorage.setItem('user', JSON.stringify(response));
-                localStorage.setItem('token', response.token);
-                navigate('/dashboard');
-            } else {
-                // Should not happen if successful, but fallback
-                navigate('/login?signup=success');
+            if (!response?.token) {
+                throw new Error(response?.error || response?.message || "Registration succeeded but no auth token was returned");
             }
+
+            const role = (response.staffRole || response.primaryRole || response.role || 'OWNER').toUpperCase();
+            const userId = response.userId ?? response.id;
+
+            authLogin(response.token, {
+                id: String(userId ?? ''),
+                userId: typeof userId === 'number' ? userId : (userId ? parseInt(String(userId), 10) : undefined),
+                username: response.username || response.email || formData.email,
+                email: response.email || formData.email,
+                fullName: response.fullName || formData.fullName,
+                phone: response.phone || formData.phone,
+                role: role === 'ADMIN' || role === 'TRAINER' || role === 'MEMBER' ? role : 'OWNER',
+                activeGymId: response.activeGymId,
+                activeGymName: response.activeGymName,
+                token: response.token
+            });
+
+            setSuccessMessage("Account created successfully. Redirecting to your dashboard...");
+            navigate('/dashboard', { replace: true });
         } catch (err: any) {
             console.error("Signup error:", err);
-            setApiError(err.response?.data?.error || "Registration failed. Please check OTP.");
+            setApiError(
+                err.response?.data?.error ||
+                err.message ||
+                "Registration failed. Please verify your OTP and try again."
+            );
         } finally {
             setIsLoading(false);
         }
@@ -160,10 +181,24 @@ export default function SignupPage() {
 
     // Handle social login success
     const handleSocialSuccess = (data: any) => {
-        localStorage.setItem('user', JSON.stringify(data));
-        if (data.token) {
-            localStorage.setItem('token', data.token);
+        if (!data?.token) {
+            setApiError("Social signup failed to complete login. Please try again.");
+            return;
         }
+        const role = (data.staffRole || data.primaryRole || data.role || 'OWNER').toUpperCase();
+        const userId = data.userId ?? data.id;
+        authLogin(data.token, {
+            id: String(userId ?? ''),
+            userId: typeof userId === 'number' ? userId : (userId ? parseInt(String(userId), 10) : undefined),
+            username: data.username || data.email || formData.email,
+            email: data.email || formData.email,
+            fullName: data.fullName || formData.fullName,
+            phone: data.phone || formData.phone,
+            role: role === 'ADMIN' || role === 'TRAINER' || role === 'MEMBER' ? role : 'OWNER',
+            activeGymId: data.activeGymId,
+            activeGymName: data.activeGymName,
+            token: data.token
+        });
         navigate('/dashboard');
     };
 
