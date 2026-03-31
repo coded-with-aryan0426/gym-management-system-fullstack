@@ -16,7 +16,7 @@ ui ux - copilot --resume=83ecae34-a70f-4e46-a436-f0bd8366d089
  svg icons copilot --resume=9423ace6-8d5b-41dd-8a3b-aafe6c219f16
 
  gym datasbe plan-    copilot --resume=ec6f12e7-0cb0-44ad-97f2-7e9d2b748e71
- 
+
 ## ⚡️ Quick Start Sequence
 
 ### 1. Database Initialization
@@ -67,6 +67,8 @@ cd frontend && npm run dev
 cloudflared tunnel --url http://localhost:5173
 
 ```
+
+
 Use THIS URL to access your app publicly.
 
 ---
@@ -97,3 +99,39 @@ We have reorganized the project for better discoverability.
 ### ⚙️ Operations (`/ops`)
 - **Scripts**: Utility shell scripts (`/ops/scripts`)
 ```
+
+
+
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#e8e8f8", "primaryBorderColor": "#9999cc", "primaryTextColor": "#000000", "lineColor": "#555555", "fontSize": "14px"}}}%%
+flowchart LR
+    PKG["`<b>`MEMBERSHIP_PACKAGES`</b><hr/>`
+    🔑 package_id : bigint PK`<br/>`
+    🔗 gym_id : bigint FK`<br/>`
+    name : varchar`<br/>`
+    price : decimal`<br/>`
+    duration : int`<br/>`
+    sessions : int"]
+
+    MEM["`<b>`MEMBERSHIPS`</b><hr/>`
+    🔑 id : bigint PK`<br/>`
+    🔗 gym_id : bigint FK`<br/>`
+    🔗 user_id : bigint FK`<br/>`
+    🔗 pkg_id : bigint FK`<br/>`
+    status : varchar`<br/>`
+    start : date`<br/>`
+    end : date"]
+
+    TXN["`<b>`TRANSACTIONS`</b><hr/>`
+    🔑 id : bigint PK`<br/>`
+    🔗 member_id : bigint FK`<br/>`
+    🔗 user_id : bigint FK`<br/>`
+    amount : decimal`<br/>`
+    type : varchar`<br/>`
+    status : varchar"]
+
+    PKG -->|"used_in ‖──o{"| MEM
+    MEM -->|"generates ‖──o{"| TXN
+
+    style PKG fill:#e8e8f8,stroke:#8888cc,stroke-width:2px
+    style MEM fill:#e8e8f8,stroke:#8888cc,stroke-width:2px
+    style TXN fill:#e8e8f8,stroke:#8888cc,stroke-width:2px
