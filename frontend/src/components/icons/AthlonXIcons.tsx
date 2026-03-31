@@ -202,7 +202,9 @@ filter[id^="axi-shadow"] { }
   justify-content: center; 
   transition: filter 0.3s cubic-bezier(0.42, 0, 0.58, 1);
 }
-.axi-icon:hover { filter: brightness(1.05); }
+.axi-icon:hover { filter: brightness(1.1) saturate(1.18); }
+.axi-icon svg [fill^="url(#grad"] { stroke-width: 1.15px; }
+.axi-icon svg [filter^="url(#filter-shadow)"] { transform: translateZ(0); }
 
 /* ── SMOOTH HOVER ANIMATIONS WITH PREMIUM EASING ── */
 .axi-icon:hover .axi-bell       { animation: axi-bellSwing 0.75s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: 12px 3px; }
@@ -324,21 +326,23 @@ function Icon({
       >
         {/* SVG gradients and filters for premium effects */}
         <defs>
-          {/* Gradient for dashboard bars - subtle blue accent */}
+          {/* Gradient for dashboard bars - high-contrast premium depth */}
           <linearGradient id="grad-dash-bar" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="0.4" />
-          </linearGradient>
-
-          {/* Gradient for member icons - soft accent */}
-          <linearGradient id="grad-member" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.9" />
+            <stop offset="0%" stopColor="currentColor" stopOpacity="0.95" />
+            <stop offset="52%" stopColor="#ffffff" stopOpacity="0.24" />
             <stop offset="100%" stopColor="currentColor" stopOpacity="0.5" />
           </linearGradient>
 
-          {/* Subtle glow filter for premium look */}
+          {/* Gradient for member icons - stronger top-light highlight */}
+          <linearGradient id="grad-member" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.38" />
+            <stop offset="45%" stopColor="currentColor" stopOpacity="0.92" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0.35" />
+          </linearGradient>
+
+          {/* Glow filter for premium pop */}
           <filter id="filter-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="0.5" result="coloredBlur" />
+            <feGaussianBlur stdDeviation="0.95" result="coloredBlur" />
             <feMerge>
               <feMergeNode in="coloredBlur" />
               <feMergeNode in="SourceGraphic" />
@@ -347,13 +351,14 @@ function Icon({
 
           {/* Soft shadow for depth */}
           <filter id="filter-shadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="1" stdDeviation="0.8" floodOpacity="0.15" />
+            <feDropShadow dx="0" dy="1.2" stdDeviation="1.1" floodOpacity="0.28" />
           </filter>
 
           {/* Radial gradient for circular elements */}
           <radialGradient id="grad-radial" cx="40%" cy="40%">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="1" />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="0.4" />
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.65" />
+            <stop offset="46%" stopColor="currentColor" stopOpacity="0.88" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0.28" />
           </radialGradient>
         </defs>
         {children}
@@ -427,32 +432,34 @@ export function MembersIcon(p: IconProps) {
   );
 }
 
-/** Trainers — dumbbell icon. Bounces on hover. */
+/** Trainers — coach silhouette with dumbbell badge. */
 export function TrainersIcon(p: IconProps) {
   return (
     <Icon {...p} label={p.label ?? 'Trainers'}>
-      <g className="axi-bounce">
-        <line x1="7" y1="12" x2="17" y2="12" />
-        <rect x="2.5"  y="9.5" width="5" height="5" rx="2" />
-        <rect x="16.5" y="9.5" width="5" height="5" rx="2" />
-        <line x1="7"  y1="10.5" x2="7"  y2="13.5" />
-        <line x1="17" y1="10.5" x2="17" y2="13.5" />
+      <circle cx="8" cy="7" r="3" fill="url(#grad-member)" filter="url(#filter-shadow)" />
+      <path d="M3 20v-1.5A4.5 4.5 0 0 1 7.5 14h1A4.5 4.5 0 0 1 13 18.5V20" strokeWidth="1.4" opacity="0.9" />
+      <g className="axi-bounce" filter="url(#filter-shadow)">
+        <line x1="13.6" y1="15" x2="20.4" y2="15" strokeWidth="1.5" />
+        <rect x="11.6" y="13.2" width="2.4" height="3.6" rx="1" fill="url(#grad-dash-bar)" />
+        <rect x="20" y="13.2" width="2.4" height="3.6" rx="1" fill="url(#grad-dash-bar)" />
       </g>
-      <path d="M17 5 L15 9" strokeOpacity="0.45" />
-      <circle cx="17" cy="4" r="1.8" />
+      <circle cx="18" cy="7" r="2.1" fill="url(#grad-radial)" filter="url(#filter-glow)" />
+      <path d="M17.2 7l.55.55L18.9 6.4" strokeWidth="1.2" />
     </Icon>
   );
 }
 
-/** Staff — person with ID badge and shimmer sweep. */
+/** Staff — ID card with employee silhouette and shimmering badge. */
 export function StaffIcon(p: IconProps) {
   return (
     <Icon {...p} label={p.label ?? 'Staff'}>
-      <circle cx="12" cy="7" r="4" />
-      <path d="M5 21v-2a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v2" />
-      <rect x="9" y="13.5" width="6" height="4"  rx="1" />
-      <rect className="axi-shimmer" x="9.5" y="14" width="5" height="3" rx="0.5" strokeOpacity="0.25" />
-      <line x1="11" y1="15.5" x2="13" y2="15.5" strokeOpacity="0.5" />
+      <rect x="4" y="3.5" width="16" height="17" rx="2.5" strokeOpacity="0.72" />
+      <rect x="6.1" y="5.2" width="11.8" height="13.1" rx="1.8" fill="url(#grad-member)" filter="url(#filter-shadow)" />
+      <circle cx="12" cy="9.2" r="2.1" fill="url(#grad-radial)" />
+      <path d="M8.8 14.4a3.2 3.2 0 0 1 6.4 0v1.2H8.8z" strokeWidth="1.2" fill="none" />
+      <rect className="axi-shimmer" x="8.4" y="15.6" width="7.2" height="1.9" rx="0.95" fill="url(#grad-dash-bar)" />
+      <rect x="15.7" y="2.8" width="5.3" height="3.3" rx="1" fill="url(#grad-radial)" filter="url(#filter-glow)" />
+      <line x1="17" y1="4.45" x2="19.4" y2="4.45" strokeWidth="1.1" />
     </Icon>
   );
 }
@@ -603,16 +610,16 @@ export function TrainerDashIcon(p: IconProps) {
   );
 }
 
-/** My Members — group with heartbeat in top corner. Heart beats on hover. */
+/** My Members — grouped avatars with premium heartbeat marker. */
 export function MyMembersIcon(p: IconProps) {
   return (
     <Icon {...p} label={p.label ?? 'My Members'}>
-      <circle cx="8" cy="8" r="3.5" />
-      <path d="M2 21v-2a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5v2" />
-      <circle cx="17" cy="9" r="2.5" />
-      <path d="M22 21v-1a3.5 3.5 0 0 0-3.5-3.5H17" />
+      <circle cx="8" cy="8" r="3.5" fill="url(#grad-member)" filter="url(#filter-shadow)" />
+      <path d="M2 21v-2a4.5 4.5 0 0 1 4.5-4.5h3a4.5 4.5 0 0 1 4.5 4.5v2" strokeWidth="1.45" />
+      <circle cx="17" cy="9" r="2.5" fill="url(#grad-radial)" filter="url(#filter-shadow)" />
+      <path d="M22 21v-1a3.5 3.5 0 0 0-3.5-3.5H17" strokeOpacity="0.78" />
       <g className="axi-heart">
-        <path d="M18.5 3.5C19.3 2.3 21 2.3 21.5 3.7 22 5.1 20.5 6.5 18.5 8 16.5 6.5 15 5.1 15.5 3.7 16 2.3 17.7 2.3 18.5 3.5Z" />
+        <path d="M18.5 3.5C19.3 2.3 21 2.3 21.5 3.7 22 5.1 20.5 6.5 18.5 8 16.5 6.5 15 5.1 15.5 3.7 16 2.3 17.7 2.3 18.5 3.5Z" fill="url(#grad-radial)" filter="url(#filter-glow)" />
       </g>
     </Icon>
   );
@@ -756,35 +763,35 @@ export function MyMembershipIcon(p: IconProps) {
   );
 }
 
-/** Member Progress — body figure with upward arrow. Person pops, arrow rises on hover. */
+/** Member Progress — athlete figure with premium progress totem. */
 export function MemberProgressIcon(p: IconProps) {
   return (
     <Icon {...p} label={p.label ?? 'My Progress'}>
       <g className="axi-person">
-        <circle cx="9" cy="5"  r="2.5" />
+        <circle cx="9" cy="5"  r="2.5" fill="url(#grad-radial)" filter="url(#filter-shadow)" />
         <line x1="9"  y1="7.5" x2="9"  y2="14" />
         <line x1="6"  y1="10"  x2="12" y2="10" />
         <line x1="9"  y1="14"  x2="6"  y2="20" />
         <line x1="9"  y1="14"  x2="12" y2="20" />
       </g>
       <g className="axi-arrowup">
-        <line x1="18" y1="4" x2="18" y2="14" strokeOpacity="0.6" />
-        <polyline points="15,7 18,4 21,7" />
-        <line x1="15" y1="9"  x2="21" y2="9"  strokeOpacity="0.35" />
-        <line x1="15" y1="12" x2="21" y2="12" strokeOpacity="0.25" />
+        <line x1="18" y1="4" x2="18" y2="14" strokeOpacity="0.7" />
+        <polyline points="15,7 18,4 21,7" filter="url(#filter-glow)" />
+        <rect x="15" y="8.2" width="6" height="1.3" rx="0.65" fill="url(#grad-dash-bar)" stroke="none" />
+        <rect x="15" y="11.1" width="6" height="1.3" rx="0.65" fill="url(#grad-dash-bar)" stroke="none" opacity="0.85" />
       </g>
     </Icon>
   );
 }
 
-/** My Trainer — person silhouette with star. Star spins on hover. */
+/** My Trainer — coach profile with premium badge. */
 export function MyTrainerIcon(p: IconProps) {
   return (
     <Icon {...p} label={p.label ?? 'My Trainer'}>
-      <circle cx="12" cy="9" r="4" />
-      <path d="M5 21v-2a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v2" />
+      <circle cx="12" cy="9" r="4" fill="url(#grad-member)" filter="url(#filter-shadow)" />
+      <path d="M5 21v-2a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v2" strokeWidth="1.45" />
       <g className="axi-star">
-        <path d="M20 1 L21 3.5 L23.5 3.5 L21.6 5.1 L22.4 7.5 L20 6 L17.6 7.5 L18.4 5.1 L16.5 3.5 L19 3.5Z" />
+        <path d="M20 1 L21 3.5 L23.5 3.5 L21.6 5.1 L22.4 7.5 L20 6 L17.6 7.5 L18.4 5.1 L16.5 3.5 L19 3.5Z" fill="url(#grad-radial)" filter="url(#filter-glow)" />
       </g>
     </Icon>
   );

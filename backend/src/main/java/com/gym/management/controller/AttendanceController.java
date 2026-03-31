@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import com.gym.management.security.CustomUserDetails;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -201,12 +202,21 @@ public class AttendanceController {
         if (auth == null || "anonymousUser".equals(auth.getPrincipal())) {
             throw new RuntimeException("Authentication required");
         }
-        if (auth.getPrincipal() instanceof User) {
-            return ((User) auth.getPrincipal()).getUserId();
+        Object principal = auth.getPrincipal();
+        if (principal instanceof CustomUserDetails cud) {
+            Long id = cud.getId();
+            if (id == null) {
+                throw new RuntimeException("User ID not found in authentication context");
+            }
+            return id;
         }
-        return userRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"))
-                .getUserId();
+        if (principal instanceof User u) {
+            return u.getUserId();
+        }
+        String username = auth.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        return user.getUserId();
     }
 
     private Map<String, Object> toCheckInMap(CheckIn c) {

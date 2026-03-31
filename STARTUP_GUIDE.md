@@ -13,6 +13,10 @@ dashbord page creater : copilot --resume=9e11587f-967c-46e8-8b39-e47f49cd3d66
 
 ui ux - copilot --resume=83ecae34-a70f-4e46-a436-f0bd8366d089
 
+ svg icons copilot --resume=9423ace6-8d5b-41dd-8a3b-aafe6c219f16
+
+ gym datasbe plan-    copilot --resume=ec6f12e7-0cb0-44ad-97f2-7e9d2b748e71
+ 
 ## ⚡️ Quick Start Sequence
 
 ### 1. Database Initialization

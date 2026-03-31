@@ -34,7 +34,7 @@ import { Logo } from "../ui/Logo"
 import { usePermissionBasedNavigation } from '../../contexts/MultiRoleAuthContext'
 import { useMultiRoleAuth } from '../../contexts/MultiRoleAuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
-import { TRAINER_ICONS, MEMBER_ICONS } from "../icons"
+import { ADMIN_ICONS, TRAINER_ICONS, MEMBER_ICONS } from "../icons"
 import "./CommandRail.css"
 
 interface MultiRoleCommandRailProps {
@@ -112,7 +112,7 @@ const MultiRoleCommandRail: React.FC<MultiRoleCommandRailProps> = ({
     const getIconMap = () => {
       if (role === 'TRAINER') return TRAINER_ICONS;
       if (role === 'MEMBER' || role === 'CUSTOMER') return MEMBER_ICONS;
-      return iconMap; // Fallback to Lucide icons
+      return ADMIN_ICONS;
     };
 
     const getIcon = (id: string, color: string, isActive: boolean) => {
