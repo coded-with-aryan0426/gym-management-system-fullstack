@@ -1,6 +1,7 @@
 package com.gym.management.controller;
 
 import com.gym.management.model.CheckIn;
+import com.gym.management.model.CheckInStatus;
 import com.gym.management.model.User;
 import com.gym.management.repository.CheckInRepository;
 import com.gym.management.repository.UserRepository;
@@ -267,7 +268,7 @@ public class AttendanceController {
                 CheckIn c = new CheckIn(u);
                 c.setCheckInTime(checkIn);
                 c.setCheckOutTime(checkOut);
-                c.setStatus("checked-out");
+                c.setStatus(CheckInStatus.CHECKED_OUT);
                 checkInRepository.save(c);
                 seeded++;
             }
@@ -279,7 +280,7 @@ public class AttendanceController {
             User u = users.get(rand.nextInt(users.size()));
             CheckIn c = new CheckIn(u);
             c.setCheckInTime(LocalDateTime.now().minusMinutes(rand.nextInt(60)));
-            c.setStatus("check-in");
+            c.setStatus(CheckInStatus.ACTIVE);
             checkInRepository.save(c);
             seeded++;
         }

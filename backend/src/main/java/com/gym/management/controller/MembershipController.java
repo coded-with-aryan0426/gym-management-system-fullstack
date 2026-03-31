@@ -23,6 +23,25 @@ public class MembershipController {
     @PostMapping("/renew")
     public ResponseEntity<?> renewMembership(@RequestBody RenewMembershipRequest request) {
         try {
+            log.info("[MembershipController] Renewing membership for user {} with plan {} variant {} gym {} upgrade {}",
+                    request.getUserId(), request.getPlanId(), request.getVariantId(), request.getGymId(), request.getIsUpgrade());
+
+            // Validate request
+            if (request.getUserId() == null) {
+                log.error("[MembershipController] User ID is required");
+                return ResponseEntity.badRequest().body(Map.of("error", "User ID is required"));
+            }
+
+            if (request.getPlanId() == null && request.getPackageId() == null) {
+                log.error("[MembershipController] Either planId or packageId is required");
+                return ResponseEntity.badRequest().body(Map.of("error", "Either plan or package must be selected"));
+            }
+
+            if (request.getPlanId() != null && request.getVariantId() == null) {
+                log.error("[MembershipController] Variant ID is required when plan ID is provided");
+                return ResponseEntity.badRequest().body(Map.of("error", "Duration variant must be selected"));
+            }
+
             Membership membership = membershipService.renewMembership(
                     request.getUserId(),
                     request.getPackageId(),
@@ -31,6 +50,9 @@ public class MembershipController {
                     request.getCustomDurationMonths(),
                     request.getGymId(),
                     request.getIsUpgrade());
+
+            log.info("[MembershipController] Membership renewed successfully: ID {} for user {}", 
+                    membership.getId(), request.getUserId());
 
             java.util.Map<String, Object> response = new java.util.LinkedHashMap<>();
             response.put("membershipId", membership.getId());
@@ -47,9 +69,18 @@ public class MembershipController {
                             ? membership.getMembershipPackage().getPackageName()
                             : "Unknown"));
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            log.error("[MembershipController] Invalid request for user {}: {}", request.getUserId(), e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            log.error("[MembershipController] Runtime error renewing membership for user {}: {}", 
+                    request.getUserId(), e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            log.error("Failed to renew membership for user {}", request.getUserId(), e);
-            return ResponseEntity.badRequest().body(Map.of("error", "Failed to renew membership. Please try again."));
+            log.error("[MembershipController] Unexpected error renewing membership for user {}", 
+                    request.getUserId(), e);
+            return ResponseEntity.internalServerError().body(Map.of("error", 
+                    "An unexpected error occurred. Please contact support if this persists."));
         }
     }
 }
