@@ -1,0 +1,11 @@
+{
+  "er": {
+    "layoutDirection": "LR",
+    "entityPadding": 15,
+    "useMaxWidth": true
+  },
+  "theme": "default",
+  "themeVariables": {
+    "fontSize": "14px"
+  }
+}

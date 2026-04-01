@@ -696,7 +696,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_0.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_0.png}
 \end{figure}
 
 
@@ -754,7 +754,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_1.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_1.png}
 \end{figure}
 
 
@@ -764,7 +764,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_2.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_2.png}
 \end{figure}
 
 
@@ -774,7 +774,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_3.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_3.png}
 \end{figure}
 
 
@@ -784,7 +784,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_system_architecture_4.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_4.png}
 \end{figure}
 
 
@@ -825,7 +825,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_0.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_0.png}
 \end{figure}
 
 
@@ -835,17 +835,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_1.png}
-\end{figure}
-
-
-\medskip\noindent\rule{\textwidth}{0.4pt}\medskip
-
-## Membership Entities
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_2.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_1.png}
 \end{figure}
 
 
@@ -855,7 +845,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_3.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_2.png}
 \end{figure}
 
 
@@ -865,7 +855,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_4.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_3.png}
 \end{figure}
 
 
@@ -875,7 +865,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_5.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_4.png}
 \end{figure}
 
 
@@ -885,7 +875,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_er_diagram_6.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_5.png}
 \end{figure}
 
 
@@ -897,7 +887,6 @@ The internship tasks were distributed across frontend and backend development, c
 |----------|----------|-------------------|
 | **Auth** | Users, Roles, Permissions | Many-to-many via mapping tables |
 | **Gym** | Gyms, Settings, Staff, Equipment | Owner-owned, one-to-many |
-| **Members** | Packages, Memberships, Transactions | Package → Membership → Transaction |
 | **Training** | Assignments, Sessions, Ratings, Progress | Trainer-Member assignments |
 | **Chat** | Conversations, Messages, Attachments | Conversation hierarchy |
 | **Notify** | Notifications, Settings | User notifications |
@@ -914,7 +903,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_0.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_0.png}
 \end{figure}
 
 
@@ -924,7 +913,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_1.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_1.png}
 \end{figure}
 
 
@@ -934,7 +923,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_2.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_2.png}
 \end{figure}
 
 
@@ -944,7 +933,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_3.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_3.png}
 \end{figure}
 
 
@@ -954,7 +943,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_4.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_4.png}
 \end{figure}
 
 
@@ -966,7 +955,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_5.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_5.png}
 \end{figure}
 
 
@@ -974,7 +963,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_6.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_6.png}
 \end{figure}
 
 
@@ -982,7 +971,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_7.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_7.png}
 \end{figure}
 
 
@@ -994,7 +983,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_8.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_8.png}
 \end{figure}
 
 
@@ -1002,7 +991,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_9.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_9.png}
 \end{figure}
 
 
@@ -1010,7 +999,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_uml_diagrams_10.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_10.png}
 \end{figure}
 
 
@@ -1025,7 +1014,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_0.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_0.png}
 \end{figure}
 
 
@@ -1035,7 +1024,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_1.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_1.png}
 \end{figure}
 
 
@@ -1047,7 +1036,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_2.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_2.png}
 \end{figure}
 
 
@@ -1055,7 +1044,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_3.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_3.png}
 \end{figure}
 
 
@@ -1063,7 +1052,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_4.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_4.png}
 \end{figure}
 
 
@@ -1071,7 +1060,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_5.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_5.png}
 \end{figure}
 
 
@@ -1079,7 +1068,7 @@ The internship tasks were distributed across frontend and backend development, c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_dfd_diagrams_6.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_6.png}
 \end{figure}
 
 
@@ -1653,7 +1642,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_0.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_0.png}
 \end{figure}
 
 
@@ -1661,7 +1650,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_1.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_1.png}
 \end{figure}
 
 
@@ -1673,7 +1662,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_2.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_2.png}
 \end{figure}
 
 
@@ -1681,7 +1670,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_3.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_3.png}
 \end{figure}
 
 
@@ -1693,7 +1682,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_4.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_4.png}
 \end{figure}
 
 
@@ -1701,7 +1690,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_5.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_5.png}
 \end{figure}
 
 
@@ -1713,7 +1702,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_6.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_6.png}
 \end{figure}
 
 
@@ -1721,7 +1710,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_7.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_7.png}
 \end{figure}
 
 
@@ -1733,7 +1722,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_8.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_8.png}
 \end{figure}
 
 
@@ -1741,7 +1730,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_9.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_9.png}
 \end{figure}
 
 
@@ -1749,7 +1738,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_10.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_10.png}
 \end{figure}
 
 
@@ -1759,7 +1748,7 @@ END
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth,height=0.6\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/.report_build/mermaid_workflows_11.png}
+\includegraphics[width=0.85\textwidth,height=0.42\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_11.png}
 \end{figure}
 
 

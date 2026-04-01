@@ -4,6 +4,7 @@
 
 ```mermaid
 classDiagram
+    direction LR
     class User {
         +Long userId
         +String username
@@ -37,6 +38,7 @@ classDiagram
 
 ```mermaid
 classDiagram
+    direction LR
     class Gym {
         +Long gymId
         +String name

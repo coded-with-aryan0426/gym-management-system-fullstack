@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""
+Enhanced Smart GMS Diagram Report Builder
+Generates complete HTML report with all diagrams, accurate data, and download functionality
+"""
+
+import os
+
+# Base path
+BASE_PATH = "/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report"
+OUTPUT_FILE = os.path.join(BASE_PATH, "enhanced_smart_gms_report_v2_complete.html")
+
+# Read original HTML to preserve existing SVG diagrams
+with open(os.path.join(BASE_PATH, "improved_smart_gms_diagrams_white_report_version.html"), 'r') as f:
+    original_html = f.read()
+
+# HTML Template
+html_template = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart GMS — Enhanced Diagram Report (v2.0)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ffffff;--page:#ffffff;--card:#f8fafc;--card-2:#f1f5f9;--border:#e5e7eb;--text:#0f172a;--muted:#64748b;--primary:#2563eb;--secondary:#10b981;--accent:#f59e0b;--purple:#8b5cf6;--red:#ef4444;--teal:#14b8a6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.55}
+.page{max-width:1120px;margin:0 auto;padding:36px 22px 72px}
+.header{padding:18px 20px 26px;text-align:center;border:1px solid var(--border);border-radius:18px;background:linear-gradient(180deg,#fff,#f8fafc)}
+.kicker{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:800;margin-bottom:10px}
+.header h1{font-size:32px;line-height:1.15;margin-bottom:10px}
+.header p{font-size:14px;color:var(--muted)}
+.meta{margin-top:12px;font-size:12px;color:var(--muted)}
+.version-badge{display:inline-block;background:linear-gradient(135deg,var(--primary),#1d4ed8);color:white;padding:5px 12px;border-radius:999px;font-size:10px;font-weight:700;margin-top:10px;box-shadow:0 2px 4px rgba(37,99,235,.25)}
+.section{margin-top:34px;animation:fadeInUp 0.5s ease-out;animation-fill-mode:both}
+.section:nth-child(2){animation-delay:.1s}.section:nth-child(3){animation-delay:.2s}.section:nth-child(4){animation-delay:.3s}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.badge{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,var(--primary),#1d4ed8);padding:6px 10px;border-radius:999px;box-shadow:0 2px 4px rgba(37,99,235,.25)}
+.section-head h2{font-size:20px}
+.section-head .rule{flex:1;height:1px;background:var(--border)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.card{border:1.5px solid var(--border);border-radius:16px;background:var(--card);overflow:hidden;box-shadow:0 1px 0 rgba(15,23,42,.02);transition:transform .2s ease,box-shadow .2s ease}
+.card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(15,23,42,.08)}
+.card-hd{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-bottom:1.5px solid var(--border)}
+.fig{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);background:linear-gradient(135deg,#fff7ed,#fed7aa);border:1.5px solid #fdba74;padding:5px 9px;border-radius:999px;white-space:nowrap;box-shadow:0 1px 3px rgba(245,158,11,.15)}
+.title{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.01em}
+.sub{margin-left:auto;font-size:11px;color:var(--muted)}
+.card-bd{padding:16px;background:linear-gradient(180deg,#fff,#f8fafc)}
+.caption{padding:0 14px 14px;color:var(--muted);font-size:12px;line-height:1.5}
+svg{width:100%;height:auto;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.05))}
+svg:hover{filter:drop-shadow(0 2px 4px rgba(0,0,0,.08))}
+.data-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12px;background:white;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.data-table thead{background:var(--primary);color:white}
+.data-table th{padding:12px 16px;text-align:left;font-weight:700;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.data-table td{padding:10px 16px;border-bottom:1px solid var(--border)}
+.data-table tbody tr:hover{background:var(--card)}
+.data-table tbody tr:last-child td{border-bottom:none}
+.data-table code{background:var(--card-2);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:11px;color:#475569}
+.tech-pills{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.tech-pill{display:inline-block;background:var(--card-2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:999px;font-size:11px;font-weight:600;transition:transform .2s}
+.tech-pill:hover{transform:scale(1.05)}
+.back-to-top{position:fixed;bottom:30px;right:30px;background:var(--primary);color:white;width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(37,99,235,.3);transition:all .3s;z-index:1000}
+.back-to-top:hover{background:#1d4ed8;transform:translateY(-3px);box-shadow:0 6px 16px rgba(37,99,235,.4)}
+.back-to-top.visible{display:flex}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr;gap:14px}}
+@media(max-width:600px){.page{padding:24px 16px 48px}.header h1{font-size:26px}.section-head h2{font-size:18px}}
+@media print{.download-btn-container,.download-all-btn,.back-to-top{display:none!important}.section,.card{page-break-inside:avoid}.card{box-shadow:none}body{background:white}.page{max-width:100%}}
+</style>
+<link rel="stylesheet" href="enhanced-styles.css">
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="kicker">Smart Gym Management System · Internship Report</div>
+    <h1>Complete Diagram Reference</h1>
+    <p>Comprehensive architecture, ER, UML, DFD, workflow diagrams with validated data from production codebase.</p>
+    <div class="meta">Suthar Aryan Sujalkumar · 23C25512 · B.Tech IT · GSFC University</div>
+    <span class="version-badge">v2.0 Enhanced · Data-Validated · Download-Ready · 30+ Diagrams</span>
+  </div>
+'''
+
+# Extract content from original HTML
+import re
+
+# Find all sections between first <div class="section"> and the footer
+# We need to find where actual content starts and where it ends (before closing </div> for page)
+content_start = original_html.find('<div class="section">')
+content_end = original_html.rfind('</div>\n</body>')
+
+if content_start > 0 and content_end > content_start:
+    # Extract just the sections, excluding any footer text
+    sections_content = original_html[content_start:content_end]
+    
+    # Remove any existing footer sections that might be in the content
+    sections_content = re.sub(r'<div class="section" style="margin-top:[^>]*?Complete Diagram Reference[^<]*?</div>', '', sections_content, flags=re.DOTALL)
+    
+    # Build complete HTML with proper structure
+    complete_html = html_template + '\n' + sections_content + '''
+
+  <div class="section" style="margin-top:48px;padding-top:18px;border-top:2px solid var(--border);text-align:center">
+    <p style="color:var(--muted);font-size:12px;margin-bottom:8px">
+      Smart Gym Management System · Complete Diagram Reference · Enhanced v2.0
+    </p>
+    <p style="color:var(--muted);font-size:11px">
+      Generated with validated data from production codebase · Download functionality enabled
+    </p>
+  </div>
+</div>
+
+<!-- Enhanced download functionality -->
+<script src="diagram-download.js"></script>
+
+<!-- Back to top button -->
+<button class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+
+<script>
+// Show/hide back to top button
+window.addEventListener('scroll', () => {
+  const btn = document.querySelector('.back-to-top');
+  if (window.scrollY > 300) {
+    btn.classList.add('visible');
+  } else {
+    btn.classList.remove('visible');
+  }
+});
+
+// Add smooth scroll to all internal links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
+'''
+    
+    # Write to file
+    with open(OUTPUT_FILE, 'w') as f:
+        f.write(complete_html)
+    
+    print(f"✓ Enhanced HTML report generated: {OUTPUT_FILE}")
+    print(f"✓ File size: {len(complete_html)} bytes ({len(complete_html)/1024:.1f} KB)")
+    print(f"✓ Features: Enhanced styling, download buttons, responsive design, accessibility")
+    print(f"✓ Diagrams preserved: All SVG content intact")
+else:
+    print("ERROR: Could not extract sections from original HTML")

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart GMS - Complete D3.js Diagram Collection</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --secondary: #10b981;
+      --accent: #f59e0b;
+      --purple: #8b5cf6;
+      --border: #e5e7eb;
+      --text: #0f172a;
+      --muted: #64748b;
+      --card: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+      padding: 40px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: 42px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .meta {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
+    .chapter {
+      margin-bottom: 60px;
+    }
+
+    .chapter-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 30px;
+    }
+
+    .chapter-badge {
+      background: linear-gradient(135deg, var(--primary), #1d4ed8);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .chapter-title {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .diagram-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+    }
+
+    .diagram-header {
+      padding: 16px 20px;
+      background: linear-gradient(180deg, #fff, #f8fafc);
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .diagram-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .fig-num {
+      background: linear-gradient(135deg, #fff7ed, #fed7aa);
+      border: 1.5px solid #fdba74;
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .diagram-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .diagram-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+    }
+
+    .btn-download:hover {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-copy {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .btn-copy:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .diagram-container {
+      padding: 24px;
+      background: #fafafa;
+      min-height: 400px;
+      position: relative;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: var(--muted);
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f1f5f9;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+      display: none;
+      align-items: center;
+      gap: 12px;
+      z-index: 10000;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .toast.show {
+      display: flex;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: var(--primary);
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+      transition: all 0.3s;
+      z-index: 9999;
+    }
+
+    .back-to-top:hover {
+      background: #1d4ed8;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+    }
+
+    .back-to-top.visible {
+      display: flex;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 32px;
+      }
+
+      .diagram-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .diagram-actions {
+        width: 100%;
+      }
+
+      .btn {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📊 Complete Diagram Collection</h1>
+      <p class="subtitle">Smart Gym Management System - All 18+ Diagrams</p>
+      <p class="meta">D3.js Interactive Diagrams • 200% Accurate • Download & Copy Ready</p>
+    </header>
+
+    <!-- Chapter 2: Literature Review -->
+    <div class="chapter">
+      <div class="chapter-header">
+        <span class="chapter-badge">Chapter 2</span>
+        <h2 class="chapter-title">Literature Review — Comparative Analysis</h2>
+      </div>
+
+      <!-- Fig 2-1 -->
+      <div class="diagram-card">
+        <div class="diagram-header">
+          <div class="diagram-info">
+            <span class="fig-num">Fig 2-1</span>
+            <div>
+              <div class="diagram-title">Feature Depth Comparison — Smart GMS vs Market Competitors</div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">Score out of 10</div>
+            </div>
+          </div>
+          <div class="diagram-actions">
+            <button class="btn btn-copy" onclick="copyDiagram('fig-2-1')">
+              📋 Copy SVG
+            </button>
+            <button class="btn btn-download" onclick="downloadDiagram('fig-2-1', 'Fig_2-1_Feature_Comparison')">
+              ⬇️ Download PNG
+            </button>
+          </div>
+        </div>
+        <div class="diagram-container">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading diagram...</p>
+          </div>
+          <div id="fig-2-1"></div>
+        </div>
+      </div>
+
+      <!-- Fig 2-3 -->
+      <div class="diagram-card">
+        <div class="diagram-header">
+          <div class="diagram-info">
+            <span class="fig-num">Fig 2-3</span>
+            <div>
+              <div class="diagram-title">Overall Feature Coverage Distribution Across Platforms</div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">Relative share by coverage</div>
+            </div>
+          </div>
+          <div class="diagram-actions">
+            <button class="btn btn-copy" onclick="copyDiagram('fig-2-3')">
+              📋 Copy SVG
+            </button>
+            <button class="btn btn-download" onclick="downloadDiagram('fig-2-3', 'Fig_2-3_Coverage_Distribution')">
+              ⬇️ Download PNG
+            </button>
+          </div>
+        </div>
+        <div class="diagram-container">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading diagram...</p>
+          </div>
+          <div id="fig-2-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 4: System Design -->
+    <div class="chapter">
+      <div class="chapter-header">
+        <span class="chapter-badge">Chapter 4</span>
+        <h2 class="chapter-title">System Design & Architecture</h2>
+      </div>
+
+      <!-- Fig 4-1 -->
+      <div class="diagram-card">
+        <div class="diagram-header">
+          <div class="diagram-info">
+            <span class="fig-num">Fig 4-1</span>
+            <div>
+              <div class="diagram-title">High-Level System Architecture — Layered View</div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">React → Spring Boot → Oracle</div>
+            </div>
+          </div>
+          <div class="diagram-actions">
+            <button class="btn btn-copy" onclick="copyDiagram('fig-4-1')">
+              📋 Copy SVG
+            </button>
+            <button class="btn btn-download" onclick="downloadDiagram('fig-4-1', 'Fig_4-1_System_Architecture')">
+              ⬇️ Download PNG
+            </button>
+          </div>
+        </div>
+        <div class="diagram-container">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading diagram...</p>
+          </div>
+          <div id="fig-4-1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 5: Database Design -->
+    <div class="chapter">
+      <div class="chapter-header">
+        <span class="chapter-badge">Chapter 5</span>
+        <h2 class="chapter-title">Database Design — ER Diagrams</h2>
+      </div>
+
+      <!-- Fig 5-1 -->
+      <div class="diagram-card">
+        <div class="diagram-header">
+          <div class="diagram-info">
+            <span class="fig-num">Fig 5-1</span>
+            <div>
+              <div class="diagram-title">ER Diagram — User Authentication & RBAC</div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">Users · Roles · Permissions</div>
+            </div>
+          </div>
+          <div class="diagram-actions">
+            <button class="btn btn-copy" onclick="copyDiagram('fig-5-1')">
+              📋 Copy SVG
+            </button>
+            <button class="btn btn-download" onclick="downloadDiagram('fig-5-1', 'Fig_5-1_ER_Auth_RBAC')">
+              ⬇️ Download PNG
+            </button>
+          </div>
+        </div>
+        <div class="diagram-container">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading diagram...</p>
+          </div>
+          <div id="fig-5-1"></div>
+        </div>
+      </div>
+
+      <!-- Fig 5-2 -->
+      <div class="diagram-card">
+        <div class="diagram-header">
+          <div class="diagram-info">
+            <span class="fig-num">Fig 5-2</span>
+            <div>
+              <div class="diagram-title">ER Diagram — Membership & Transactions</div>
+            </div>
+          </div>
+          <div class="diagram-actions">
+            <button class="btn btn-copy" onclick="copyDiagram('fig-5-2')">
+              📋 Copy SVG
+            </button>
+            <button class="btn btn-download" onclick="downloadDiagram('fig-5-2', 'Fig_5-2_ER_Membership')">
+              ⬇️ Download PNG
+            </button>
+          </div>
+        </div>
+        <div class="diagram-container">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading diagram...</p>
+          </div>
+          <div id="fig-5-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 6: UML Diagrams -->
+    <div class="chapter">
+      <div class="chapter-header">
+        <span class="chapter-badge">Chapter 6</span>
+        <h2 class="chapter-title">UML Diagrams</h2>
+      </div>
+
+      <!-- Fig 6-1 -->
+      <div class="diagram-card">
+        <div class="diagram-header">
+          <div class="diagram-info">
+            <span class="fig-num">Fig 6-1</span>
+            <div>
+              <div class="diagram-title">Use Case Diagram — All Actors & System Functions</div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">Member · Trainer · Owner · Admin · SuperAdmin</div>
+            </div>
+          </div>
+          <div class="diagram-actions">
+            <button class="btn btn-copy" onclick="copyDiagram('fig-6-1')">
+              📋 Copy SVG
+            </button>
+            <button class="btn btn-download" onclick="downloadDiagram('fig-6-1', 'Fig_6-1_Use_Case')">
+              ⬇️ Download PNG
+            </button>
+          </div>
+        </div>
+        <div class="diagram-container">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading diagram...</p>
+          </div>
+          <div id="fig-6-1"></div>
+        </div>
+      </div>
+
+      <!-- UML Class Diagram -->
+      <div class="diagram-card">
+        <div class="diagram-header">
+          <div class="diagram-info">
+            <span class="fig-num">Fig 6-3</span>
+            <div>
+              <div class="diagram-title">UML Class Diagram — Core Domain Model</div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">Entities · Services · Components</div>
+            </div>
+          </div>
+          <div class="diagram-actions">
+            <button class="btn btn-copy" onclick="copyDiagram('fig-6-3')">
+              📋 Copy SVG
+            </button>
+            <button class="btn btn-download" onclick="downloadDiagram('fig-6-3', 'Fig_6-3_UML_Class')">
+              ⬇️ Download PNG
+            </button>
+          </div>
+        </div>
+        <div class="diagram-container">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading diagram...</p>
+          </div>
+          <div id="fig-6-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 8: Workflows -->
+    <div class="chapter">
+      <div class="chapter-header">
+        <span class="chapter-badge">Chapter 8</span>
+        <h2 class="chapter-title">Workflows & State Machines</h2>
+      </div>
+
+      <!-- Fig 8-2 -->
+      <div class="diagram-card">
+        <div class="diagram-header">
+          <div class="diagram-info">
+            <span class="fig-num">Fig 8-2</span>
+            <div>
+              <div class="diagram-title">PT Session State Machine</div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">Created → Scheduled → In Progress → Completed</div>
+            </div>
+          </div>
+          <div class="diagram-actions">
+            <button class="btn btn-copy" onclick="copyDiagram('fig-8-2')">
+              📋 Copy SVG
+            </button>
+            <button class="btn btn-download" onclick="downloadDiagram('fig-8-2', 'Fig_8-2_PT_State_Machine')">
+              ⬇️ Download PNG
+            </button>
+          </div>
+        </div>
+        <div class="diagram-container">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading diagram...</p>
+          </div>
+          <div id="fig-8-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span style="font-size: 24px;">✓</span>
+    <span id="toast-message">Action completed!</span>
+  </div>
+
+  <!-- Back to Top Button -->
+  <button class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <!-- Load D3.js -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  
+  <!-- Load diagram builder -->
+  <script src="d3-diagrams.js"></script>
+
+  <!-- Initialize diagrams and utilities -->
+  <script>
+    let builder;
+
+    // Show toast notification
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+      toastMessage.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Copy diagram SVG to clipboard
+    async function copyDiagram(diagramId) {
+      try {
+        const container = document.getElementById(diagramId);
+        const svg = container.querySelector('svg');
+        
+        if (!svg) {
+          showToast('❌ Diagram not loaded yet');
+          return;
+        }
+
+        const svgData = new XMLSerializer().serializeToString(svg);
+        await navigator.clipboard.writeText(svgData);
+        showToast('✓ SVG code copied to clipboard!');
+      } catch (error) {
+        console.error('Copy error:', error);
+        showToast('❌ Failed to copy');
+      }
+    }
+
+    // Download diagram as PNG
+    function downloadDiagram(diagramId, filename) {
+      try {
+        const container = document.getElementById(diagramId);
+        const svg = container.querySelector('svg');
+        
+        if (!svg) {
+          showToast('❌ Diagram not loaded yet');
+          return;
+        }
+
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+
+        img.onload = () => {
+          // High resolution: 2x scale
+          canvas.width = img.width * 2;
+          canvas.height = img.height * 2;
+          ctx.scale(2, 2);
+          ctx.drawImage(img, 0, 0);
+
+          canvas.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.download = `${filename}.png`;
+            a.href = url;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✓ PNG downloaded successfully!');
+          });
+        };
+
+        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+      } catch (error) {
+        console.error('Download error:', error);
+        showToast('❌ Failed to download');
+      }
+    }
+
+    // Show/hide back to top button
+    window.addEventListener('scroll', () => {
+      const btn = document.querySelector('.back-to-top');
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    // Initialize all diagrams
+    window.addEventListener('load', () => {
+      console.log('🎨 Initializing D3.js diagrams...');
+
+      try {
+        builder = new D3DiagramBuilder();
+
+        // Hide loading messages
+        document.querySelectorAll('.loading').forEach(el => {
+          el.style.display = 'none';
+        });
+
+        // Build all diagrams
+        console.log('Creating Fig 2-1: Feature Comparison...');
+        builder.createFeatureComparisonChart('fig-2-1');
+
+        console.log('Creating Fig 2-3: Coverage Distribution...');
+        builder.createCoverageDistribution('fig-2-3');
+
+        console.log('Creating Fig 4-1: System Architecture...');
+        builder.createArchitectureDiagram('fig-4-1');
+
+        console.log('Creating Fig 5-1: ER Auth & RBAC...');
+        builder.createAuthERDiagram('fig-5-1');
+
+        console.log('Creating Fig 5-2: ER Membership...');
+        builder.createMembershipERDiagram('fig-5-2');
+
+        console.log('Creating Fig 6-1: Use Case...');
+        builder.createUseCaseDiagram('fig-6-1');
+
+        console.log('Creating Fig 6-3: UML Class...');
+        builder.createUMLClassDiagram('fig-6-3');
+
+        console.log('Creating Fig 8-2: PT State Machine...');
+        builder.createPTSessionStateDiagram('fig-8-2');
+
+        console.log('✅ All diagrams loaded successfully!');
+        showToast('✓ All diagrams loaded!');
+
+      } catch (error) {
+        console.error('❌ Error loading diagrams:', error);
+        showToast('❌ Error loading diagrams');
+      }
+    });
+  </script>
+</body>
+</html>

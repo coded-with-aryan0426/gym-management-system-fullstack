@@ -96,44 +96,6 @@ erDiagram
 
 ---
 
-## Membership Entities
-
-```mermaid
-erDiagram
-    MEMBERSHIP_PACKAGES ||--o{ MEMBERSHIPS : "used_in"
-    MEMBERSHIPS ||--o{ TRANSACTIONS : "generates"
-
-    MEMBERSHIP_PACKAGES {
-        bigint package_id PK
-        bigint gym_id FK
-        varchar name
-        decimal price
-        int duration
-        int sessions
-    }
-
-    MEMBERSHIPS {
-        bigint id PK
-        bigint gym_id FK
-        bigint user_id FK
-        bigint pkg_id FK
-        varchar status
-        date start
-        date end
-    }
-
-    TRANSACTIONS {
-        bigint id PK
-        bigint member_id FK
-        bigint user_id FK
-        decimal amount
-        varchar type
-        varchar status
-    }
-```
-
----
-
 ## Training & Session Entities
 
 ```mermaid
@@ -182,6 +144,10 @@ erDiagram
 
 ```mermaid
 erDiagram
+    CONVERSATIONS ||--o{ CONVERSATION_PARTICIPANTS : "has"
+    CONVERSATIONS ||--o{ MESSAGES : "contains"
+    MESSAGES ||--o{ MESSAGE_ATTACHMENTS : "has"
+
     CONVERSATIONS {
         bigint conversation_id PK
         varchar name
@@ -213,10 +179,6 @@ erDiagram
         varchar file_type
         bigint file_size
     }
-
-    CONVERSATIONS ||--o{ CONVERSATION_PARTICIPANTS : has
-    CONVERSATIONS ||--o{ MESSAGES : contains
-    MESSAGES ||--o{ MESSAGE_ATTACHMENTS : has
 ```
 
 ---
@@ -282,7 +244,6 @@ erDiagram
 |----------|----------|-------------------|
 | **Auth** | Users, Roles, Permissions | Many-to-many via mapping tables |
 | **Gym** | Gyms, Settings, Staff, Equipment | Owner-owned, one-to-many |
-| **Members** | Packages, Memberships, Transactions | Package → Membership → Transaction |
 | **Training** | Assignments, Sessions, Ratings, Progress | Trainer-Member assignments |
 | **Chat** | Conversations, Messages, Attachments | Conversation hierarchy |
 | **Notify** | Notifications, Settings | User notifications |

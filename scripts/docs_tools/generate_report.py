@@ -105,12 +105,15 @@ def check_dependencies():
 # Mermaid Rendering
 # =============================================================================
 
+MERMAID_CONFIG = Path(__file__).parent / "mermaid_config.json"
+
 def render_mermaid(code: str, out_png: Path) -> bool:
     mmd = out_png.with_suffix(".mmd")
     mmd.write_text(code, encoding="utf-8")
     cmd = [
         "mmdc", "-i", str(mmd), "-o", str(out_png),
-        "-s", str(DIAGRAM_SCALE), "-b", "white"
+        "-s", str(DIAGRAM_SCALE), "-b", "white",
+        "-c", str(MERMAID_CONFIG),
     ]
     try:
         subprocess.run(cmd, capture_output=True, timeout=120)
@@ -134,16 +137,28 @@ def replace_mermaid(content: str, file_tag: str, mmdc_ok: bool) -> str:
         if not mmdc_ok:
             return ""  # strip mermaid block entirely
 
-        png = TEMP_DIR / f"mermaid_{file_tag}_{idx}.png"
-        if render_mermaid(code, png):
-            # Standard figure placement, no forced pagebreaks
-            return (
-                "\\begin{figure}[H]\n"
-                "\\centering\n"
-                f"\\includegraphics[width=0.85\\textwidth,height=0.6\\textheight,keepaspectratio]{{{png}}}\n"
-                "\\end{figure}\n"
-            )
-        return ""  # render failed, strip
+        img_name = f"mermaid_{file_tag}_{idx}.png"
+        report_png = REPORT_DIR / img_name   # user-managed, source of truth
+        temp_png   = TEMP_DIR   / img_name   # fallback render destination
+
+        if report_png.exists():
+            # Use the existing image in report dir (preserves manual updates)
+            print(f"    [USE]    {img_name} (from report/)")
+            final_png = report_png
+        elif render_mermaid(code, temp_png):
+            # No existing image — render fresh and save to report dir too
+            shutil.copy(temp_png, report_png)
+            print(f"    [RENDER] {img_name}")
+            final_png = report_png
+        else:
+            return ""  # render failed, strip
+
+        return (
+            "\\begin{figure}[H]\n"
+            "\\centering\n"
+            f"\\includegraphics[width=0.85\\textwidth,height=0.42\\textheight,keepaspectratio]{{{final_png}}}\n"
+            "\\end{figure}\n"
+        )
 
     return pattern.sub(replacer, content)
 
@@ -337,8 +352,16 @@ def main() -> int:
     print(f"\n  Assembling chapters...\n{'-' * 60}")
     combined_md = assemble_report(mmdc_ok)
 
-    print(f"\n  Building PDF...\n{'-' * 60}")
+    print("\n  Building PDF...\n{'-' * 60}")
     success = build_pdf(combined_md)
+    
+    if success:
+        # Sync only freshly-rendered images (do NOT overwrite user-managed ones)
+        print(f"\n  Syncing new renders to {REPORT_DIR}...")
+        for png in TEMP_DIR.glob("mermaid_*.png"):
+            dest = REPORT_DIR / png.name
+            if not dest.exists():   # never overwrite manual images
+                shutil.copy(png, dest)
 
     #cleanup()
 
