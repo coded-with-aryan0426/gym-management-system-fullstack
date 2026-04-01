@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart GMS - Complete Diagram Library (42 Interactive Diagrams)</title>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 25px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        nav {
+            background: #f8fafc;
+            padding: 20px 40px;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.3s;
+        }
+
+        .nav-tab:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        main {
+            padding: 40px;
+        }
+
+        .category-section {
+            margin-bottom: 60px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .category-icon {
+            font-size: 2.5rem;
+        }
+
+        .category-title {
+            font-size: 2rem;
+            color: #0f172a;
+        }
+
+        .category-count {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .diagram-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+        }
+
+        .diagram-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .diagram-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .diagram-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .diagram-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 5px;
+        }
+
+        .diagram-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .diagram-badge {
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .diagram-body {
+            padding: 20px;
+            background: #ffffff;
+        }
+
+        .diagram-container {
+            width: 100%;
+            min-height: 400px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fafafa;
+        }
+
+        .diagram-actions {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        footer {
+            background: #0f172a;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            font-size: 1.2rem;
+            color: #667eea;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .diagram-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .nav-tab {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏋️ Smart GMS - Complete Diagram Library</h1>
+            <p class="subtitle">42 Interactive Diagrams with Copy & Download Functionality</p>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number">42</div>
+                    <div class="stat-label">Total Diagrams</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Categories</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Interactive</div>
+                </div>
+            </div>
+        </header>
+
+        <nav>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="scrollToSection('dfd')">📊 DFD (7)</button>
+                <button class="nav-tab" onclick="scrollToSection('er')">🗄️ ER (7)</button>
+                <button class="nav-tab" onclick="scrollToSection('uml')">📐 UML (11)</button>
+                <button class="nav-tab" onclick="scrollToSection('workflow')">🔄 Workflow (12)</button>
+                <button class="nav-tab" onclick="scrollToSection('architecture')">🏗️ Architecture (5)</button>
+            </div>
+        </nav>
+
+        <main>
+            <!-- DFD DIAGRAMS -->
+            <section id="dfd" class="category-section">
+                <div class="category-header">
+                    <span class="category-icon">📊</span>
+                    <h2 class="category-title">Data Flow Diagrams (DFD)</h2>
+                    <span class="category-count">7 diagrams</span>
+                </div>
+                
+                <div class="diagram-grid">
+                    <!-- DFD 0: Context -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">DFD Level 0: Context Diagram</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">DFD</span>
+                                <span>Shows system boundary and external entities</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="dfd-0" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('dfd-0')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('dfd-0', 'DFD_Level_0_Context')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- DFD 1: Level 1 -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">DFD Level 1: Main Processes</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">DFD</span>
+                                <span>6 core processes with data stores</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="dfd-1" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('dfd-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('dfd-1', 'DFD_Level_1_Main_Processes')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- DFD 2.1: Authentication -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">DFD Level 2.1: Authentication</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">DFD</span>
+                                <span>Login, OAuth, 2FA, JWT flow</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="dfd-2-1" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('dfd-2-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('dfd-2-1', 'DFD_Level_2_Authentication')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- DFD 2.2: Membership -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">DFD Level 2.2: Membership</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">DFD</span>
+                                <span>Package selection & approval flow</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="dfd-2-2" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('dfd-2-2')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('dfd-2-2', 'DFD_Level_2_Membership')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- DFD 2.3: Training -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">DFD Level 2.3: Training</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">DFD</span>
+                                <span>PT session booking & tracking</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="dfd-2-3" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('dfd-2-3')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('dfd-2-3', 'DFD_Level_2_Training')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- DFD 2.4: Communication -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">DFD Level 2.4: Communication</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">DFD</span>
+                                <span>Chat, messages, WebSocket flow</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="dfd-2-4" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('dfd-2-4')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('dfd-2-4', 'DFD_Level_2_Communication')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- DFD 2.5: Analytics -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">DFD Level 2.5: Analytics</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">DFD</span>
+                                <span>Revenue, stats, report generation</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="dfd-2-5" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('dfd-2-5')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('dfd-2-5', 'DFD_Level_2_Analytics')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ER DIAGRAMS -->
+            <section id="er" class="category-section">
+                <div class="category-header">
+                    <span class="category-icon">🗄️</span>
+                    <h2 class="category-title">Entity-Relationship Diagrams</h2>
+                    <span class="category-count">7 diagrams</span>
+                </div>
+                
+                <div class="diagram-grid">
+                    <!-- ER 1: User & Auth -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">ER Diagram: User & Authentication</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">ER</span>
+                                <span>User, Role, Permission entities</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="er-1" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('er-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('er-1', 'ER_User_Authentication')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ER 2: Gym Management -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">ER Diagram: Gym Management</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">ER</span>
+                                <span>Gym, Settings, Staff, Equipment</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="er-2" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('er-2')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('er-2', 'ER_Gym_Management')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ER 3: Membership -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">ER Diagram: Membership</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">ER</span>
+                                <span>Packages, Memberships, Transactions</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="er-3" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('er-3')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('er-3', 'ER_Membership')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ER 4: Training -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">ER Diagram: Training & Sessions</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">ER</span>
+                                <span>PT Sessions, Ratings, Progress</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="er-4" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('er-4')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('er-4', 'ER_Training_Sessions')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ER 5: Communication -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">ER Diagram: Communication</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">ER</span>
+                                <span>Conversations, Messages, Attachments</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="er-5" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('er-5')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('er-5', 'ER_Communication')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ER 6: Notifications -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">ER Diagram: Notifications</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">ER</span>
+                                <span>Notifications & Settings</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="er-6" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('er-6')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('er-6', 'ER_Notifications')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ER 7: Analytics -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">ER Diagram: Analytics</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">ER</span>
+                                <span>Gym Analytics & Trainer Stats</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="er-7" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('er-7')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('er-7', 'ER_Analytics')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- UML DIAGRAMS -->
+            <section id="uml" class="category-section">
+                <div class="category-header">
+                    <span class="category-icon">📐</span>
+                    <h2 class="category-title">UML Diagrams</h2>
+                    <span class="category-count">11 diagrams</span>
+                </div>
+                
+                <div class="diagram-grid">
+                    <!-- UML diagrams will use Mermaid for now -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Class Diagram: Core User & Auth</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">UML</span>
+                                <span>User, Role, Permission classes</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="uml-1" class="diagram-container mermaid">
+classDiagram
+    class User {
+        +Long userId
+        +String username
+        +String email
+        +String fullName
+        +String phone
+        +String avatarId
+        +Boolean twoFactorEnabled
+        +Set~Role~ roles
+    }
+    class Role {
+        +Long roleId
+        +String roleName
+        +Set~Permission~ permissions
+    }
+    class Permission {
+        +Long id
+        +String module
+        +String action
+    }
+    User "1" --> "*" Role : has
+    Role "*" --> "*" Permission : grants
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('uml-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('uml-1', 'UML_Class_User_Auth')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add more UML diagrams using Mermaid syntax -->
+                    <!-- For brevity, I'll add placeholders and the script will render them -->
+                </div>
+            </section>
+
+            <!-- WORKFLOW DIAGRAMS -->
+            <section id="workflow" class="category-section">
+                <div class="category-header">
+                    <span class="category-icon">🔄</span>
+                    <h2 class="category-title">Workflow Diagrams</h2>
+                    <span class="category-count">12 diagrams</span>
+                </div>
+                
+                <div class="diagram-grid">
+                    <!-- Workflow diagrams use Mermaid flowcharts -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">User Registration Flow</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Email & OAuth registration paths</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-1" class="diagram-container mermaid">
+flowchart TB
+    A[Start] --> B{Method}
+    B -->|Email| C[Fill Form]
+    B -->|Google| D[OAuth]
+    B -->|Facebook| D
+    C --> E{Valid?}
+    E -->|No| C
+    E -->|Yes| F{Exists?}
+    F -->|Yes| C
+    F -->|No| G[Hash Password]
+    D --> H{Linked?}
+    H -->|Yes| I[Login]
+    H -->|No| G
+    G --> J[Create User]
+    J --> K[Assign Role]
+    K --> L[Generate JWT]
+    I --> L
+    L --> M[Dashboard]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-1', 'Workflow_Registration')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ARCHITECTURE DIAGRAMS -->
+            <section id="architecture" class="category-section">
+                <div class="category-header">
+                    <span class="category-icon">🏗️</span>
+                    <h2 class="category-title">Architecture Diagrams</h2>
+                    <span class="category-count">5 diagrams</span>
+                </div>
+                
+                <div class="diagram-grid">
+                    <!-- Architecture diagram placeholder -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">High-Level System Architecture</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Architecture</span>
+                                <span>Full stack layers</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="arch-1" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('arch-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('arch-1', 'Architecture_High_Level')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Smart Gym Management System | 42 Interactive Diagrams</p>
+            <p style="margin-top: 10px; opacity: 0.8;">Generated from production codebase with D3.js & Mermaid</p>
+        </footer>
+    </div>
+
+    <script src="d3-diagrams.js"></script>
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: { useMaxWidth: true, htmlLabels: true },
+            securityLevel: 'loose'
+        });
+
+        // Initialize D3 diagrams
+        const builder = new D3DiagramBuilder();
+
+        // DFD Diagrams
+        builder.createDFDLevel0('dfd-0');
+        builder.createDFDLevel1('dfd-1');
+        builder.createDFDLevel2Auth('dfd-2-1');
+        builder.createDFDLevel2Membership('dfd-2-2');
+        builder.createDFDLevel2Training('dfd-2-3');
+        builder.createDFDLevel2Communication('dfd-2-4');
+        builder.createDFDLevel2Analytics('dfd-2-5');
+
+        // ER Diagrams
+        builder.createAuthERDiagram('er-1');\n        builder.createGymERDiagram('er-2');\n        builder.createMembershipERDiagram('er-1');
+        builder.createMembershipERDiagram('er-3');
+        builder.createTrainingERDiagram('er-4');
+        builder.createCommunicationERDiagram('er-5');
+        builder.createNotificationERDiagram('er-6');
+        builder.createAnalyticsERDiagram('er-7');
+
+        // Architecture
+        builder.createArchitectureDiagram('arch-1');
+
+        // Navigation
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+            // Update active tab
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Copy SVG to clipboard (D3 diagrams)
+        function copyDiagram(containerId) {
+            const container = document.getElementById(containerId);
+            const svg = container.querySelector('svg');
+            if (svg) {
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svg);
+                navigator.clipboard.writeText(svgString).then(() => {
+                    alert('✅ SVG copied to clipboard!');
+                });
+            }
+        }
+
+        // Download PNG (D3 diagrams)
+        function downloadDiagram(containerId, filename) {
+            const container = document.getElementById(containerId);
+            const svg = container.querySelector('svg');
+            if (svg) {
+                const canvas = document.createElement('canvas');
+                const bbox = svg.getBoundingClientRect();
+                canvas.width = bbox.width * 2;
+                canvas.height = bbox.height * 2;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                const data = new XMLSerializer().serializeToString(svg);
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob(blob => {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${filename}.png`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    });
+                };
+                img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(data)));
+            }
+        }
+
+        // Copy Mermaid SVG
+        function copyMermaidDiagram(containerId) {
+            const container = document.getElementById(containerId);
+            const svg = container.querySelector('svg');
+            if (svg) {
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svg);
+                navigator.clipboard.writeText(svgString).then(() => {
+                    alert('✅ SVG copied to clipboard!');
+                });
+            }
+        }
+
+        // Download Mermaid PNG
+        function downloadMermaidDiagram(containerId, filename) {
+            downloadDiagram(containerId, filename);
+        }
+    </script>
+</body>
+</html>
+
+                    <!-- UML 2: Class Gym & Membership -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Class Diagram: Gym & Membership</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">UML</span>
+                                <span>Gym, Membership, Package relationships</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="uml-2" class="diagram-container mermaid">
+classDiagram
+    class Gym {
+        +Long gymId
+        +String name
+        +String address
+        +String city
+        +User owner
+        +Boolean isPublic
+        +String inviteCode
+    }
+    class Membership {
+        +Long id
+        +Gym gym
+        +User user
+        +MembershipPackage package
+        +String status
+        +Date startDate
+        +Date endDate
+    }
+    class MembershipPackage {
+        +Long id
+        +String name
+        +Double price
+        +Integer days
+        +Integer sessions
+    }
+    Gym "1" --> "*" Membership : has
+    Membership "*" --> "1" MembershipPackage : uses
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('uml-2')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('uml-2', 'UML_Class_Gym_Membership')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- UML 3: Class Training -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Class Diagram: Training & Sessions</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">UML</span>
+                                <span>PT Sessions, Equipment, Classes</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="uml-3" class="diagram-container mermaid">
+classDiagram
+    class PTSession {
+        +Long sessionId
+        +User trainer
+        +User member
+        +DateTime sessionDate
+        +Integer duration
+        +String status
+        +String notes
+        +schedule()
+        +complete()
+        +cancel()
+    }
+    class Equipment {
+        +Long id
+        +String name
+        +String category
+        +Integer quantity
+        +String status
+    }
+    class GymClass {
+        +Long classId
+        +String name
+        +User instructor
+        +Integer capacity
+        +DateTime startTime
+    }
+    PTSession "*" --> "1" User : trainer
+    PTSession "*" --> "1" User : member
+    GymClass "*" --> "1" User : instructor
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('uml-3')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('uml-3', 'UML_Class_Training')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- UML 4: Class Communication -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Class Diagram: Communication</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">UML</span>
+                                <span>Conversations, Messages, Notifications</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="uml-4" class="diagram-container mermaid">
+classDiagram
+    class Conversation {
+        +Long id
+        +String name
+        +Boolean isGroup
+        +User createdBy
+        +getMessages()
+        +addParticipant()
+    }
+    class Message {
+        +Long id
+        +Conversation conversation
+        +User sender
+        +String content
+        +Boolean isEdited
+        +DateTime createdAt
+        +edit()
+        +delete()
+    }
+    class Notification {
+        +Long id
+        +User user
+        +String title
+        +String message
+        +String type
+        +Boolean isRead
+        +markAsRead()
+    }
+    Conversation "1" --> "*" Message : contains
+    Message "*" --> "1" User : sender
+    Notification "*" --> "1" User : recipient
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('uml-4')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('uml-4', 'UML_Class_Communication')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- UML 5: Use Case -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Use Case Diagram</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">UML</span>
+                                <span>All system actors and use cases</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="uml-5" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('uml-5')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('uml-5', 'UML_Use_Case')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- UML 6.1: Sequence Auth -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Sequence: Authentication Flow</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">UML</span>
+                                <span>Login validation and JWT generation</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="uml-6-1" class="diagram-container mermaid">
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant A as AuthController
+    participant S as AuthService
+    participant D as Database
+    U->>F: Enter credentials
+    F->>A: POST /api/auth/login
+    A->>S: authenticate()
+    S->>D: findByUsername()
+    D-->>S: User entity
+    S->>S: validatePassword()
+    alt Valid
+        S-->>A: JWT Token
+        A-->>F: 200 OK
+        F-->>U: Dashboard
+    else Invalid
+        S-->>A: 401 Error
+        A-->>F: Unauthorized
+        F-->>U: Error message
+    end
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('uml-6-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('uml-6-1', 'UML_Sequence_Auth')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- UML 6.2: Sequence Membership -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Sequence: Membership Purchase</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">UML</span>
+                                <span>Package selection and purchase flow</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="uml-6-2" class="diagram-container mermaid">
+sequenceDiagram
+    participant M as Member
+    participant F as Frontend
+    participant C as Controller
+    participant S as Service
+    participant D as Database
+    M->>F: Select Package
+    F->>C: GET /api/packages
+    C->>S: getActivePackages()
+    S->>D: findActive()
+    D-->>S: List
+    S-->>C: PackageDTOs
+    C-->>F: Packages
+    F-->>M: Display
+    M->>F: Confirm Purchase
+    F->>C: POST /api/memberships
+    C->>S: createMembership()
+    S->>D: save()
+    S-->>C: Created
+    C-->>F: 201 Success
+    F-->>M: Confirmation
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('uml-6-2')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('uml-6-2', 'UML_Sequence_Membership')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- UML 6.3: Sequence PT Booking -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Sequence: PT Session Booking</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">UML</span>
+                                <span>Session creation and notifications</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="uml-6-3" class="diagram-container mermaid">
+sequenceDiagram
+    participant M as Member
+    participant F as Frontend
+    participant C as Controller
+    participant S as Service
+    participant N as NotificationService
+    participant D as Database
+    M->>F: Select Trainer & Time
+    F->>C: POST /api/pt-sessions
+    C->>S: bookSession()
+    S->>D: checkAvailability()
+    D-->>S: Available
+    S->>D: save(session)
+    S->>N: notifyTrainer()
+    S-->>C: SessionDTO
+    C-->>F: 201 Created
+    F-->>M: Booking Confirmed
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('uml-6-3')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('uml-6-3', 'UML_Sequence_PT_Booking')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- UML 7.1: Activity Registration -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Activity: User Registration</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">UML</span>
+                                <span>Email and OAuth registration paths</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="uml-7-1" class="diagram-container mermaid">
+flowchart TB
+    A[Start] --> B{Auth Method}
+    B -->|Email| C[Enter Details]
+    B -->|OAuth| D[Select Provider]
+    C --> E{Valid?}
+    E -->|No| F[Show Errors] --> C
+    E -->|Yes| G{Email Exists?}
+    D --> H[Authorize]
+    H --> I{User Exists?}
+    I -->|Yes| J[Link Account]
+    I -->|No| K[Create User]
+    G -->|Yes| L[Email Error] --> C
+    G -->|No| M[Hash Password]
+    M --> N[Create User]
+    N --> O[Assign Role]
+    J --> O
+    K --> O
+    O --> P[Welcome Email]
+    P --> Q[Dashboard]
+    Q --> R[End]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('uml-7-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('uml-7-1', 'UML_Activity_Registration')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- UML 7.2: Activity Membership Approval -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Activity: Membership Approval</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">UML</span>
+                                <span>Approval workflow with conditions</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="uml-7-2" class="diagram-container mermaid">
+flowchart TB
+    A[New Request] --> B[Status: PENDING]
+    B --> C{Owner Decision}
+    C -->|Approve| D[Status: ACTIVE]
+    D --> E[Calculate End Date]
+    E --> F[Assign Benefits]
+    F --> G[Approval Email]
+    G --> H[Access Granted]
+    C -->|Reject| I[Status: REJECTED]
+    I --> J[Log Reason]
+    J --> K[Rejection Email]
+    K --> L[Notified]
+    C -->|Need Info| M[Status: PENDING_INFO]
+    M --> N[Request Info]
+    N --> O[Member Responds]
+    O --> C
+    H --> P[End]
+    L --> P
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('uml-7-2')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('uml-7-2', 'UML_Activity_Membership_Approval')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- UML 7.3: Activity Chat Message Flow -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Activity: Chat Message Flow</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">UML</span>
+                                <span>Message sending with attachments</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="uml-7-3" class="diagram-container mermaid">
+flowchart TB
+    A[Type Message] --> B[Click Send]
+    B --> C{Valid?}
+    C -->|Empty| D[Error] --> A
+    C -->|OK| E{Attachments?}
+    E -->|Yes| F[Upload Files]
+    F --> G[Get URLs]
+    G --> H[Create Message]
+    E -->|No| H
+    H --> I[Save to DB]
+    I --> J[Broadcast WS]
+    J --> K[Update Sender UI]
+    J --> L[Push to Recipients]
+    L --> M[Show Notification]
+    M --> N[Update Badge]
+    N --> O[End]
+    K --> O
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('uml-7-3')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('uml-7-3', 'UML_Activity_Chat_Message')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+                    <!-- Workflow 1.1: Registration -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Registration Flow</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Email & OAuth registration</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-1-1" class="diagram-container mermaid">
+flowchart TB
+    A[Start] --> B{Method}
+    B -->|Email| C[Fill Form]
+    B -->|Google| D[OAuth]
+    B -->|Facebook| D
+    C --> E{Valid?}
+    E -->|No| C
+    E -->|Yes| F{Exists?}
+    F -->|Yes| C
+    F -->|No| G[Hash Password]
+    D --> H{Linked?}
+    H -->|Yes| I[Login]
+    H -->|No| G
+    G --> J[Create User]
+    J --> K[Assign Role]
+    K --> L[Generate JWT]
+    I --> L
+    L --> M[Dashboard]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-1-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-1-1', 'Workflow_Registration')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow 1.2: Login 2FA -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Login with 2FA</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Authentication with OTP verification</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-1-2" class="diagram-container mermaid">
+flowchart TB
+    A[Enter Credentials] --> B{Valid?}
+    B -->|No| A
+    B -->|Yes| C{Locked?}
+    C -->|Yes| D[Account Blocked]
+    C -->|No| E{2FA Enabled?}
+    E -->|No| F[Generate JWT]
+    E -->|Yes| G[Send OTP]
+    G --> H[Enter OTP]
+    H --> I{Verify}
+    I -->|No| J{Retry?}
+    J -->|Yes| H
+    J -->|No| K[Lock Account]
+    I -->|Yes| F
+    F --> L[Go to Dashboard]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-1-2')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-1-2', 'Workflow_Login_2FA')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow 2.1: Purchase -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Membership Purchase</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Package selection to approval</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-2-1" class="diagram-container mermaid">
+flowchart TB
+    A[Login] --> B[Browse Packages]
+    B --> C[Select Package]
+    C --> D{Active Member?}
+    D -->|Yes| E[Upgrade Request]
+    D -->|No| F[New Request]
+    E --> G[Pending Approval]
+    F --> G
+    G --> H[Notify Owner]
+    H --> I{Decision}
+    I -->|Approve| J[Activate Membership]
+    I -->|Reject| K[Send Rejection]
+    J --> L[Confirmation Email]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-2-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-2-1', 'Workflow_Membership_Purchase')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow 2.2: Expiry -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Membership Expiry</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Expiry checking and handling</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-2-2" class="diagram-container mermaid">
+flowchart TB
+    A[Daily Scheduler] --> B[Query All Memberships]
+    B --> C{Expired?}
+    C -->|No| D[Skip]
+    C -->|Yes| E[Update Status]
+    E --> F[Revoke Access]
+    F --> G[Notify Member]
+    G --> H{Grace Period?}
+    H -->|Yes| I[Limited Access]
+    H -->|No| J[Full Block]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-2-2')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-2-2', 'Workflow_Membership_Expiry')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow 3.1: Trainer Assignment -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Trainer Assignment</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Request and approval flow</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-3-1" class="diagram-container mermaid">
+flowchart TB
+    A[Browse Trainers] --> B[View Profile]
+    B --> C[Send Request]
+    C --> D[Notify Trainer]
+    D --> E{Response}
+    E -->|Accept| F[Add to Client List]
+    E -->|Decline| G[Suggest Others]
+    E -->|Timeout| G
+    F --> H[Enable Chat]
+    H --> I[Notify Member]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-3-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-3-1', 'Workflow_Trainer_Assignment')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow 3.2: Progress Tracking -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Progress Tracking</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Trainer recording member progress</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-3-2" class="diagram-container mermaid">
+flowchart TB
+    A[Trainer Opens Dashboard] --> B{Select Action}
+    B -->|Metrics| C[Record Measurements]
+    B -->|Notes| D[Add Progress Notes]
+    B -->|Photos| E[Upload Photos]
+    B -->|Goals| F[Set Targets]
+    C --> G[Update Chart]
+    D --> G
+    E --> G
+    F --> G
+    G --> H[Save to DB]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-3-2')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-3-2', 'Workflow_Progress_Tracking')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow 4.1: Session Creation -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Session Creation</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Booking and confirmation</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-4-1" class="diagram-container mermaid">
+flowchart TB
+    A[Select Trainer] --> B[Open Calendar]
+    B --> C[Pick Time Slot]
+    C --> D{Available?}
+    D -->|No| B
+    D -->|Yes| E[Confirm Booking]
+    E --> F[Create Session]
+    F --> G[Deduct Credits]
+    G --> H[Notify Both]
+    H --> I[Add to Calendar]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-4-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-4-1', 'Workflow_Session_Creation')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow 4.2: Session Lifecycle -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Session Lifecycle</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Complete session workflow</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-4-2" class="diagram-container"></div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyDiagram('workflow-4-2')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadDiagram('workflow-4-2', 'Workflow_Session_Lifecycle')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow 5.1: Conversation Start -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Start Conversation</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Chat initialization</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-5-1" class="diagram-container mermaid">
+flowchart TB
+    A[Open Chat] --> B{Exists?}
+    B -->|Yes| C[Load History]
+    B -->|No| D[Select User]
+    D --> E{Allowed?}
+    E -->|No| F[Show Error]
+    E -->|Yes| G[Create Conversation]
+    C --> H[Connect WebSocket]
+    G --> H
+    H --> I[Show Chat UI]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-5-1')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-5-1', 'Workflow_Conversation_Start')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow 5.2: Message Flow -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Message Flow</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Message sending with attachments</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-5-2" class="diagram-container mermaid">
+flowchart TB
+    A[Type Message] --> B{Has Attachment?}
+    B -->|Yes| C[Upload File]
+    C --> D[Get URL]
+    D --> E[Create Message]
+    B -->|No| E
+    E --> F[Save to DB]
+    F --> G[Broadcast via WS]
+    G --> H{Recipient Online?}
+    H -->|Yes| I[Show in Chat]
+    H -->|No| J[Send Push Notification]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-5-2')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-5-2', 'Workflow_Message_Flow')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow 5.3: Message Delivery -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Message Delivery Status</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Send, Server, Recipient flows</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-5-3" class="diagram-container mermaid">
+flowchart TB
+    subgraph Sender["Sender"]
+        S1[Send] --> S2[Pending]
+        S2 --> S3{ACK?}
+        S3 -->|Yes| S4[Delivered]
+        S3 -->|No| S5[Retry]
+        S5 --> S1
+    end
+    subgraph Server["Server"]
+        V1[Receive] --> V2[Validate]
+        V2 --> V3[Persist]
+        V3 --> V4[Broadcast]
+    end
+    subgraph Recipient["Recipient"]
+        R1[WS Event] --> R2{Chat Open?}
+        R2 -->|Yes| R3[Display]
+        R2 -->|No| R4[Badge + Toast]
+    end
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-5-3')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-5-3', 'Workflow_Message_Delivery')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Workflow 6: Notifications -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Workflow: Notifications</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Workflow</span>
+                                <span>Event-based notification dispatch</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="workflow-6" class="diagram-container mermaid">
+flowchart TB
+    A[System Event] --> B{Event Type}
+    B -->|Session| C[Session Notification]
+    B -->|Message| D[Message Notification]
+    B -->|Membership| E[Membership Notification]
+    C --> F[Save to DB]
+    D --> F
+    E --> F
+    F --> G{User Online?}
+    G -->|Yes| H[Push via WebSocket]
+    G -->|No| I{Email Enabled?}
+    I -->|Yes| J[Send Email]
+    I -->|No| K[Queue for Later]
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('workflow-6')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('workflow-6', 'Workflow_Notifications')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+                    <!-- Arch 2: Component Architecture -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Component Architecture</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Architecture</span>
+                                <span>Frontend, Backend, Services</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="arch-2" class="diagram-container mermaid">
+flowchart LR
+    subgraph Frontend["Frontend Components"]
+        subgraph Pages["Pages"]
+            LP[Landing Page]
+            AUTH[Auth Pages]
+            MD[Member Dashboard]
+            TD[Trainer Dashboard]
+            OD[Owner Dashboard]
+        end
+        subgraph Shared["Shared"]
+            NAV[Navigation]
+            CHAT[Chat Widget]
+            NOTIF[Notifications]
+        end
+        subgraph Contexts["Contexts"]
+            AC[AuthContext]
+            TC[ThemeContext]
+            NC[NotificationContext]
+        end
+    end
+    subgraph Backend["Backend Services"]
+        subgraph Controllers["Controllers"]
+            AuthC[AuthController]
+            UserC[UserController]
+            MemC[MembershipController]
+            PTc[PTSessionController]
+            ChatC[ChatController]
+        end
+        subgraph Services["Services"]
+            AuthS[AuthService]
+            UserS[UserService]
+            MemS[MembershipService]
+            PTs[PTSessionService]
+            ChatS[ChatService]
+        end
+        subgraph Security["Security"]
+            JWT[JwtProvider]
+            RBAC[PermissionService]
+        end
+    end
+    LP --> NAV
+    MD --> CHAT
+    AC --> AuthC
+    AuthC --> AuthS --> JWT
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('arch-2')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('arch-2', 'Architecture_Components')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Arch 3: Authentication Flow -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Authentication Flow (Sequence)</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Architecture</span>
+                                <span>JWT token generation and validation</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="arch-3" class="diagram-container mermaid">
+sequenceDiagram
+    participant C as Client
+    participant F as Frontend
+    participant G as API Gateway
+    participant A as AuthService
+    participant J as JwtProvider
+    participant D as Database
+    C->>F: Login Request
+    F->>G: POST /api/auth/login
+    G->>A: authenticate()
+    A->>D: findUser()
+    D-->>A: User
+    A->>A: validatePassword()
+    A->>J: generateToken(user, roles)
+    J-->>A: JWT Token
+    A-->>G: AuthResponse
+    G-->>F: {token, user, roles}
+    F->>F: Store in localStorage
+    F-->>C: Redirect to Dashboard
+    Note over F,G: Subsequent Requests
+    F->>G: Request + Bearer Token
+    G->>J: validateToken()
+    J-->>G: Claims
+    G->>G: Check Permissions
+    G-->>F: Protected Resource
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('arch-3')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('arch-3', 'Architecture_Auth_Sequence')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Arch 4: Database Architecture -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Database Architecture</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Architecture</span>
+                                <span>Entity relationships and data flows</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="arch-4" class="diagram-container mermaid">
+flowchart TB
+    subgraph Core["Core Tables"]
+        USERS[(users)]
+        ROLES[(roles)]
+        PERMS[(permissions)]
+    end
+    subgraph Gym["Gym Tables"]
+        GYMS[(gyms)]
+        SETTINGS[(gym_settings)]
+        STAFF[(gym_staff)]
+    end
+    subgraph Membership["Membership Tables"]
+        MEMBERSHIPS[(memberships)]
+        PACKAGES[(membership_packages)]
+    end
+    subgraph Training["Training Tables"]
+        SESSIONS[(pt_sessions)]
+        TRAINERS[(trainer_details)]
+        RATINGS[(session_ratings)]
+    end
+    subgraph Communication["Communication Tables"]
+        CONVOS[(conversations)]
+        MESSAGES[(messages)]
+        NOTIFS[(notifications)]
+    end
+    USERS --> ROLES
+    USERS --> GYMS
+    GYMS --> SETTINGS
+    GYMS --> STAFF
+    USERS --> MEMBERSHIPS
+    MEMBERSHIPS --> PACKAGES
+    USERS --> SESSIONS
+    SESSIONS --> RATINGS
+    USERS --> CONVOS
+    CONVOS --> MESSAGES
+    USERS --> NOTIFS
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('arch-4')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('arch-4', 'Architecture_Database')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Arch 5: Deployment Architecture -->
+                    <div class="diagram-card">
+                        <div class="diagram-header">
+                            <div class="diagram-title">Deployment Architecture</div>
+                            <div class="diagram-meta">
+                                <span class="diagram-badge">Architecture</span>
+                                <span>Infrastructure and hosting</span>
+                            </div>
+                        </div>
+                        <div class="diagram-body">
+                            <div id="arch-5" class="diagram-container mermaid">
+flowchart TB
+    subgraph Client["Client"]
+        BROWSER[Web Browser]
+    end
+    subgraph Frontend_Hosting["Frontend Hosting"]
+        STATIC[Static Files - Vercel/Netlify]
+    end
+    subgraph Backend_Hosting["Backend Hosting"]
+        API[Spring Boot App]
+        WS[WebSocket Server]
+    end
+    subgraph Database_Tier["Database Tier"]
+        DB[(Oracle Database)]
+    end
+    subgraph External["External"]
+        GOOGLE[Google OAuth]
+        FB[Facebook OAuth]
+        MAIL[SMTP Server]
+    end
+    BROWSER --> STATIC
+    BROWSER --> API
+    BROWSER <--> WS
+    API --> DB
+    API <--> GOOGLE
+    API <--> FB
+    API --> MAIL
+                            </div>
+                        </div>
+                        <div class="diagram-actions">
+                            <button class="btn btn-secondary" onclick="copyMermaidDiagram('arch-5')">
+                                📋 Copy SVG
+                            </button>
+                            <button class="btn btn-primary" onclick="downloadMermaidDiagram('arch-5', 'Architecture_Deployment')">
+                                ⬇️ Download PNG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+
+        <footer>
+            <p>&copy; 2026 Smart Gym Management System | 42 Interactive Diagrams</p>
+            <p style="margin-top: 10px; opacity: 0.8;">Generated from production codebase with D3.js & Mermaid</p>
+        </footer>
+    </div>
+
+    <script src="d3-diagrams.js"></script>
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: { useMaxWidth: true, htmlLabels: true },
+            securityLevel: 'loose'
+        });
+
+        // Initialize D3 diagrams
+        const builder = new D3DiagramBuilder();
+
+        // DFD Diagrams (7)
+        builder.createDFDLevel0('dfd-0');
+        builder.createDFDLevel1('dfd-1');
+        builder.createDFDLevel2Auth('dfd-2-1');
+        builder.createDFDLevel2Membership('dfd-2-2');
+        builder.createDFDLevel2Training('dfd-2-3');
+        builder.createDFDLevel2Communication('dfd-2-4');
+        builder.createDFDLevel2Analytics('dfd-2-5');
+
+        // ER Diagrams (7)
+        builder.createAuthERDiagram('er-1');
+        builder.createGymERDiagram('er-2');
+        builder.createMembershipERDiagram('er-3');
+        builder.createTrainingERDiagram('er-4');
+        builder.createCommunicationERDiagram('er-5');
+        builder.createNotificationERDiagram('er-6');
+        builder.createAnalyticsERDiagram('er-7');
+
+        // UML Use Case (1)
+        builder.createUseCaseDiagram('uml-5');
+
+        // Workflow: Session Lifecycle (1)
+        builder.createPTSessionStateDiagram('workflow-4-2');
+
+        // Architecture (1)
+        builder.createArchitectureDiagram('arch-1');
+
+        // Navigation
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Copy SVG to clipboard (D3 diagrams)
+        function copyDiagram(containerId) {
+            const container = document.getElementById(containerId);
+            const svg = container.querySelector('svg');
+            if (svg) {
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svg);
+                navigator.clipboard.writeText(svgString).then(() => {
+                    alert('✅ SVG copied to clipboard!');
+                });
+            }
+        }
+
+        // Download PNG (D3 diagrams)
+        function downloadDiagram(containerId, filename) {
+            const container = document.getElementById(containerId);
+            const svg = container.querySelector('svg');
+            if (svg) {
+                const canvas = document.createElement('canvas');
+                const bbox = svg.getBoundingClientRect();
+                canvas.width = bbox.width * 2;
+                canvas.height = bbox.height * 2;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                const data = new XMLSerializer().serializeToString(svg);
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob(blob => {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${filename}.png`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    });
+                };
+                img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(data)));
+            }
+        }
+
+        // Copy Mermaid SVG
+        function copyMermaidDiagram(containerId) {
+            const container = document.getElementById(containerId);
+            const svg = container.querySelector('svg');
+            if (svg) {
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svg);
+                navigator.clipboard.writeText(svgString).then(() => {
+                    alert('✅ SVG copied to clipboard!');
+                });
+            }
+        }
+
+        // Download Mermaid PNG
+        function downloadMermaidDiagram(containerId, filename) {
+            downloadDiagram(containerId, filename);
+        }
+    </script>
+</body>
+</html>
