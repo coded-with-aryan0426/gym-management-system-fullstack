@@ -6,3 +6,10 @@ target/
 .env
 .idea/
 *.log
+*.aux
+*.lof
+*.lot
+*.toc
+*.out
+*.fls
+*.fdb_latexmk
