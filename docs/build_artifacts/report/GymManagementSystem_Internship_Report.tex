@@ -146,14 +146,14 @@
 
 %% ---- Chapter Heading ----
 \titleformat{\chapter}[hang]
-  {\normalfont\Large\bfseries}{\chaptername\ \thechapter:}{6pt}{\Large\bfseries}
+  {\normalfont\Large\bfseries\color{reportprimary}}{\chaptername\ \thechapter:}{6pt}{\Large\bfseries\color{reportprimary}}
 \titlespacing*{\chapter}{0pt}{-10pt}{12pt}
 
-\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{1em}{}
+\titleformat{\section}{\normalfont\large\bfseries\color{reportprimary}}{\thesection}{1em}{}
 \titlespacing*{\section}{0pt}{10pt plus 2pt}{4pt plus 1pt}
-\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries\color{reportprimary}}{\thesubsection}{1em}{}
 \titlespacing*{\subsection}{0pt}{8pt plus 2pt}{3pt plus 1pt}
-\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries\color{reportprimary}}{\thesubsubsection}{1em}{}
 \titlespacing*{\subsubsection}{0pt}{6pt plus 1pt}{2pt}
 
 %% ---- Captions (Chapter-Number style: Figure 2-3) ----
@@ -207,7 +207,8 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  hidelinks,
+  colorlinks=true,
+  allcolors=reportprimary,
   pdfcreator={LaTeX via pandoc}}
 
 \author{}
@@ -217,8 +218,10 @@
 \usepackage[object=vectorian]{pgfornament}
 \usepackage{eso-pic}
 \usepackage{fancyhdr}
+\usepackage{xcolor}
 
 \definecolor{gold}{RGB}{212,175,55}
+\definecolor{reportprimary}{RGB}{0,51,102}
 
 \newcommand{\redborder}{%
   \begin{tikzpicture}[remember picture,overlay]
@@ -231,7 +234,7 @@
 
 \fancypagestyle{fancy}{%
   \fancyhf{} 
-  \fancyhead[L]{\bfseries\nouppercase{\leftmark}}
+  \fancyhead[L]{\bfseries\color{reportprimary}\nouppercase{\leftmark}}
   \fancyfoot[R]{\thepage}
   \fancyfoot[L]{\footnotesize \textsf{BTech IT} \ $|$ \ \textsf{School of Computer Science Engineering \& Technology}}
 }
@@ -260,7 +263,7 @@
 \begin{center}
 \vspace*{0.4in}
 
-{\Large \textbf{SMART GYM MANAGEMENT SYSTEM}}
+{\Large \textbf{\color{reportprimary}SMART GYM MANAGEMENT SYSTEM}}
 
 \vspace{12pt}
 {\normalsize \textbf{A Full-Stack Web Application for Comprehensive Gym Operations Management\\[4pt](React + Spring Boot + Oracle)}}
