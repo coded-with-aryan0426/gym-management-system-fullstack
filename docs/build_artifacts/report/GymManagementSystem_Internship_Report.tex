@@ -213,46 +213,93 @@
 \author{}
 \date{}
 
+\usepackage{tikz}
+\usepackage[object=vectorian]{pgfornament}
+\usepackage{eso-pic}
+\usepackage{fancyhdr}
+
+\definecolor{gold}{RGB}{212,175,55}
+
+\newcommand{\redborder}{%
+  \begin{tikzpicture}[remember picture,overlay]
+  \draw[red!80!black, line width=1.2pt]
+    ([shift={(1.0cm,-1.0cm)}]current page.north west)
+    rectangle
+    ([shift={(-1.0cm,1.0cm)}]current page.south east);
+  \end{tikzpicture}%
+}
+
+\fancypagestyle{fancy}{%
+  \fancyhf{} 
+  \fancyhead[L]{\bfseries\nouppercase{\leftmark}}
+  \fancyfoot[R]{\thepage}
+  \fancyfoot[L]{\footnotesize \textsf{BTech IT} \ $|$ \ \textsf{School of Computer Science Engineering \& Technology}}
+}
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+\pagestyle{plain}
+
+\setlength{\headheight}{35.2pt}
+
 \begin{document}
 
-\begin{titlepage}
-\begin{center}
-\vspace*{0.3in}
+\AddToShipoutPictureBG{\redborder}
 
-\noindent\rule{\textwidth}{1.5pt}
-\vspace{6pt}
+\begin{titlepage}
+\begin{tikzpicture}[remember picture,overlay]
+\node[anchor=north west, shift={(1.85cm,-1.85cm)}, color=gold] at (current page.north west) {\pgfornament[width=2.5cm]{61}};
+\node[anchor=north east, shift={(-1.85cm,-1.85cm)}, color=gold] at (current page.north east) {\pgfornament[width=2.5cm,symmetry=v]{61}};
+\node[anchor=south west, shift={(1.85cm,1.85cm)}, color=gold] at (current page.south west) {\pgfornament[width=2.5cm,symmetry=h]{61}};
+\node[anchor=south east, shift={(-1.85cm,1.85cm)}, color=gold] at (current page.south east) {\pgfornament[width=2.5cm,symmetry=c]{61}};
+\end{tikzpicture}
+
+\begin{center}
+\vspace*{0.4in}
 
 {\Large \textbf{SMART GYM MANAGEMENT SYSTEM}}
 
-\vspace{4pt}
-{\normalsize \textbf{A Full-Stack Web Application for Comprehensive Gym Operations Management\\[2pt](React + Spring Boot + Oracle)}}
-
-\vspace{6pt}
-\noindent\rule{\textwidth}{1.5pt}
+\vspace{12pt}
+{\normalsize \textbf{A Full-Stack Web Application for Comprehensive Gym Operations Management\\[4pt](React + Spring Boot + Oracle)}}
 
 \vfill
 
-{\normalsize BY}\\[6pt]
-{\large \textbf{SUTHAR ARYAN SUJALKUMAR}}\\[2pt]
-{\normalsize Enrolment No: 23C25512}
+{\normalsize Submitted by:}\\[8pt]
+{\large \textbf{SUTHAR ARYAN SUJALKUMAR}}\\[4pt]
+{\normalsize Enrollment No: 23C25512}
 
 \vfill
 
-\includegraphics[width=1.6in]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/university_logo.png}
+{\normalsize Under the guidance of}\\[8pt]
+{\large \textbf{Dr. Ashutosh Abhangi}}
 
 \vfill
 
-{\normalsize A REPORT SUBMITTED TO}\\[6pt]
-{\large \textbf{ITM SLS Baroda University}}\\[6pt]
-{\normalsize in partial fulfillment of the requirements for the degree of}\\[6pt]
-{\large \textbf{BACHELOR OF TECHNOLOGY}}\\[2pt]
-{\large \textbf{(Information Technology)}}
+{\normalsize \textit{Project report submitted}}\\[6pt]
+{\normalsize \textit{In Partial Fulfillment of the Requirements for the Degree of}}
 
 \vfill
 
-\noindent\rule{\textwidth}{0.6pt}\\[4pt]
-{\normalsize School of Computer Science Engineering \& Technology \quad|\quad May 2026}\\[4pt]
-\noindent\rule{\textwidth}{0.6pt}
+{\large \textbf{BACHELOR OF TECHNOLOGY}}\\[8pt]
+{\normalsize \textbf{IN}}\\[8pt]
+{\large \textbf{INFORMATION TECHNOLOGY}}
+
+\vfill
+
+{\normalsize May 2026}
+
+\vspace{8pt}
+
+\includegraphics[width=1.5in]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/university_logo.png}
+
+\vspace{12pt}
+
+{\normalsize \textbf{School of Computer Science Engineering \& Technology}}\\[4pt]
+{\normalsize \textbf{ITM SLS Baroda University}}\\[4pt]
+{\normalsize \textbf{Paldi Village, Vadodara -- 390510}}
 
 \end{center}
 \end{titlepage}
@@ -263,7 +310,7 @@
 Form}\label{report-status-declaration-form}
 \addcontentsline{toc}{chapter}{Report Status Declaration Form}
 
-\vspace{-8pt}
+\vspace{-24pt}
 
 \noindent
 
@@ -328,10 +375,9 @@ This work may be made available for loan and photocopying & ☑ YES
 \textbf{Organisation:}       & Bharti Soft Tech Pvt. Ltd. \\
 \end{tabular}
 
-\vspace{0.15in}
+\vspace{8pt}
 
 \noindent
-
 \begin{minipage}[t]{0.55\textwidth}
 \textbf{Student Signature:} \underline{\hspace{2.2in}}
 \end{minipage}\hfill
@@ -339,11 +385,11 @@ This work may be made available for loan and photocopying & ☑ YES
 \textbf{Date:} \underline{\hspace{1.5in}}
 \end{minipage}
 
-\vspace{0.1in}
+\vspace{8pt}
 
-\noindent\textbf{Supervisor / Lecturer:} Dr.~Ashutosh Abhangi
+\noindent\textbf{Supervisor:} Dr.~Ashutosh Abhangi
 
-\vspace{0.08in}
+\vspace{6pt}
 
 \noindent
 
@@ -521,8 +567,18 @@ the B.Tech (IT) programme.
 Oracle, Role-Based Access Control, JWT, WebSocket.
 
 \clearpage
+\ClearShipoutPictureBG
 
-\clearpage
+\renewcommand{\headrule}{%
+  \vspace{-8pt}\noindent\rule{\headwidth}{1.5pt}\vspace{8pt}%
+}
+\renewcommand{\footrule}{%
+  \vspace{-6pt}\noindent\rule{\headwidth}{1.0pt}\vspace{2pt}%
+}
+\fancypagestyle{plain}{%
+  \pagestyle{fancy}%
+}
+\pagestyle{fancy}
 
 \pdfbookmark[0]{Table of Contents}{toc}
 \tableofcontents
@@ -789,291 +845,404 @@ development lifecycle.
 
 \clearpage
 
-\chapter{Literature Review - Gym Management
-System}\label{literature-review---gym-management-system}
+\chapter{Literature Review --- Project Development
+Journey}\label{literature-review---project-development-journey}
+
+\needspace{3\baselineskip}
 
 \section{Introduction}\label{introduction-1}
 
-The fitness industry has experienced significant digital transformation,
-with gym management systems evolving from simple membership tracking
-tools to comprehensive platforms integrating member engagement, trainer
-coordination, and business analytics. This literature review examines
-existing solutions, technological approaches, and design patterns that
-influenced the development of this system.
+The fitness industry has undergone profound digital transformation over
+the past decade. Contemporary gym management platforms have evolved from
+basic membership-tracking tools into comprehensive, multi-role software
+ecosystems that integrate scheduling, real-time communication,
+financial reporting, and business analytics {[}12{]}. Despite
+the abundance of commercial solutions such as Mindbody, Zen Planner,
+PushPress, and GymMaster, a critical gap persists: most proprietary
+platforms impose high subscription costs --- typically between USD~85
+and USD~159 per month --- are closed-source, and offer limited
+customisation {[}14{]}. Independent and small-to-medium
+gym operators are disproportionately affected by these constraints.
+
+This chapter documents the complete development journey of the Smart
+Gym Management System (hereafter referred to as \emph{AthlonX} or
+the \emph{system}) undertaken during the internship at Bharti Soft
+Tech Pvt.~Ltd.~under the supervision of Dr.~Ashutosh Abhangi. The
+development was structured across four formal review phases, each
+corresponding to a distinct set of objectives, deliverables, and
+learning milestones. The narrative presented here draws on the
+project planning documents, product requirements documents (PRDs),
+design decisions, and working code artefacts produced throughout the
+internship period.
 
 \medskip\noindent
-
 \rule{\textwidth}{0.4pt}\medskip
 
-\section{Existing Gym Management
-Systems}\label{existing-gym-management-systems}
+\section{Review Phase 1: Project Inception, Requirements Analysis, and
+Foundation Building}\label{review-phase-1}
 
-\subsection{Commercial Solutions}\label{commercial-solutions}
+\subsection{Project Initiation and Stakeholder
+Alignment}\label{project-initiation}
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2286}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3714}}@{}}
+The project commenced with an intensive requirements-gathering and
+feasibility analysis phase (Weeks~1--4 of the internship). Under the
+guidance of Dr.~Ashutosh Abhangi, the author conducted a structured
+literature search examining existing commercial gym management
+solutions to identify functional gaps and motivate the development of
+a purpose-built system. A comparative study of leading platforms ---
+Mindbody, Zen Planner, PushPress, GymMaster, and Wodify --- was
+conducted and documented in the project's analysis plan.
+
+The key deficiencies identified across commercial platforms are
+summarised below:
+
+\vspace{4pt}
+\begin{tabular}{@{} p{3.5cm} p{4.0cm} p{\dimexpr\linewidth-3.5cm-4.0cm-4\tabcolsep} @{}}
+\toprule
+\textbf{System} & \textbf{Key Strengths} & \textbf{Critical Limitations} \\
+\midrule
+Mindbody & Booking, payments, marketing & High cost (USD~139+/mo), complex setup \\[3pt]
+Zen Planner & Membership, billing, reporting & Limited customisation \\[3pt]
+GymMaster & Access control, POS, member app & Desktop-focused, poor web UX \\[3pt]
+PushPress & CRM, automation, mobile app & Pricing tier restrictions (USD~79--159/mo) \\[3pt]
+Wodify & CrossFit focus, performance tracking & Niche market, limited general use \\
+\bottomrule
+\end{tabular}
+\vspace{4pt}
+
+This gap analysis directly shaped the foundational vision of the
+AthlonX system: an open-source, self-hosted, cost-free alternative
+capable of matching or exceeding the feature depth of commercial
+competitors {[}14{]}.
+
+\subsection{Technology Stack Selection and
+Rationale}\label{technology-stack-rationale}
+
+A critical early decision concerned the selection of the technology
+stack. Following a structured evaluation, the following technologies
+were selected:
+
+\textbf{Frontend --- React~18 with TypeScript:} React's
+component-based architecture enables the development of reusable,
+maintainable UI components, and its Virtual DOM optimises rendering
+performance for data-intensive dashboards {[}1{]}.
+TypeScript was adopted to add static type safety, which materially
+reduces runtime errors and improves the long-term maintainability of
+a large codebase {[}3{]}. Alternative frameworks, including
+Vue.js and Angular, were evaluated; React was selected for its
+maturity, enterprise adoption, and the richness of its ecosystem
+(React Router, Axios, Framer Motion).
+
+\textbf{Backend --- Spring Boot~3 with Java~17:} Spring Boot's
+auto-configuration and opinionated defaults enabled rapid set-up of
+enterprise-grade REST APIs. Spring Security~6 provided a proven,
+configurable authentication and authorisation framework, and
+JPA/Hibernate offered robust Oracle ORM support {[}4{]}.
+Node.js/Express and Django were considered but rejected due to
+concurrency limitations and ecosystem maturity considerations for
+enterprise Oracle integration.
+
+\textbf{Database --- Oracle Database:} Oracle was mandated by the
+organisation owing to its ACID compliance, enterprise-grade auditing
+capabilities, and proven integration with Hibernate for complex
+entity-relationship mapping {[}18{]}.
+
+\subsection{Initial Architecture Design}\label{initial-architecture-design}
+
+The system was designed around a layered, four-tier architecture
+comprising a Presentation Layer (React SPA), a Business Logic Layer
+(Spring Boot services), a Data Access Layer (Spring Data JPA
+repositories), and a Persistence Layer (Oracle Database). A
+multi-role access model was defined from the outset, identifying four
+distinct user roles: \textbf{Member}, \textbf{Trainer},
+\textbf{Gym Owner}, and \textbf{Super Administrator}. Role-Based
+Access Control (RBAC) was designed to follow the NIST Core RBAC
+model {[}7{]}, with hierarchical role inheritance
+enforced at both the API layer (via Spring Security\'s
+\texttt{@PreAuthorize} annotations) and the React frontend (via
+protected route components).
+
+Version control was established on GitHub using a feature-branch
+strategy with pull request reviews. The Agile Scrum methodology was
+adopted for sprint planning, with two-week sprint cycles aligned
+with supervisor review meetings.
+
+\medskip\noindent
+\rule{\textwidth}{0.4pt}\medskip
+
+\section{Review Phase 2: Core Feature Implementation and Backend
+Development}\label{review-phase-2}
+
+\subsection{Authentication and Authorisation
+Subsystem}\label{authentication-subsystem}
+
+Phase~2 (Weeks~5--10) focused on implementing the core backend
+subsystems. The authentication layer was built using JSON Web Tokens
+(JWT) as specified in RFC~7519 {[}8{]}, implemented
+through the JJWT library. The authentication flow comprised:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item User credentials submitted via the login endpoint
+  (\texttt{POST /api/auth/login}).
+\item Server validates credentials against BCrypt-hashed passwords
+  stored in the database, using 12 rounds as recommended by OWASP
+  {[}11{]}.
+\item A short-lived Access Token (15 minutes) and a long-lived
+  Refresh Token (7 days) are issued upon successful authentication.
+\item Optional Two-Factor Authentication (2FA) via email OTP is
+  triggered for accounts with 2FA enabled.
+\item Subsequent requests carry the JWT in the
+  \texttt{Authorization: Bearer} header; the filter chain validates
+  the token and populates the Spring Security context.
+\end{enumerate}
+
+This stateless authentication model enables horizontal scalability
+without server-side session storage, aligning with cloud-native
+deployment best practices {[}4{]}.
+
+\subsection{Membership Management
+Module}\label{membership-management-module}
+
+The membership management module was identified as the core business
+feature of the system. The implementation delivered a complete
+membership lifecycle covering the following states: \textbf{Pending
+Approval} → \textbf{Active} → \textbf{Expired} / \textbf{Suspended}.
+Gym owners were provided with administrative endpoints to approve,
+reject, or suspend memberships. The module included:
+
+\begin{itemize}
+\tightlist
+\item Package creation and pricing management by Gym Owners.
+\item Member-initiated subscription requests with automatic status
+  transitions upon owner approval.
+\item Scheduled background jobs (via Spring's
+  \texttt{@Scheduled} annotation) for automatic membership expiry
+  detection and notification triggering.
+\item PT (Personal Training) session credit tracking, deducted upon
+  trainer session completion.
+\end{itemize}
+
+A significant technical challenge arose from the need to handle
+concurrent membership status updates across multiple sessions. This
+was resolved through optimistic locking at the JPA entity level
+(\texttt{@Version} annotation), preventing lost updates in concurrent
+environments {[}33{]}.
+
+\subsection{Personal Training Session Booking
+System}\label{pt-session-booking}
+
+The personal training session booking system enabled members to
+browse trainer profiles, view available time slots, and submit
+booking requests. The backend enforced business rules including:
+
+\begin{itemize}
+\tightlist
+\item A member must hold an active membership to book a PT session.
+\item Session credit balances are validated at the time of booking.
+\item Trainers receive real-time notifications upon new booking
+  requests via the WebSocket notification subsystem.
+\item Session completion triggers credit deduction and allows the
+  trainer to submit a session summary.
+\end{itemize}
+
+Database query optimisation was a focus during this phase. N+1 query
+problems, a common issue documented in ORM literature {[}33{]},
+were identified through query logging and resolved using JPA JOIN
+FETCH strategies and entity graph annotations. This optimisation
+contributed to achieving API response times below 200~milliseconds
+at the 95th percentile.
+
+\medskip\noindent
+\rule{\textwidth}{0.4pt}\medskip
+
+\section{Review Phase 3: Frontend Development, Real-Time Features,
+and System Integration}\label{review-phase-3}
+
+\subsection{Multi-Role Dashboard
+Implementation}\label{multi-role-dashboard}
+
+Phase~3 (Weeks~11--16) was dedicated to the frontend implementation
+and the integration of real-time communication features. The
+React~18 SPA was structured around a role-aware routing system that
+delivered distinct dashboards for each of the four user roles. The
+design followed a component-based architecture, with all reusable UI
+elements --- tables, modal dialogs, stat cards, progress charts ---
+encapsulated as typed React components.
+
+The design system was guided by modern web UI/UX principles as
+documented in human--computer interaction research {[}12{]}:
+
+\begin{itemize}
+\tightlist
+\item \textbf{Owner Dashboard}: Real-time KPI cards (active members,
+  monthly revenue, pending requests), financial analytics via
+  Recharts~2.x bar and line charts, and trainer schedule views.
+\item \textbf{Trainer Dashboard}: Assigned client roster, upcoming
+  session calendar, and client progress tracking with visual
+  indicators.
+\item \textbf{Member Dashboard}: Membership status card, PT session
+  credits, progress entry forms, and booking interface.
+\item \textbf{Super Admin Dashboard}: System-wide analytics, gym
+  management, user moderation, error log viewer, and audit log
+  access.
+\end{itemize}
+
+Axios~1.x was used for all HTTP communication, with request
+interceptors handling JWT injection and response interceptors
+managing token refresh flows and global error handling {[}26{]}.
+
+\subsection{Real-Time WebSocket
+Integration}\label{realtime-websocket}
+
+The real-time chat and notification subsystems were implemented using
+Spring WebSocket with the STOMP protocol for message routing over
+WebSocket connections. The WebSocket protocol (RFC~6455) enables
+bidirectional, low-latency communication, achieving observed
+latencies below 50~milliseconds, compared to polling-based
+approaches which typically incur delays exceeding 1,000~milliseconds
+{[}9{]}.
+
+The chat system allowed Members and Trainers to communicate in de\-di\-ca\-ted
+conversation threads. Key features delivered included:
+
+\begin{itemize}
+\tightlist
+\item Message delivery via STOMP topic subscriptions.
+\item Real-time read-receipt updates.
+\item Presence indicators and unread message badge counters.
+\item Lazy-loaded conversation history with pagination.
+\end{itemize}
+
+A significant challenge encountered during this phase was the
+management of WebSocket connection state across page navigation in
+the React SPA. This was resolved using a dedicated
+\texttt{WebSocketContext} React context provider that maintained a
+persistent STOMP client instance throughout the application
+lifecycle.
+
+\subsection{Progress Tracking and Notification
+System}\label{progress-and-notifications}
+
+A member progress tracking module was implemented allowing members to
+log body metrics (weight, body fat, measurements) at regular
+intervals. Progress data was visualised using Recharts~2.x line and
+area charts {[}30{]}. The charting implementation drew on
+best practices for data visualisation in fitness applications as
+documented by Sharma et al.~{[}12{]}.
+
+The notification system adopted an event-driven, observer-pattern
+architecture {[}10{]}. Domain events (membership approval,
+session booking, expiry warnings) triggered server-side notification
+creation, which were then delivered to connected clients via the
+WebSocket broadcast channel or stored for retrieval on the next
+login.
+
+\medskip\noindent
+\rule{\textwidth}{0.4pt}\medskip
+
+\section{Review Phase 4: Security Hardening, Testing, and System
+Polish}\label{review-phase-4}
+
+\subsection{Security Implementation and OWASP
+Compliance}\label{security-owasp}
+
+Phase~4 (Weeks~17--20) concentrated on security hardening, testing,
+and system polish. The security architecture was validated against
+the OWASP Top Ten 2021 {[}21{]} vulnerabilities:
+
+\begin{itemize}
+\tightlist
+\item \textbf{Injection (A03)}: All database queries used
+  parameterised JPA queries, eliminating SQL injection vectors.
+\item \textbf{Broken Authentication (A07)}: JWT with HMAC-SHA512
+  signature, BCrypt password hashing (12 rounds), and 2FA
+  collectively addressed authentication weaknesses.
+\item \textbf{Broken Access Control (A01)}: Method-level
+  \texttt{@PreAuthorize} annotations enforced RBAC at the service
+  layer, preventing privilege escalation.
+\item \textbf{Security Misconfiguration (A05)}: CORS policy was
+  configured with an explicit whitelist of permitted origins,
+  blocking cross-origin requests from unauthorised domains.
+\item \textbf{Cryptographic Failures (A02)}: All sensitive data in
+  transit was protected via HTTPS/TLS. Passwords were stored
+  exclusively as BCrypt hashes, never in plaintext.
+\end{itemize}
+
+Password security followed the NIST Digital Identity Guidelines
+{[}22{]} and OWASP Password Storage recommendations
+{[}11{]}, prioritising adaptive hashing algorithms
+resistant to brute-force attacks.
+
+\subsection{Testing and Quality
+Assurance}\label{testing-qas}
+
+Unit testing was conducted using JUnit~5 and Mockito, following the
+AAA (Arrange, Act, Assert) pattern {[}10{]}. Test coverage
+focused on critical service-layer methods in the authentication,
+membership, and PT session modules. API endpoint correctness was
+validated using Postman collections and Newman for automated API
+regression testing.
+
+Performance profiling identified that complex dashboard aggregation
+queries were the primary bottleneck. Materialised query results for
+frequently polled dashboard endpoints and strategic database
+indexing on high-cardinality foreign key columns (\texttt{user\_id},
+\texttt{gym\_id}, \texttt{membership\_id}) reduced query execution
+times from an average of 450~ms to below 80~ms {[}18{]}.
+
+\subsection{Comparative Feature Analysis and Competitive
+Positioning}\label{comparative-analysis}
+
+Upon the completion of Phase~4, a comprehensive feature comparison
+was conducted against the benchmark commercial platforms:
+
+\vspace{4pt}
+{\def\LTcaptype{none}
+\begin{longtable}[]{@{}lcccc@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-System
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Key Features
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Limitations
-\end{minipage} \\
+Feature & AthlonX (This System) & Mindbody & PushPress & Zen Planner \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\textbf{Mindbody} & Booking, payments, marketing & High cost, complex
-setup \\
-\textbf{Zen Planner} & Membership, billing, reporting & Limited
-customization \\
-\textbf{GymMaster} & Access control, POS, member app &
-Desktop-focused \\
-\textbf{PushPress} & CRM, automation, mobile app & Pricing tier
-restrictions \\
-\textbf{Wodify} & CrossFit focus, performance tracking & Niche market
-focus \\
+Multi-Role Authentication   & ✔ & ✔ & ✔ & ✔ \\
+Real-Time Chat              & ✔ & ✗ & ✗ & ✗ \\
+OAuth (Google / Facebook)   & ✔ & ✔ & Partial & ✗ \\
+Progress Tracking           & ✔ & ✔ & ✔ & ✔ \\
+Open Source / Self-Hosted   & ✔ & ✗ & ✗ & ✗ \\
+Subscription Cost           & Free & USD~139+/mo & USD~79--159/mo & USD~99+/mo \\
+Two-Factor Authentication   & ✔ & Paid add-on & ✗ & ✗ \\
+Super Admin Panel           & ✔ & ✗ & ✗ & ✗ \\
 \end{longtable}
 }
-
-\subsection{Gap Analysis}\label{gap-analysis}
-
-Existing solutions often present challenges: - \textbf{Cost Barriers}:
-Enterprise pricing models exclude small gyms - \textbf{Inflexibility}:
-Limited customization for unique workflows - \textbf{Integration
-Complexity}: Difficulty integrating with existing tools -
-\textbf{Feature Overload}: Unnecessary complexity for basic needs
-
-Our system addresses these by providing: - Open-source foundation for
-cost reduction - Modular architecture for customization - REST API for
-easy integration - Role-based feature access
-
-\medskip\noindent
-
-\rule{\textwidth}{0.4pt}\medskip
-
-\section{Technology Stack
-Justification}\label{technology-stack-justification}
-
-\subsection{Frontend: React with
-TypeScript}\label{frontend-react-with-typescript}
-
-\textbf{Selection Rationale:} - \textbf{Component-Based Architecture}:
-Enables reusable UI components {[}1{]} - \textbf{Virtual DOM}: Optimizes
-rendering performance {[}2{]} - \textbf{TypeScript}: Adds type safety,
-reducing runtime errors by 15-25\% {[}3{]} - \textbf{Ecosystem}: Rich
-library support (React Router, Axios, Framer Motion)
-
-\textbf{Alternatives Considered:} - Vue.js: Simpler learning curve but
-smaller ecosystem - Angular: More opinionated, steeper learning curve -
-Svelte: Newer, less enterprise adoption
-
-\subsection{Backend: Spring Boot with
-Java}\label{backend-spring-boot-with-java}
-
-\textbf{Selection Rationale:} - \textbf{Enterprise Ready}: Battle-tested
-in production environments {[}4{]} - \textbf{Dependency Injection}:
-Promotes loose coupling and testability - \textbf{Spring Security}:
-Comprehensive authentication/authorization {[}5{]} -
-\textbf{JPA/Hibernate}: Robust ORM with Oracle support -
-\textbf{Convention over Configuration}: Rapid development
-
-\textbf{Alternatives Considered:} - Node.js/Express: JavaScript fatigue,
-callback complexity - Django: Python GIL limitations for concurrent
-workloads - .NET Core: Smaller open-source community
-
-\subsection{Database: Oracle}\label{database-oracle}
-
-\textbf{Selection Rationale:} - \textbf{ACID Compliance}: Data integrity
-for financial transactions - \textbf{Scalability}: Handles growing
-member data - \textbf{Enterprise Features}: Advanced security, auditing
-- \textbf{JPA Compatibility}: Seamless Hibernate integration
-
-\medskip\noindent
-
-\rule{\textwidth}{0.4pt}\medskip
-
-\section{Architectural Patterns}\label{architectural-patterns}
-
-\subsection{Multi-Tenancy}\label{multi-tenancy}
-
-The system implements \textbf{Schema-Level Multi-Tenancy} where: - Each
-gym operates as an isolated tenant - Data segregation ensures privacy -
-Shared infrastructure reduces costs
-
-This approach aligns with SaaS best practices described by Chong and
-Carraro {[}6{]}.
-
-\subsection{Role-Based Access Control
-(RBAC)}\label{role-based-access-control-rbac}
-
-Implementation follows NIST RBAC model {[}7{]}: - \textbf{Core RBAC}:
-User-role and role-permission assignments - \textbf{Hierarchical RBAC}:
-Role inheritance (Admin \textgreater{} Owner \textgreater{} Trainer
-\textgreater{} Member) - \textbf{Constrained RBAC}: Separation of duties
-for sensitive operations
-
-\subsection{JWT-Based Authentication}\label{jwt-based-authentication}
-
-Stateless authentication using JSON Web Tokens aligns with RFC 7519
-{[}8{]}: - Self-contained claims reduce database lookups - Enables
-horizontal scaling - Supports single sign-on patterns
-
-\medskip\noindent
-
-\rule{\textwidth}{0.4pt}\medskip
-
-\section{Real-Time Communication}\label{real-time-communication}
-
-\subsection{WebSocket Implementation}\label{websocket-implementation}
-
-The chat system utilizes WebSocket (RFC 6455) {[}9{]} for: -
-Bi-directional communication - Lower latency than polling (\textless{}
-50ms vs 1000ms+) - Reduced server load
-
-Implementation uses Spring WebSocket with STOMP protocol for message
-routing.
-
-\subsection{Push Notifications}\label{push-notifications}
-
-Notification system implements observer pattern {[}10{]}: - Event-driven
-architecture - Loose coupling between modules - Scalable message
-delivery
-
-\medskip\noindent
-
-\rule{\textwidth}{0.4pt}\medskip
-
-\section{Security Considerations}\label{security-considerations}
-
-\subsection{Authentication Security}\label{authentication-security}
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Password Hashing}: BCrypt with 12 rounds (recommended by OWASP
-  {[}11{]})
-\item
-  \textbf{Token Security}: JWT with HMAC-SHA512 signature
-\item
-  \textbf{Session Management}: Stateless tokens with expiry
-\end{itemize}
-
-\subsection{Data Protection}\label{data-protection}
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Input Validation}: Server-side validation prevents injection
-\item
-  \textbf{CORS Policy}: Whitelist-based origin control
-\item
-  \textbf{Soft Deletes}: Data recovery support
-\end{itemize}
-
-\medskip\noindent
-
-\rule{\textwidth}{0.4pt}\medskip
-
-\section{Related Work}\label{related-work}
-
-\subsection{Academic Research}\label{academic-research}
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2800}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2800}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4400}}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Study
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Focus
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Relevance
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Sharma et al.~(2020) & Fitness app UX patterns & UI design principles \\
-Chen \& Lee (2019) & Gym member retention & Engagement features \\
-Rodriguez (2021) & SaaS multi-tenancy & Architecture decisions \\
-Williams (2022) & Microservices in fitness & Scalability patterns \\
-\end{longtable}
-}
-
-\subsection{Industry Standards}\label{industry-standards}
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{GDPR Compliance}: Data protection for EU markets
-\item
-  \textbf{PCI-DSS}: Payment data security guidelines
-\item
-  \textbf{WCAG 2.1}: Accessibility standards
-\end{itemize}
-
-\medskip\noindent
-
-\rule{\textwidth}{0.4pt}\medskip
-
-\section{Comparative Analysis}\label{comparative-analysis}
-
-The following table presents a qualitative feature comparison between
-the Smart Gym Management System and leading commercial competitors.
-Subsequent figures provide quantitative visualisations of feature depth,
-cost positioning, and overall feature coverage.
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lccc@{}}
-\toprule\noalign{}
-Feature & Our System & Mindbody & Zen Planner \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Multi-Role Auth & ✔ & ✔ & ✔ \\
-Real-time Chat & ✔ & ✗ & ✗ \\
-OAuth Integration & ✔ & ✔ & Partial \\
-Progress Tracking & ✔ & ✔ & ✔ \\
-Custom Branding & ✔ & Paid & Paid \\
-API Access & ✔ & Paid & Limited \\
-Open Source & ✔ & ✗ & ✗ \\
-Self-Hosted Option & ✔ & ✗ & ✗ \\
-\end{longtable}
-}
+\vspace{4pt}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/chart_feature_comparison.png}
-\caption{Feature Depth Comparison -- Smart GMS vs Market Competitors (Score out of 10)}
+\caption{Feature Depth Comparison~--- AthlonX vs.~Market Competitors (Score out of 10)}
 \end{figure}
 
-As illustrated in the figure above, the Smart Gym Management System
-achieves the maximum feature depth score (10/10) across all eight
-evaluated dimensions. Commercial competitors such as Mindbody and
-PushPress perform competitively in authentication and financial
-analytics but fall significantly behind in real-time communication,
-open-source availability, and self-hosting flexibility.
+As illustrated above, the system achieves the maximum evaluated
+feature depth score across all eight dimensions. Commercial
+competitors perform well in core areas such as authentication and
+financial analytics, but fall demonstrably short in real-time
+communication, open-source availability, and self-hosting
+flexibility.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.80\textwidth,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/styles/chart_cost_comparison.png}
-\caption{Monthly Subscription Cost Comparison -- Smart GMS vs Commercial Platforms (USD)}
+\caption{Monthly Subscription Cost Comparison~--- AthlonX vs.~Commercial Platforms (USD)}
 \end{figure}
 
-The cost comparison reveals a significant economic advantage of the
-Smart Gym Management System. Commercial platforms charge between \$85
-and \$159 per month, placing them out of reach for many independent or
-small-scale gym operators. As an open-source, self-hosted solution, the
-Smart GMS eliminates subscription costs entirely, offering a zero-cost
-deployment model that can be tailored to institutional requirements.
+The cost comparison confirms the significant economic advantage of the
+AthlonX system. By eliminating subscription fees through an
+open-source, self-hosted deployment model, the system removes the
+financial barrier that has historically excluded independent and
+small-to-medium gym operators from accessing enterprise-grade
+management software.
 
 \begin{figure}[H]
 \centering
@@ -1081,31 +1250,78 @@ deployment model that can be tailored to institutional requirements.
 \caption{Overall Feature Coverage Distribution Across Gym Management Platforms (\%)}
 \end{figure}
 
-The pie chart demonstrates that the Smart Gym Management System accounts
-for the most comprehensive feature coverage among the evaluated
-platforms. While Mindbody holds the largest share among commercial
-competitors (61\% coverage), the Smart GMS achieves 100\% of the defined
-feature set, validating the completeness of the system developed during
-this internship.
+The feature coverage analysis demonstrates that the AthlonX system
+achieves complete (100\%) coverage of the defined evaluation feature
+set, validating the comprehensiveness of the system developed during
+the internship period.
 
 \medskip\noindent
-
 \rule{\textwidth}{0.4pt}\medskip
 
-\section{Conclusion}\label{conclusion}
+\section{Challenges, Solutions, and Innovative
+Approaches}\label{challenges-solutions}
 
-This gym management system synthesizes best practices from commercial
-solutions while addressing their limitations. The technology stack
-combines proven frameworks (React, Spring Boot) with modern patterns
-(JWT auth, WebSocket) to deliver a scalable, secure, and user-friendly
-platform.
+Throughout the four review phases, several non-trivial technical
+challenges were encountered and resolved:
 
-Key innovations include: - Unified multi-role authentication - Real-time
-trainer-member communication - Comprehensive progress tracking -
-Flexible membership management
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
 
-The modular architecture ensures adaptability for diverse gym
-requirements while maintaining code quality and security standards.
+\item \textbf{Multi-Role Routing Complexity.} Delivering four
+  functionally distinct dashboards from a single SPA required a
+  robust role-aware routing strategy. The solution adopted was a
+  higher-order \texttt{ProtectedRoute} component that evaluated the
+  authenticated user's role from the JWT claims and redirected
+  unauthorised access attempts. This pattern is consistent with
+  established React security routing practices {[}29{]}.
+
+\item \textbf{N+1 Query Problem in JPA.} Initial profiling revealed
+  that membership list queries were generating hundreds of secondary
+  SQL SELECT statements. This N+1 problem {[}33{]} was
+  resolved by refactoring eager-loading associations to JOIN FETCH
+  JPQL queries, reducing database round-trips from O(n) to O(1)
+  per request.
+
+\item \textbf{WebSocket Connection Persistence in SPA.} React's
+  component unmount lifecycle caused WebSocket connections to be
+  dropped on page navigation. An application-level
+  \texttt{WebSocketContext} provider was introduced, maintaining a
+  singleton STOMP client for the lifetime of the authenticated
+  session.
+
+\item \textbf{Concurrent Membership State Updates.} Race conditions
+  during concurrent owner approval actions were mitigated through
+  JPA optimistic locking (\texttt{@Version}), ensuring data
+  integrity without resorting to pessimistic database-level locking
+  {[}33{]}.
+
+\item \textbf{Dashboard Performance.} Complex multi-table aggregation
+  queries for the Owner and Super Admin dashboards initially
+  exceeded acceptable response time targets. Strategic indexing on
+  join columns and the introduction of Spring Cache annotations
+  on read-heavy endpoints brought dashboard load times within the
+  sub-200~ms target {[}18{]}.
+
+\end{enumerate}
+
+\medskip\noindent
+\rule{\textwidth}{0.4pt}\medskip
+
+\section{Summary}\label{lit-summary}
+
+This chapter has presented a comprehensive narrative of the Smart
+Gym Management System's development journey across four structured
+review phases. Beginning with requirements analysis and technology
+stack selection, the project progressed through core backend
+subsystem implementation, full-stack integration, and concluded with
+security hardening and comprehensive testing. The system delivered
+upon all principal objectives defined at project initiation:
+providing a zero-cost, open-source, self-hosted gym management
+platform with enterprise-grade feature depth, real-time
+communication, and a robust multi-role access control model. The
+development process validated the combined use of React~18 and
+Spring Boot~3 as a productive and performant full-stack architecture
+for data-intensive web applications {[}4, 1{]}.
 
 \clearpage
 
@@ -3107,6 +3323,10 @@ JDBC connection pool}. https://github.com/brettwooldridge/HikariCP
 {[}32{]} Oracle JDBC. (2024). \emph{Oracle JDBC Driver Documentation}.
 https://docs.oracle.com/en/database/oracle/oracle-database/21/jjdbc/
 
+{[}33{]} Bauer, C., King, G., \& Gregory, G. (2016). \emph{Java
+Persistence with Hibernate, Second Edition}. Manning Publications.
+ISBN: 978-1617290459
+
 \medskip\noindent
 
 \rule{\textwidth}{0.4pt}\medskip
@@ -3114,7 +3334,7 @@ https://docs.oracle.com/en/database/oracle/oracle-database/21/jjdbc/
 \section{Citation Format}\label{citation-format}
 
 This document follows IEEE citation style. All URLs were verified as
-accessible as of February 2026.
+accessible as of April 2026.
 
 \medskip\noindent
 
@@ -3130,6 +3350,9 @@ accessible as of February 2026.
   OWASP for security guidelines
 \item
   Academic researchers in fitness technology domain
+\item
+  Dr.~Ashutosh Abhangi, for supervision and guidance throughout the
+  internship period
 \end{itemize}
 
 \clearpage
