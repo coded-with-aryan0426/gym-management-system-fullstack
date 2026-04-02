@@ -124,6 +124,7 @@ public class SecurityConfig {
 
                         // ==================== OWNER OR TRAINER ====================
                         // Trainers need access to manage their assigned members and sessions
+                        .requestMatchers("/api/trainer-requests/**").hasAnyRole("OWNER", "ADMIN", "TRAINER", "MEMBER", "CUSTOMER")
                         .requestMatchers("/api/trainer/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
                         .requestMatchers("/api/trainer/equipment/**").hasAnyRole("OWNER", "ADMIN", "TRAINER")
                         .requestMatchers("/api/pt-sessions/member/**")

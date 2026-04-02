@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -30,56 +31,57 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                Long userId = tokenProvider.getUserIdFromJWT(jwt);
-                // Context and GymId available if needed for custom auth object
-                // String context = tokenProvider.getContextFromJWT(jwt);
-                // Long gymId = tokenProvider.getGymIdFromJWT(jwt);
+            if (StringUtils.hasText(jwt)) {
+                if (tokenProvider.validateToken(jwt)) {
+                    Long userId = tokenProvider.getUserIdFromJWT(jwt);
 
-                UserDetails userDetails = customUserDetailsService.loadUserById(userId);
+                    UserDetails userDetails = customUserDetailsService.loadUserById(userId);
 
-                // Augment authorities with JWT claims (Context-aware security)
-                java.util.List<org.springframework.security.core.GrantedAuthority> authorities = new java.util.ArrayList<>(
-                        userDetails.getAuthorities());
+                    java.util.List<org.springframework.security.core.GrantedAuthority> authorities = new java.util.ArrayList<>(
+                            userDetails.getAuthorities());
 
-                String staffRole = tokenProvider.getStaffRoleFromJWT(jwt);
-                String jwtContext = tokenProvider.getContextFromJWT(jwt);
-                logger.info("JWT Validation: User=" + userDetails.getUsername() + ", StaffRole=" + staffRole + ", Context=" + jwtContext);
+                    String staffRole = tokenProvider.getStaffRoleFromJWT(jwt);
+                    String jwtContext = tokenProvider.getContextFromJWT(jwt);
 
-                // Add staffRole authority (TRAINER, OWNER, etc.) for STAFF context users
-                if (StringUtils.hasText(staffRole)) {
-                    String roleAuth = "ROLE_" + staffRole.toUpperCase();
-                    boolean hasRole = authorities.stream().anyMatch(a -> a.getAuthority().equals(roleAuth));
-                    if (!hasRole) {
-                        logger.info("Adding authority from JWT: " + roleAuth);
-                        authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(roleAuth));
-                    }
-                }
-
-                // Add ROLE_MEMBER and ROLE_CUSTOMER for MEMBER context users
-                if ("MEMBER".equalsIgnoreCase(jwtContext)) {
-                    for (String r : new String[]{"ROLE_MEMBER", "ROLE_CUSTOMER"}) {
-                        boolean has = authorities.stream().anyMatch(a -> a.getAuthority().equals(r));
-                        if (!has) {
-                            logger.info("Adding member authority from JWT context: " + r);
-                            authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(r));
+                    if (StringUtils.hasText(staffRole)) {
+                        String roleAuth = "ROLE_" + staffRole.toUpperCase();
+                        boolean hasRole = authorities.stream().anyMatch(a -> a.getAuthority().equals(roleAuth));
+                        if (!hasRole) {
+                            authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(roleAuth));
                         }
                     }
+
+                    if ("MEMBER".equalsIgnoreCase(jwtContext)) {
+                        for (String r : new String[]{"ROLE_MEMBER", "ROLE_CUSTOMER"}) {
+                            boolean has = authorities.stream().anyMatch(a -> a.getAuthority().equals(r));
+                            if (!has) {
+                                authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(r));
+                            }
+                        }
+                    }
+
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, authorities);
+
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    logger.debug("JWT token validation failed for request to: " + request.getRequestURI());
                 }
-
-                logger.info("Final Authorities: " + authorities);
-
-                // For now, standard UsernamePasswordAuthenticationToken is fine
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, authorities);
-
-                // We can add the gym context to the details
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+        } catch (UsernameNotFoundException ex) {
+            logger.warn("User not found during JWT authentication: " + ex.getMessage());
+            SecurityContextHolder.clearContext();
+        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+            logger.warn("Expired JWT token for request to: " + request.getRequestURI());
+            SecurityContextHolder.clearContext();
+        } catch (io.jsonwebtoken.MalformedJwtException ex) {
+            logger.warn("Malformed JWT token for request to: " + request.getRequestURI());
+            SecurityContextHolder.clearContext();
         } catch (Exception ex) {
-            logger.error("Could not set user authentication in security context", ex);
+            logger.error("Could not set user authentication in security context for request to: " + request.getRequestURI(), ex);
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

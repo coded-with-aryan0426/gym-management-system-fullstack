@@ -17,6 +17,10 @@ import {
 import api from "../../services/api"
 import { equipmentApi } from "../../services/equipmentApi"
 import { useCurrency } from "../../contexts/CurrencyContext"
+import { 
+  SkeletonKPIGrid, SkeletonChart, SkeletonCard, SkeletonTable,
+  SkeletonPageHeader, SkeletonActivityFeed
+} from "../../components/ui/Skeleton"
 import "./Dashboard.css"
 
 /* ── Dummy sparkline so KPI cards always show a trend shape ── */
@@ -324,88 +328,71 @@ const Dashboard: React.FC = () => {
   // ─── Skeleton Loading State ───────────────────────────────────────────────
   if (loading && !data) return (
     <div className="dash" role="main" aria-busy="true" aria-label="Loading dashboard">
-      {/* Skeleton Header */}
-      <header className="dash__header dash__header--skeleton">
-        <div className="dash__header-greet">
-          <div className="skeleton-icon-circle" />
-          <div>
-            <div className="skeleton-line skeleton-line--lg" style={{ width: 200 }} />
-            <div className="skeleton-line" style={{ width: 160, marginTop: 8 }} />
-          </div>
-        </div>
-        <div className="dash__kpi-row dash__kpi-row--skeleton">
-          {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="dash-kpi-skeleton">
-              <div className="skeleton-line" style={{ width: 60, height: 12 }} />
-              <div className="skeleton-line skeleton-line--lg" style={{ width: 80 }} />
-              <div className="skeleton-line" style={{ width: 50, height: 10 }} />
-            </div>
-          ))}
-        </div>
-      </header>
-
-      {/* Skeleton KPI Cards */}
-      <section className="dash__metrics dash__metrics--skeleton">
-        {[1, 2, 3, 4, 5, 6].map(i => (
-          <div key={i} className="dash-metric-skeleton">
-            <div className="dash-metric-skeleton__top">
-              <div className="skeleton-line" style={{ width: '50%', height: 14 }} />
-              <div className="skeleton-icon-box" />
-            </div>
-            <div className="skeleton-line skeleton-line--lg" style={{ width: '60%', marginTop: 12 }} />
-            <div className="skeleton-line" style={{ width: '40%', marginTop: 12, height: 12 }} />
-          </div>
-        ))}
-      </section>
-
-      {/* Skeleton Charts Row */}
-      <div className="dash__charts-row dash__charts-row--skeleton">
-        <div className="dash-chart-skeleton">
-          <div className="dash-chart-skeleton__header">
-            <div className="skeleton-line" style={{ width: 150, height: 18 }} />
-            <div className="skeleton-line" style={{ width: 100, height: 14 }} />
-          </div>
-          <div className="dash-chart-skeleton__body">
-            {[1, 2, 3, 4, 5, 6, 7].map(i => (
-              <div key={i} className="skeleton-bar" style={{ height: `${30 + Math.random() * 50}%` }} />
-            ))}
-          </div>
-        </div>
-        <div className="dash-chart-skeleton dash-chart-skeleton--sm">
-          <div className="dash-chart-skeleton__header">
-            <div className="skeleton-line" style={{ width: 120, height: 18 }} />
-          </div>
-          <div className="skeleton-pie-container">
-            <div className="skeleton-pie" />
-          </div>
-        </div>
+      <SkeletonPageHeader />
+      
+      {/* KPI Strip */}
+      <div className="dash__header" style={{ marginTop: '16px' }}>
+        <SkeletonKPIGrid count={5} />
       </div>
 
-      {/* Skeleton Activity Section */}
-      <div className="dash__lists-row dash__lists-row--skeleton">
-        <div className="dash-list-skeleton">
-          <div className="skeleton-line" style={{ width: 140, height: 18, marginBottom: 16 }} />
-          {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="dash-list-skeleton__item">
-              <div className="skeleton-avatar" />
-              <div className="dash-list-skeleton__content">
-                <div className="skeleton-line" style={{ width: '70%', height: 14 }} />
-                <div className="skeleton-line" style={{ width: '50%', height: 12 }} />
-              </div>
-            </div>
-          ))}
+      <div className="dash__grid">
+        {/* Finance Section */}
+        <div className="dash__row-label">
+          <span className="dash__row-label-icon"><TrendingUp size={11} /></span>
+          Finance &amp; Money Flow
         </div>
-        <div className="dash-list-skeleton">
-          <div className="skeleton-line" style={{ width: 120, height: 18, marginBottom: 16 }} />
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="dash-list-skeleton__item">
-              <div className="skeleton-icon-box skeleton-icon-box--sm" />
-              <div className="dash-list-skeleton__content">
-                <div className="skeleton-line" style={{ width: '80%', height: 14 }} />
-                <div className="skeleton-line" style={{ width: '40%', height: 12 }} />
-              </div>
-            </div>
-          ))}
+        
+        <div style={{ gridColumn: 'span 8' }}>
+          <SkeletonChart type="area" height={280} />
+        </div>
+        
+        <div style={{ gridColumn: 'span 4' }}>
+          <SkeletonCard hasImage={false} lines={6} />
+        </div>
+
+        {/* Analytics Section */}
+        <div className="dash__row-label" style={{ marginTop: '16px' }}>
+          <span className="dash__row-label-icon"><BarChart3 size={11} /></span>
+          Analytics &amp; Member Insights
+        </div>
+        
+        <div style={{ gridColumn: 'span 4' }}>
+          <SkeletonChart type="bar" height={240} />
+        </div>
+        
+        <div style={{ gridColumn: 'span 4' }}>
+          <SkeletonChart type="pie" height={240} />
+        </div>
+        
+        <div style={{ gridColumn: 'span 4' }}>
+          <SkeletonCard hasImage={false} lines={5} />
+        </div>
+
+        {/* Activity Section */}
+        <div className="dash__row-label" style={{ marginTop: '16px' }}>
+          <span className="dash__row-label-icon"><Activity size={11} /></span>
+          Activity Feed &amp; Notifications
+        </div>
+        
+        <div style={{ gridColumn: 'span 6' }}>
+          <SkeletonCard hasImage={false} lines={2} />
+          <div style={{ marginTop: '12px' }}>
+            <SkeletonActivityFeed count={5} />
+          </div>
+        </div>
+        
+        <div style={{ gridColumn: 'span 3' }}>
+          <SkeletonCard hasImage={false} lines={2} />
+          <div style={{ marginTop: '12px' }}>
+            <SkeletonActivityFeed count={4} />
+          </div>
+        </div>
+        
+        <div style={{ gridColumn: 'span 3' }}>
+          <SkeletonCard hasImage={false} lines={2} />
+          <div style={{ marginTop: '12px' }}>
+            <SkeletonActivityFeed count={4} />
+          </div>
         </div>
       </div>
     </div>
@@ -439,19 +426,19 @@ const Dashboard: React.FC = () => {
               icon: <Eye size={13} />, label: "On Floor",
               value: String(data?.liveMembers || 0),
               sub: `${data?.checkIns || 0} ins`,
-              color: "blue", spark: DEMO_SPARK,
+              color: "blue", spark: null,
             },
             {
               icon: <Users size={13} />, label: "Members",
               value: String(totalMembers),
               sub: `+${data?.newSignups || 0} today`,
-              color: "violet", spark: DEMO_SPARK.map(d => ({ v: d.v * 1.2 })),
+              color: "violet", spark: null,
             },
             {
               icon: <Dumbbell size={13} />, label: "Sessions",
               value: String(data?.totalSessionsToday || 0),
               sub: `${data?.totalTrainers || 0} trainers`,
-              color: "amber", spark: DEMO_SPARK.map(d => ({ v: d.v * 0.8 })),
+              color: "amber", spark: null,
             },
             {
               icon: <CreditCard size={13} />, label: "Dues",
@@ -491,7 +478,7 @@ const Dashboard: React.FC = () => {
       <div className="dash__grid">
 
         {/* ══ ROW LABEL: FINANCE ══ */}
-        <div className="dash__row-label" style={{ gridColumn: 'span 12' }}>
+        <div className="dash__row-label">
           <span className="dash__row-label-icon"><TrendingUp size={11} /></span>
           Finance &amp; Money Flow
         </div>
@@ -691,7 +678,7 @@ const Dashboard: React.FC = () => {
           </motion.section>
 
             {/* ══ ROW LABEL: MEMBERS ══ */}
-          <div className="dash__row-label" style={{ gridColumn: 'span 12' }}>
+          <div className="dash__row-label">
             <span className="dash__row-label-icon"><Users size={11} /></span>
             Members
           </div>
@@ -852,7 +839,7 @@ const Dashboard: React.FC = () => {
           </motion.section>
 
           {/* ══ ROW LABEL: TRAINERS ══ */}
-          <div className="dash__row-label" style={{ gridColumn: 'span 12' }}>
+          <div className="dash__row-label">
             <span className="dash__row-label-icon"><Dumbbell size={11} /></span>
             Trainers &amp; Classes
           </div>
@@ -966,7 +953,7 @@ const Dashboard: React.FC = () => {
           </motion.section>
 
           {/* ══ ROW LABEL: EQUIPMENT ══ */}
-          <div className="dash__row-label" style={{ gridColumn: 'span 12' }}>
+          <div className="dash__row-label">
             <span className="dash__row-label-icon"><Layers size={11} /></span>
             Equipment
             <span className="dash__row-label-tag">Go to Equipment page to manage</span>
@@ -1081,7 +1068,7 @@ const Dashboard: React.FC = () => {
           </motion.section>
 
           {/* ══ ROW LABEL: GYM OPERATIONS ══ */}
-          <div className="dash__row-label" style={{ gridColumn: 'span 12' }}>
+          <div className="dash__row-label">
             <span className="dash__row-label-icon"><Activity size={11} /></span>
             Gym Operations
           </div>
@@ -1219,7 +1206,7 @@ const Dashboard: React.FC = () => {
           </motion.section>
 
             {/* ══ ROW LABEL: ALERTS & EVENTS ══ */}
-          <div className="dash__row-label" style={{ gridColumn: 'span 12' }}>
+          <div className="dash__row-label">
             <span className="dash__row-label-icon"><Flame size={11} /></span>
             Alerts &amp; Events
           </div>
@@ -1304,7 +1291,7 @@ const KPICard: React.FC<KPICardProps> = ({ icon, label, value, change, sub, colo
       {/* body */}
       <div className="dash__kpi-body">
         <span className="dash__kpi-label">{label}</span>
-        <span className="dash__kpi-value">{value}</span>
+        <span className="dash__kpi-value">{value || '—'}</span>
         {sub && <span className="dash__kpi-sub">{sub}</span>}
       </div>
       {/* change badge */}

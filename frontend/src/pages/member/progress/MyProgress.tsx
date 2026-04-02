@@ -6,6 +6,7 @@ import { memberProgressApi } from '../../services/api';
 import { showToast } from '../../../utils/toast';
 import '../../styles/macos-member.css';
 import './MyProgress.css';
+import '../../../styles/progress-modals.css';
 
 // Import section components
 import OverviewTab from './OverviewTab';

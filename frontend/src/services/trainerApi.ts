@@ -491,6 +491,28 @@ export const trainerApi = {
         await apiClient.delete(`/trainer/classes/${id}`);
     },
 
+    async duplicateClass(id: number, newDate: string): Promise<TrainerClassItem> {
+        // Fetch the original class
+        const response = await apiClient.get(`/trainer/classes/${id}`);
+        const originalClass = normalizeResponse<TrainerClassItem>(response.data);
+        
+        // Create a new class with same details but new date
+        const duplicateData: CreateClassRequest = {
+            title: `${originalClass.title} (Copy)`,
+            date: newDate,
+            startTime: originalClass.startTime,
+            endTime: originalClass.endTime,
+            duration: originalClass.duration,
+            room: originalClass.room,
+            capacity: originalClass.capacity,
+            type: originalClass.type,
+            recurring: false, // Don't duplicate recurring setting
+            notes: originalClass.notes
+        };
+        
+        return await this.createClass(duplicateData);
+    },
+
     async getClassAttendees(id: number): Promise<ClassAttendee[]> {
         const response = await apiClient.get(`/trainer/classes/${id}/attendees`);
         return normalizeResponse<ClassAttendee[]>(response.data);

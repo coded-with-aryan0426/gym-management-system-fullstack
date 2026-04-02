@@ -18,6 +18,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
 import { useCurrency } from "../../contexts/CurrencyContext";
+import { 
+    SkeletonKPIGrid, SkeletonChart, SkeletonCard, 
+    SkeletonPageHeader, SkeletonListItem, SkeletonActivityFeed
+} from "../../components/ui/Skeleton";
 
 // Import unified dashboard CSS
 import '../../styles/dashboard/dashboard-core.css';
@@ -225,8 +229,7 @@ const TrainerDashboard: React.FC = () => {
             }
         } catch (err) {
             console.error("Failed to fetch dashboard data", err);
-            setData(getMockData());
-            setError("Syncing...");
+            setError("Failed to load dashboard — retrying...");
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -284,31 +287,58 @@ const TrainerDashboard: React.FC = () => {
     // Loading skeleton
     if (loading && !data) {
         return (
-            <div className="dash" role="main" aria-busy="true" aria-label="Loading dashboard">
-              <header className="dash__header dash__header--skeleton">
-                <div className="dash__header-greet">
-                  <div className="skeleton-icon-circle" />
-                  <div>
-                    <div className="skeleton-line skeleton-line--lg" style={{ width: 200 }} />
-                    <div className="skeleton-line" style={{ width: 160, marginTop: 8 }} />
-                  </div>
+            <div className="dash dash--trainer" role="main" aria-busy="true" aria-label="Loading dashboard">
+                <SkeletonPageHeader />
+                
+                {/* KPI Strip */}
+                <div className="dash__header" style={{ marginTop: '16px' }}>
+                    <SkeletonKPIGrid count={4} />
                 </div>
-                <div className="dash__kpi-row dash__kpi-row--skeleton">
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="dash-kpi-skeleton">
-                      <div className="skeleton-line" style={{ width: 60, height: 12 }} />
-                      <div className="skeleton-line skeleton-line--lg" style={{ width: 80 }} />
+
+                <div className="dash__grid">
+                    {/* Performance Section */}
+                    <div className="dash__row-label" style={{ gridColumn: 'span 12' }}>
+                        <span className="dash__row-label-icon"><TrendingUp size={11} /></span>
+                        Performance &amp; Activity
                     </div>
-                  ))}
+                    
+                    <div style={{ gridColumn: 'span 8' }}>
+                        <SkeletonChart type="area" height={220} />
+                    </div>
+                    
+                    <div style={{ gridColumn: 'span 4' }}>
+                        <SkeletonChart type="pie" height={220} />
+                    </div>
+
+                    {/* Schedule Section */}
+                    <div className="dash__row-label" style={{ gridColumn: 'span 12', marginTop: '16px' }}>
+                        <span className="dash__row-label-icon"><Calendar size={11} /></span>
+                        Today's Schedule &amp; Client Tasks
+                    </div>
+                    
+                    <div style={{ gridColumn: 'span 8' }}>
+                        <SkeletonCard hasImage={false} lines={5} />
+                        <div style={{ marginTop: '12px' }}>
+                            <SkeletonActivityFeed count={4} />
+                        </div>
+                    </div>
+                    
+                    <div style={{ gridColumn: 'span 4' }}>
+                        <SkeletonCard hasImage={false} lines={4} />
+                    </div>
+
+                    {/* Financials Section */}
+                    <div className="dash__row-label" style={{ gridColumn: 'span 12', marginTop: '16px' }}>
+                        <span className="dash__row-label-icon"><IndianRupee size={11} /></span>
+                        Financials &amp; Operations
+                    </div>
+                    
+                    {[1, 2, 3].map(i => (
+                        <div key={i} style={{ gridColumn: 'span 4' }}>
+                            <SkeletonCard hasImage={false} lines={3} />
+                        </div>
+                    ))}
                 </div>
-              </header>
-              <div className="dash__grid">
-                <div className="dash__card dash__card--span8" style={{ height: 320 }}><div className="skeleton-line--lg" /></div>
-                <div className="dash__card dash__card--span4" style={{ height: 320 }}><div className="skeleton-line--lg" /></div>
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="dash__card dash__card--membership" style={{ height: 280 }}><div className="skeleton-line" /></div>
-                ))}
-              </div>
             </div>
         );
     }

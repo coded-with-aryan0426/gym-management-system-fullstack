@@ -503,6 +503,11 @@ const AttendancePage: React.FC = () => {
     };
   }, [autoRefresh, loadData]);
 
+  // Load data on mount and when dependencies change
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
   // ─── Handlers ─────────────────────────────────────────────────────────────
 
 
@@ -657,9 +662,9 @@ const AttendancePage: React.FC = () => {
         <div className="att-header">
           <div className="att-header__left">
             <div className="att-header__icon"><Activity size={24} /></div>
-            <div>
+            <div className="att-header__title-group">
               <h1 className="att-header__title">Attendance Analytics</h1>
-              <p className="att-header__sub">Loading data...</p>
+              <p className="att-header__sub"><span className="att-header__sub-text">Loading data...</span></p>
             </div>
           </div>
         </div>
@@ -679,10 +684,12 @@ const AttendancePage: React.FC = () => {
           <div className="att-header__icon" aria-hidden="true">
             <Activity size={24} />
           </div>
-          <div>
+          <div className="att-header__title-group">
             <h1 className="att-header__title">Attendance Analytics</h1>
             <p className="att-header__sub">
-              Managing flow for {activeRole === 'all' ? 'All Roles' : activeRole + 's'}
+              <span className="att-header__sub-text">
+                Managing flow for {activeRole === 'all' ? 'All Roles' : activeRole + 's'}
+              </span>
               {autoRefresh && <span className="att-auto-refresh-badge">● Auto-refresh</span>}
             </p>
           </div>
@@ -795,41 +802,28 @@ const AttendancePage: React.FC = () => {
         </div>
       </header>
 
-      {/* ── KPI Grid ────────────────────────────────────────────────────── */}
-      <section className="att-kpi-grid" aria-label="Key metrics">
-        {kpis.map((kpi, i) => (
-          <motion.div
-            key={kpi.label}
-            className="att-kpi-card"
-            variants={CARD}
-            initial="hidden"
-            animate="visible"
-            custom={i}
-          >
-            <div className="att-kpi-card__glow" style={{ background: kpi.color }} aria-hidden="true" />
-            <div className="att-kpi-card__inner">
-              <div className="att-kpi-card__top">
-                <span className="att-kpi-card__label">{kpi.label}</span>
-                <span className="att-kpi-card__icon" style={{ background: `${kpi.color}18`, color: kpi.color }} aria-hidden="true">
-                  {kpi.icon}
-                </span>
+      {/* ── KPI Strip ───────────────────────────────────────────────────── */}
+      <section className="att-kpi-strip" aria-label="Key metrics">
+        <div className="att-kpi-strip__inner">
+          {kpis.map((kpi, i) => (
+            <div key={kpi.label} className="att-kpi-strip__item">
+              <div className="att-kpi-strip__icon" style={{ background: `${kpi.color}18`, color: kpi.color }} aria-hidden="true">
+                {kpi.icon}
               </div>
-              <div className="att-kpi-card__value">{kpi.value}</div>
-              <div className="att-kpi-card__bottom">
-                <span className="att-kpi-card__sub">{kpi.sub}</span>
-                {kpi.highlight && (
-                  <span className="att-kpi-highlight-badge">{kpi.highlight}</span>
-                )}
-                {kpi.trend !== null && (
-                  <span className={`att-kpi-card__trend ${kpi.trend >= 0 ? 'att-kpi-card__trend--up' : 'att-kpi-card__trend--down'}`}>
-                    {kpi.trend >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                    {Math.abs(kpi.trend)}%
-                  </span>
-                )}
+              <div className="att-kpi-strip__body">
+                <div className="att-kpi-strip__value">{kpi.value}</div>
+                <div className="att-kpi-strip__label">{kpi.label}</div>
               </div>
+              {kpi.sub && <div className="att-kpi-strip__sub">{kpi.sub}</div>}
+              {kpi.trend !== null && (
+                <div className={`att-kpi-strip__trend ${kpi.trend >= 0 ? 'up' : 'down'}`}>
+                  {kpi.trend >= 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+                  {Math.abs(kpi.trend)}%
+                </div>
+              )}
             </div>
-          </motion.div>
-        ))}
+          ))}
+        </div>
       </section>
 
       {/* ── Charts Section ─────────────────────────────────────────────── */}

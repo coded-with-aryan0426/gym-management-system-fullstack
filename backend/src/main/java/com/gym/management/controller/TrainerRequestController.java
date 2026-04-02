@@ -37,7 +37,12 @@ public class TrainerRequestController {
     // ── helpers ─────────────────────────────────────────────────────────────
 
     private User currentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return null;
+        }
+        String username = auth.getName();
+        if (username == null || username.isBlank()) return null;
         return userRepository.findByUsername(username).orElse(null);
     }
 
@@ -59,25 +64,29 @@ public class TrainerRequestController {
         m.put("status", r.getStatus().name());
         m.put("memberMessage", r.getMemberMessage());
         m.put("trainerNote", r.getTrainerNote());
-        m.put("createdAt", r.getCreatedAt().toString());
+        m.put("createdAt", r.getCreatedAt() != null ? r.getCreatedAt().toString() : null);
         m.put("resolvedAt", r.getResolvedAt() != null ? r.getResolvedAt().toString() : null);
 
         // Member info (for trainer-facing view)
         User mem = r.getMember();
-        Map<String, Object> memberMap = new LinkedHashMap<>();
-        memberMap.put("userId", mem.getUserId());
-        memberMap.put("name", mem.getFullName());
-        memberMap.put("email", mem.getEmail());
-        memberMap.put("phone", mem.getPhone() != null ? mem.getPhone() : "");
-        m.put("member", memberMap);
+        if (mem != null) {
+            Map<String, Object> memberMap = new LinkedHashMap<>();
+            memberMap.put("userId", mem.getUserId());
+            memberMap.put("name", mem.getFullName());
+            memberMap.put("email", mem.getEmail());
+            memberMap.put("phone", mem.getPhone() != null ? mem.getPhone() : "");
+            m.put("member", memberMap);
+        }
 
         // Trainer info (for member-facing view)
         User tr = r.getTrainer();
-        Map<String, Object> trainerMap = new LinkedHashMap<>();
-        trainerMap.put("userId", tr.getUserId());
-        trainerMap.put("name", tr.getFullName());
-        trainerMap.put("email", tr.getEmail());
-        m.put("trainer", trainerMap);
+        if (tr != null) {
+            Map<String, Object> trainerMap = new LinkedHashMap<>();
+            trainerMap.put("userId", tr.getUserId());
+            trainerMap.put("name", tr.getFullName());
+            trainerMap.put("email", tr.getEmail());
+            m.put("trainer", trainerMap);
+        }
 
         return m;
     }
@@ -98,7 +107,11 @@ public class TrainerRequestController {
 
         Long trainerId;
         try {
-            trainerId = Long.valueOf(body.get("trainerId").toString());
+            Object raw = body.get("trainerId");
+            if (raw == null) return ResponseEntity.badRequest().body(Map.of("message", "trainerId is required"));
+            trainerId = Long.valueOf(raw.toString());
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "trainerId must be a number"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", "trainerId is required"));
         }

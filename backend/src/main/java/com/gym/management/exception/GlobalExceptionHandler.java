@@ -112,6 +112,38 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle null pointer exceptions (500)
+     */
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ErrorResponse> handleNullPointer(NullPointerException ex, WebRequest request) {
+        String traceId = generateTraceId();
+        logger.error("[{}] Null pointer exception: {}", traceId, ex.getMessage(), ex);
+
+        ErrorResponse error = new ErrorResponse(
+                false,
+                "INTERNAL_ERROR",
+                "A required resource was not found. Please try again later.",
+                traceId);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    /**
+     * Handle runtime exceptions (500)
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex, WebRequest request) {
+        String traceId = generateTraceId();
+        logger.error("[{}] Runtime exception: {}", traceId, ex.getMessage(), ex);
+
+        ErrorResponse error = new ErrorResponse(
+                false,
+                "INTERNAL_ERROR",
+                ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred.",
+                traceId);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    /**
      * Catch-all handler for unexpected exceptions (500)
      */
     @ExceptionHandler(Exception.class)

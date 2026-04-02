@@ -140,7 +140,46 @@
 .mm-hero__content {
     position: relative;
     z-index: 1;
-    padding: 16px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 12px;
+}
+
+.mm-hero__left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.mm-hero__stats-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    min-width: 70px;
+}
+
+.mm-hero__stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.mm-hero__stat-value {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--macos-text-primary);
+}
+
+.mm-hero__stat-label {
+    font-size: 0.5rem;
+    color: var(--macos-text-tertiary);
+    text-transform: uppercase;
 }
 
 .mm-hero__header {
@@ -176,7 +215,7 @@
 }
 
 .mm-hero__title {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 800;
     margin: 0;
     color: var(--macos-text-primary);
@@ -186,20 +225,37 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 10px;
+    font-size: 8px;
     color: var(--macos-text-tertiary);
     cursor: pointer;
 }
 
 .mm-status {
-    padding: 2px 8px;
+    padding: 2px 6px;
     border-radius: 4px;
-    font-size: 9px;
+    font-size: 7px;
     font-weight: 700;
     text-transform: uppercase;
     background: var(--macos-success-bg);
     color: var(--macos-success);
     border: 1px solid rgba(52, 199, 89, 0.2);
+}
+
+.mm-hero__tier {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--macos-bg-tertiary);
+    font-size: 7px;
+    font-weight: 800;
+    color: var(--tier-color, #3b82f6);
+    width: fit-content;
+}
+
+.mm-hero__tier span {
+    font-size: 8px;
 }
 
 .mm-hero__actions {
@@ -235,7 +291,8 @@
 .mm-hero__body {
     display: flex;
     gap: 24px;
-    margin-bottom: 16px;
+    padding: 8px 0;
+    margin-bottom: 8px;
     align-items: center;
 }
 
@@ -274,7 +331,7 @@
 }
 
 .mm-countdown-compact__value {
-    font-size: 20px;
+    font-size: 1.2rem;
     font-weight: 800;
     color: var(--macos-text-primary);
     font-variant-numeric: tabular-nums;
@@ -305,10 +362,10 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 12px;
+    padding: 3px 6px;
     background: var(--macos-bg-tertiary);
     border-radius: 6px;
-    font-size: 11px;
+    font-size: 8px;
     color: var(--macos-text-secondary);
 }
 
@@ -365,56 +422,6 @@
 
 .mm-renew-btn:hover {
     background: var(--macos-bg-glass-hover);
-}
-
-.mm-quick-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.mm-quick-stat {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px;
-    background: var(--macos-bg-secondary);
-    border-radius: 12px;
-    border: 1px solid var(--macos-border);
-}
-
-.theme-light .mm-quick-stat {
-    box-shadow: var(--shadow-sm);
-}
-
-.mm-quick-stat__icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mm-quick-stat__icon--blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
-.mm-quick-stat__icon--green { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
-.mm-quick-stat__icon--purple { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
-.mm-quick-stat__icon--amber { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
-
-.mm-quick-stat__value {
-    display: block;
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--macos-text-primary);
-    line-height: 1;
-}
-
-.mm-quick-stat__label {
-    display: block;
-    font-size: 10px;
-    color: var(--macos-text-tertiary);
-    margin-top: 2px;
 }
 
 .mm-tabs {
@@ -1423,6 +1430,21 @@
         padding: 20px;
     }
     
+    .mm-hero__content {
+        flex-direction: column;
+    }
+
+    .mm-hero__stats-vertical {
+        flex-direction: row;
+        justify-content: space-around;
+        width: 100%;
+    }
+
+    .mm-hero__stat-item {
+        flex-direction: row;
+        gap: 6px;
+    }
+
     .mm-hero__stats,
     .mm-quick-stats,
     .mm-actions-grid,
@@ -1451,10 +1473,24 @@
     }
     
     .mm-hero__stats,
-    .mm-quick-stats,
     .mm-actions-grid,
     .mm-activity-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .mm-hero__content {
+        flex-direction: column;
+    }
+
+    .mm-hero__stats-vertical {
+        flex-direction: row;
+        justify-content: space-around;
+        width: 100%;
+    }
+
+    .mm-hero__stat-item {
+        flex-direction: row;
+        gap: 6px;
     }
     
     .mm-benefits-grid {
@@ -1473,7 +1509,6 @@
 
 @media (max-width: 480px) {
     .mm-hero__stats,
-    .mm-quick-stats,
     .mm-actions-grid,
     .mm-activity-grid,
     .mm-benefits-grid {

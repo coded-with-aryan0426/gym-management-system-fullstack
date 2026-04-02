@@ -55,10 +55,12 @@ public class AttendanceController {
     @GetMapping("/trends")
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
     public ResponseEntity<List<Map<String, Object>>> getAttendanceTrends(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @RequestParam(required = false) String role) {
-        return ResponseEntity.ok(attendanceService.getTrends(null, from, to, role));
+        LocalDate effectiveFrom = from != null ? from : LocalDate.now().minusDays(30);
+        LocalDate effectiveTo = to != null ? to : LocalDate.now();
+        return ResponseEntity.ok(attendanceService.getTrends(null, effectiveFrom, effectiveTo, role));
     }
 
     @GetMapping("/heatmap")

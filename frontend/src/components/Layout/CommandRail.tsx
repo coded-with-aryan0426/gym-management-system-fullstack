@@ -33,7 +33,15 @@ import {
   Activity,
   CheckSquare,
   BadgeCheck,
-  UserCheck
+  UserCheck,
+  UserCog,
+  BookOpen,
+  CalendarDays,
+  HeartPulse,
+  CalendarCheck,
+  ClipboardCheck,
+  ClipboardList,
+  BarChart3
 } from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext"
 import { useTheme } from "../../contexts/ThemeContext"
@@ -41,7 +49,7 @@ import { useClickOutside } from "../../hooks"
 import { superAdminApi } from "../../services/superAdminApi"
 import { Logo } from "../ui/Logo"
 import Avatar from "../ui/Avatar"
-import { ADMIN_ICONS, TRAINER_ICONS, MEMBER_ICONS } from "../icons"
+
 import "./CommandRail.css"
 import { useFeatureContext } from "../../contexts/FeatureContext"
 import { prefetchOnHover, cancelPrefetch } from "../../services/prefetchService"
@@ -55,6 +63,32 @@ export interface NavItem {
   id?: string;
   end?: boolean;
 }
+
+const iconMap: Record<string, any> = {
+  dashboard: LayoutDashboard,
+  members: Users,
+  trainers: UserCheck,
+  staff: UserCog,
+  equipment: Dumbbell,
+  classes: BookOpen,
+  financials: CreditCard,
+  attendance: CheckSquare,
+  tasks: CheckSquare,
+  profile: User,
+  "my-membership": Crown,
+  "my-progress": Activity,
+  "my-attendance": CalendarCheck,
+  "available-classes": Dumbbell,
+  "my-trainer": UserCheck,
+  "my-bookings": CalendarDays,
+  notifications: MessageSquare,
+  "my-members": Users,
+  "member-attendance": ClipboardCheck,
+  "my-classes": Dumbbell,
+  "my-schedule": CalendarDays,
+  "progress-notes": ClipboardList,
+  reports: BarChart3
+};
 
 const defaultNavItems: NavItem[] = [
   { path: "/dashboard", label: "Dashboard", id: "dashboard", key: "dashboard", color: "#f87171", end: true },
@@ -129,11 +163,7 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
     return <User size={10} />;
   };
 
-  const getIconMap = () => {
-    if (role === 'TRAINER' || role === 'PERSONAL TRAINER') return TRAINER_ICONS;
-    if (role === 'MEMBER' || role === 'CUSTOMER') return MEMBER_ICONS;
-    return ADMIN_ICONS; // Default for OWNER, ADMIN, SUPER_ADMIN
-  };
+
 
   const getGreeting = () => {
     const hour = currentTime.getHours();
@@ -251,10 +281,9 @@ const CommandRail: React.FC<CommandRailProps> = ({ isCollapsed = false, onToggle
                 <span className="command-rail__icon">
                   {item.key ? (
                     (() => {
-                      const iconMap = getIconMap();
                       const IconComponent = iconMap[item.key];
                       return IconComponent ? (
-                        <IconComponent 
+                        <IconComponent
                           size={isActive ? 20 : 18}
                           className={isActive ? "opacity-100" : "opacity-80"}
                           style={{ color: item.color }}

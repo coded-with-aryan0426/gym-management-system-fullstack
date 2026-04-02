@@ -154,9 +154,13 @@
   /* Component Spacing */
   --dash-page-pad: var(--dash-space-6);
   --dash-page-pad-mobile: var(--dash-space-4);
-  --dash-card-pad: var(--dash-space-4);
+  --dash-card-pad: var(--dash-space-3);
   --dash-section-gap: var(--dash-space-5);
   --dash-grid-gap: var(--dash-space-2);
+  
+  /* Compact Spacing Overrides */
+  --dash-space-xs: 0.25rem;  /* 4px */
+  --dash-space-sm: 0.5rem;   /* 8px */
   
   /* ─────────────────────────────────────────────────────────────────────────
      1.4 BORDER RADIUS
@@ -492,7 +496,7 @@
   display: flex;
   align-items: center;
   gap: var(--dash-space-2);
-  margin-bottom: var(--dash-space-3);
+  margin-bottom: var(--dash-space-2);
   flex-shrink: 0;
   position: relative;
   z-index: 1;

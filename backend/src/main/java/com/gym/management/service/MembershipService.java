@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -239,17 +238,6 @@ public class MembershipService {
         }
 
         return MembershipStatus.ACTIVE;
-    }
-
-    private Membership findMembershipToRenew(List<Membership> memberships) {
-        if (memberships == null || memberships.isEmpty()) {
-            return null;
-        }
-
-        return memberships.stream()
-                .filter(m -> m.getStatus() != MembershipStatus.CANCELLED)
-                .max(Comparator.comparing(Membership::getEffectiveEndDateTime, Comparator.nullsLast(LocalDateTime::compareTo)))
-                .orElse(memberships.get(0));
     }
 
     private Gym resolveGymForMembership(Long gymId, List<Membership> memberships) {

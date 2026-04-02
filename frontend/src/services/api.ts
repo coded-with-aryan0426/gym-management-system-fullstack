@@ -1228,5 +1228,164 @@ const betaFeedbackApi = {
   }
 };
 
+// Trainer Attendance & Reports API (Phase 3 implementation)
+const trainerAttendanceReportsApi = {
+  // Attendance Recording
+  async recordAttendance(sessionId: number, attendanceData: any): Promise<void> {
+    await apiClient.post(`/attendance/session/${sessionId}/record`, attendanceData);
+  },
+
+  async bulkCheckIn(memberIds: number[]): Promise<void> {
+    await apiClient.post('/attendance/bulk-check-in', { memberIds });
+  },
+
+  async markNoShow(sessionId: number, memberId: number): Promise<void> {
+    await apiClient.post(`/attendance/session/${sessionId}/no-show`, { memberId });
+  },
+
+  async getAttendanceHistory(memberId: number): Promise<any[]> {
+    const response = await apiClient.get(`/attendance/trainer/member/${memberId}/history`);
+    return response.data;
+  },
+
+  // Reports Export
+  async getReports(params: { type: string; startDate: string; endDate: string }): Promise<any> {
+    const response = await apiClient.get('/trainer/reports', { params });
+    return response.data;
+  },
+
+  async exportReportCSV(params: { type: string; period: string; startDate?: string; endDate?: string }): Promise<Blob> {
+    const response = await apiClient.get(`/trainer/reports/export/${params.type}`, {
+      params: { period: params.period, startDate: params.startDate, endDate: params.endDate },
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  async exportReportPDF(params: { period: string; startDate?: string; endDate?: string }): Promise<Blob> {
+    const response = await apiClient.get('/trainer/reports/export/pdf', {
+      params: { period: params.period, startDate: params.startDate, endDate: params.endDate },
+      responseType: 'blob'
+    });
+    return response.data;
+  }
+};
+
+// Trainer Class Management API
+export interface TrainerClassDTO {
+  id: number;
+  title: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  duration: number;
+  room: string;
+  capacity: number;
+  enrolled: number;
+  type: 'group' | 'pt';
+  status: 'upcoming' | 'in-progress' | 'completed' | 'cancelled';
+  recurring: boolean;
+  notes?: string;
+  attendees: {
+    confirmed: number;
+    pending: number;
+    absent: number;
+  };
+}
+
+export interface CreateTrainerClassDTO {
+  title: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  duration: number;
+  room: string;
+  capacity: number;
+  type: 'group' | 'pt';
+  recurring?: boolean;
+  notes?: string;
+}
+
+const trainerClassApi = {
+  async getClasses(startDate?: string, endDate?: string): Promise<TrainerClassDTO[]> {
+    const params: Record<string, string> = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    const response = await apiClient.get<any>('/trainer/classes', { params });
+    return response.data?.data || response.data || [];
+  },
+
+  async getTodayClasses(): Promise<TrainerClassDTO[]> {
+    const response = await apiClient.get<any>('/trainer/classes/today');
+    return response.data?.data || response.data || [];
+  },
+
+  async createClass(data: CreateTrainerClassDTO): Promise<TrainerClassDTO> {
+    const response = await apiClient.post<any>('/trainer/classes', data);
+    return response.data?.data || response.data;
+  },
+
+  async updateClass(id: number, data: Partial<CreateTrainerClassDTO>): Promise<TrainerClassDTO> {
+    const response = await apiClient.put<any>(`/trainer/classes/${id}`, data);
+    return response.data?.data || response.data;
+  },
+
+  async updateClassStatus(id: number, status: string): Promise<TrainerClassDTO> {
+    const response = await apiClient.put<any>(`/trainer/classes/${id}/status`, { status });
+    return response.data?.data || response.data;
+  },
+
+  async deleteClass(id: number): Promise<void> {
+    await apiClient.delete(`/trainer/classes/${id}`);
+  },
+
+  async duplicateClass(id: number, newDate: string): Promise<TrainerClassDTO> {
+    // Get original class by fetching all classes and finding the one
+    const response = await apiClient.get<any>('/trainer/classes');
+    const classes = response.data?.data || response.data || [];
+    const original = classes.find((c: any) => c.id === id);
+    
+    if (!original) {
+      throw new Error('Class not found');
+    }
+
+    // Create duplicate with new date
+    const duplicateData: CreateTrainerClassDTO = {
+      title: `${original.title} (Copy)`,
+      date: newDate,
+      startTime: original.startTime,
+      endTime: original.endTime,
+      duration: original.duration,
+      room: original.room,
+      capacity: original.capacity,
+      type: original.type,
+      recurring: false,
+      notes: original.notes
+    };
+
+    return await this.createClass(duplicateData);
+  },
+
+  async getClassAttendees(classId: number): Promise<any[]> {
+    const response = await apiClient.get(`/trainer/classes/${classId}/attendees`);
+    return response.data?.data || response.data || [];
+  },
+
+  async updateAttendance(classId: number, updates: Array<{ memberId: number; status: string }>): Promise<void> {
+    await apiClient.put(`/trainer/classes/${classId}/attendance`, { attendees: updates });
+  }
+};
+
 // Export all APIs
-export { ptSessionApi, trainerPerformanceApi, gymSettingsApi, membershipPackageApi, analyticsApi, memberProgressApi, gymClassApi, betaFeedbackApi };
+export { 
+  ptSessionApi, 
+  trainerPerformanceApi, 
+  gymSettingsApi, 
+  membershipPackageApi, 
+  analyticsApi, 
+  memberProgressApi, 
+  gymClassApi, 
+  betaFeedbackApi,
+  trainerAttendanceReportsApi,
+  trainerClassApi 
+};

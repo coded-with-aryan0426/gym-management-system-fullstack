@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
     LineChart, 
     Line, 
@@ -12,8 +12,9 @@ import {
     Area
 } from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
-import { memberProgressApi } from '../../services/api';
+import { memberProgressApi, BodyMeasurementDTO } from '../../services/api';
 import { Scale, Activity, Zap, Ruler, Calendar, TrendingDown, TrendingUp } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface MetricData {
     recordDate: string;
@@ -45,37 +46,76 @@ const MetricsTab: React.FC<{ timeRange: string }> = ({ timeRange }) => {
     const [metrics, setMetrics] = useState<MetricData[]>([]);
     const [measurements, setMeasurements] = useState<MeasurementData[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
+    const [formData, setFormData] = useState<BodyMeasurementDTO>({
+        recordDate: new Date().toISOString().split('T')[0],
+        chest: 0,
+        waist: 0,
+        hips: 0,
+        arms: 0,
+        legs: 0,
+        shoulders: 0
+    });
 
     useEffect(() => {
-        const fetchMetrics = async () => {
-            if (!memberId) return;
-            
-            try {
-                setLoading(true);
-                const [metricsData, measurementsData] = await Promise.all([
-                    memberProgressApi.getMetrics(memberId),
-                    memberProgressApi.getMeasurements(memberId)
-                ]);
-                
-                // Sort by date and format
-                const formattedMetrics = metricsData
-                    .sort((a: any, b: any) => new Date(a.recordDate).getTime() - new Date(b.recordDate).getTime())
-                    .map((m: any) => ({
-                        ...m,
-                        formattedDate: new Date(m.recordDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                    }));
-                
-                setMetrics(formattedMetrics);
-                setMeasurements(measurementsData);
-            } catch (error) {
-                console.error('Error fetching metrics:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchMetrics();
     }, [memberId, timeRange]);
+
+    const fetchMetrics = async () => {
+        if (!memberId) return;
+        
+        try {
+            setLoading(true);
+            const [metricsData, measurementsData] = await Promise.all([
+                memberProgressApi.getMetrics(memberId),
+                memberProgressApi.getMeasurements(memberId)
+            ]);
+            
+            // Sort by date and format
+            const formattedMetrics = metricsData
+                .sort((a: any, b: any) => new Date(a.recordDate).getTime() - new Date(b.recordDate).getTime())
+                .map((m: any) => ({
+                    ...m,
+                    formattedDate: new Date(m.recordDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                }));
+            
+            setMetrics(formattedMetrics);
+            setMeasurements(measurementsData);
+        } catch (error) {
+            console.error('Error fetching metrics:', error);
+            toast.error('Failed to load metrics');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!memberId) return;
+        
+        try {
+            await memberProgressApi.createMeasurement(memberId, formData);
+            toast.success('Measurement added successfully!');
+            setShowModal(false);
+            resetForm();
+            fetchMetrics();
+        } catch (error) {
+            console.error('Error adding measurement:', error);
+            toast.error('Failed to add measurement');
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            recordDate: new Date().toISOString().split('T')[0],
+            chest: 0,
+            waist: 0,
+            hips: 0,
+            arms: 0,
+            legs: 0,
+            shoulders: 0
+        });
+    };
 
     const CustomTooltip = ({ active, payload, label, unit }: any) => {
         if (active && payload && payload.length) {
@@ -285,9 +325,13 @@ const MetricsTab: React.FC<{ timeRange: string }> = ({ timeRange }) => {
                             <h3>Body Measurements</h3>
                         </div>
                         <div className="metric-card__actions">
-                            <span className="last-updated">
-                                Last updated: {measurements.length > 0 ? new Date(measurements[measurements.length - 1].recordDate).toLocaleDateString() : 'Never'}
-                            </span>
+                            <button className="btn-primary btn-sm" onClick={() => setShowModal(true)}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Add Measurement
+                            </button>
                         </div>
                     </div>
                     <div className="measurements-grid">
@@ -315,6 +359,127 @@ const MetricsTab: React.FC<{ timeRange: string }> = ({ timeRange }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Measurement Form Modal */}
+            <AnimatePresence>
+                {showModal && (
+                    <motion.div 
+                        className="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowModal(false)}
+                    >
+                        <motion.div 
+                            className="modal-content"
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="modal-header">
+                                <h3>Add Body Measurements</h3>
+                                <button className="modal-close" onClick={() => setShowModal(false)}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"/>
+                                        <line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <form onSubmit={handleSubmit} className="modal-form">
+                                <div className="form-group">
+                                    <label>Date</label>
+                                    <input
+                                        type="date"
+                                        value={formData.recordDate}
+                                        onChange={(e) => setFormData({...formData, recordDate: e.target.value})}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Chest (cm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.chest || ''}
+                                            onChange={(e) => setFormData({...formData, chest: Number(e.target.value)})}
+                                            placeholder="95.5"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Waist (cm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.waist || ''}
+                                            onChange={(e) => setFormData({...formData, waist: Number(e.target.value)})}
+                                            placeholder="80.0"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Hips (cm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.hips || ''}
+                                            onChange={(e) => setFormData({...formData, hips: Number(e.target.value)})}
+                                            placeholder="98.0"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Arms (cm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.arms || ''}
+                                            onChange={(e) => setFormData({...formData, arms: Number(e.target.value)})}
+                                            placeholder="35.0"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Legs (cm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.legs || ''}
+                                            onChange={(e) => setFormData({...formData, legs: Number(e.target.value)})}
+                                            placeholder="55.0"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Shoulders (cm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.shoulders || ''}
+                                            onChange={(e) => setFormData({...formData, shoulders: Number(e.target.value)})}
+                                            placeholder="110.0"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="modal-footer">
+                                    <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="btn-primary">
+                                        Save Measurements
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 };

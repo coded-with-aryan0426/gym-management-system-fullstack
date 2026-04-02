@@ -324,146 +324,130 @@ const MyMembership: React.FC = () => {
                 <div className="mm-hero__pattern" />
 
                 <div className="mm-hero__content">
-                    <div className="mm-hero__header">
-                        <div className="mm-hero__plan-info">
-                            <div className="mm-hero__tier" style={{ '--tier-color': membershipTier.color } as React.CSSProperties}>
-                                {membershipTier.icon}
-                                <span>{membershipTier.tier.toUpperCase()}</span>
-                            </div>
-                            <h1 className="mm-hero__title">{membership?.packageName || 'Membership'}</h1>
-                            <div className="mm-hero__id-group">
-                                <div className="mm-hero__id" onClick={handleCopyMemberId}>
-                                    <span>ID: {user?.userId ? getOrCreateAppId(user.userId, 'MEMBER', (user as any).createdAt) : 'MBR-----'}</span>
-                                    <Copy size={10} />
+                    {/* LEFT SIDE - Plan info (smaller) */}
+                    <div className="mm-hero__left">
+                        <div className="mm-hero__header">
+                            <div className="mm-hero__plan-info">
+                                <div className="mm-hero__tier" style={{ '--tier-color': membershipTier.color } as React.CSSProperties}>
+                                    {membershipTier.icon}
+                                    <span>{membershipTier.tier.toUpperCase()}</span>
                                 </div>
-                                <div className={`mm-status ${membership?.isExpired ? 'mm-status--expired' : ''} ${isUsingDummyData ? 'mm-status--preview' : ''}`}>
-                                    {isUsingDummyData ? 'Preview' : membership?.isExpired ? 'Expired' : 'Active'}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mm-hero__actions">
-                            <motion.button
-                                className="mm-qr-btn"
-                                onClick={() => setShowQRCode(true)}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                            >
-                                <QrCode size={14} />
-                                QR
-                            </motion.button>
-                            <motion.button
-                                className="mm-renew-btn"
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                            >
-                                <RefreshCw size={14} />
-                                Renew
-                            </motion.button>
-                        </div>
-                    </div>
-
-                    <div className="mm-hero__body">
-                        <div className="mm-hero__timer-section">
-                            <div className="mm-countdown-compact">
-                                <div className="mm-countdown-compact__label">
-                                    <Timer size={12} />
-                                    Time Remaining
-                                </div>
-                                <div className="mm-countdown-compact__grid">
-                                    <div className="mm-countdown-compact__item">
-                                        <span className="mm-countdown-compact__value">{timeLeft.days}</span>
-                                        <span className="mm-countdown-compact__unit">d</span>
+                                <h1 className="mm-hero__title">{membership?.packageName || 'Membership'}</h1>
+                                <div className="mm-hero__id-group">
+                                    <div className="mm-hero__id" onClick={handleCopyMemberId}>
+                                        <span>ID: {user?.userId ? getOrCreateAppId(user.userId, 'MEMBER', (user as any).createdAt) : 'MBR-----'}</span>
+                                        <Copy size={10} />
                                     </div>
-                                    <span className="mm-countdown-compact__sep">:</span>
-                                    <div className="mm-countdown-compact__item">
-                                        <span className="mm-countdown-compact__value">{String(timeLeft.hours).padStart(2, '0')}</span>
-                                        <span className="mm-countdown-compact__unit">h</span>
-                                    </div>
-                                    <span className="mm-countdown-compact__sep">:</span>
-                                    <div className="mm-countdown-compact__item">
-                                        <span className="mm-countdown-compact__value">{String(timeLeft.minutes).padStart(2, '0')}</span>
-                                        <span className="mm-countdown-compact__unit">m</span>
-                                    </div>
-                                    <span className="mm-countdown-compact__sep">:</span>
-                                    <div className="mm-countdown-compact__item mm-countdown-compact__item--seconds">
-                                        <span className="mm-countdown-compact__value">{String(timeLeft.seconds).padStart(2, '0')}</span>
-                                        <span className="mm-countdown-compact__unit">s</span>
+                                    <div className={`mm-status ${membership?.isExpired ? 'mm-status--expired' : ''} ${isUsingDummyData ? 'mm-status--preview' : ''}`}>
+                                        {isUsingDummyData ? 'Preview' : membership?.isExpired ? 'Expired' : 'Active'}
                                     </div>
                                 </div>
                             </div>
+
+                            <div className="mm-hero__actions">
+                                <motion.button
+                                    className="mm-qr-btn"
+                                    onClick={() => setShowQRCode(true)}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    <QrCode size={14} />
+                                    QR
+                                </motion.button>
+                                <motion.button
+                                    className="mm-renew-btn"
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    <RefreshCw size={14} />
+                                    Renew
+                                </motion.button>
+                            </div>
                         </div>
 
-                        <div className="mm-hero__stats-section">
-                            <div className="mm-hero__stats-row">
-                                <div className="mm-hero__stat-pill">
-                                    <Calendar size={12} />
-                                    <span>Started: <strong>{membership?.startDate ? formatDate(membership.startDate) : 'N/A'}</strong></span>
+                        <div className="mm-hero__body">
+                            <div className="mm-hero__timer-section">
+                                <div className="mm-countdown-compact">
+                                    <div className="mm-countdown-compact__label">
+                                        <Timer size={12} />
+                                        Time Remaining
+                                    </div>
+                                    <div className="mm-countdown-compact__grid">
+                                        <div className="mm-countdown-compact__item">
+                                            <span className="mm-countdown-compact__value">{timeLeft.days}</span>
+                                            <span className="mm-countdown-compact__unit">d</span>
+                                        </div>
+                                        <span className="mm-countdown-compact__sep">:</span>
+                                        <div className="mm-countdown-compact__item">
+                                            <span className="mm-countdown-compact__value">{String(timeLeft.hours).padStart(2, '0')}</span>
+                                            <span className="mm-countdown-compact__unit">h</span>
+                                        </div>
+                                        <span className="mm-countdown-compact__sep">:</span>
+                                        <div className="mm-countdown-compact__item">
+                                            <span className="mm-countdown-compact__value">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                                            <span className="mm-countdown-compact__unit">m</span>
+                                        </div>
+                                        <span className="mm-countdown-compact__sep">:</span>
+                                        <div className="mm-countdown-compact__item mm-countdown-compact__item--seconds">
+                                            <span className="mm-countdown-compact__value">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                                            <span className="mm-countdown-compact__unit">s</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="mm-hero__stat-pill">
-                                    <Clock size={12} />
-                                    <span>Expires: <strong>{membership?.endDate ? formatDate(membership.endDate) : 'N/A'}</strong></span>
-                                </div>
-                                <div className="mm-hero__stat-pill">
-                                    <CreditCard size={12} />
-                                    <span>Plan: <strong>₹{membership?.packagePrice?.toLocaleString('en-IN') || '0'}{membership?.planDuration ? ` / ${membership.planDuration}` : ''}</strong></span>
+                            </div>
+
+                            <div className="mm-hero__stats-section">
+                                <div className="mm-hero__stats-row">
+                                    <div className="mm-hero__stat-pill">
+                                        <Calendar size={12} />
+                                        <span>Started: <strong>{membership?.startDate ? formatDate(membership.startDate) : 'N/A'}</strong></span>
+                                    </div>
+                                    <div className="mm-hero__stat-pill">
+                                        <Clock size={12} />
+                                        <span>Expires: <strong>{membership?.endDate ? formatDate(membership.endDate) : 'N/A'}</strong></span>
+                                    </div>
+                                    <div className="mm-hero__stat-pill">
+                                        <CreditCard size={12} />
+                                        <span>Plan: <strong>₹{membership?.packagePrice?.toLocaleString('en-IN') || '0'}{membership?.planDuration ? ` / ${membership.planDuration}` : ''}</strong></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="mm-hero__progress-container">
-                        <div className="mm-hero__progress-bar">
-                            <motion.div
-                                className="mm-hero__progress-fill"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${progressPercentage}%` }}
-                                transition={{ duration: 1.2, ease: 'easeOut' }}
-                            />
+                        <div className="mm-hero__progress-container">
+                            <div className="mm-hero__progress-bar">
+                                <motion.div
+                                    className="mm-hero__progress-fill"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${progressPercentage}%` }}
+                                    transition={{ duration: 1.2, ease: 'easeOut' }}
+                                />
+                            </div>
+                            <div className="mm-hero__progress-labels">
+                                <span>{membership?.startDate ? formatDate(membership.startDate) : ''}</span>
+                                <span>{membership?.endDate ? formatDate(membership.endDate) : ''}</span>
+                            </div>
                         </div>
-                        <div className="mm-hero__progress-labels">
-                            <span>{membership?.startDate ? formatDate(membership.startDate) : ''}</span>
-                            <span>{membership?.endDate ? formatDate(membership.endDate) : ''}</span>
+                    </div>
+                    
+                    {/* RIGHT SIDE - Stats vertical list */}
+                    <div className="mm-hero__stats-vertical">
+                        <div className="mm-hero__stat-item">
+                            <span className="mm-hero__stat-value">{usageStats.gymVisits}</span>
+                            <span className="mm-hero__stat-label">Visits</span>
                         </div>
-                    </div>
-                </div>
-            </motion.div>
-
-            <motion.div className="mm-quick-stats" variants={itemVariants}>
-                <div className="mm-quick-stat">
-                    <div className="mm-quick-stat__icon mm-quick-stat__icon--blue">
-                        <MapPin size={16} />
-                    </div>
-                    <div className="mm-quick-stat__info">
-                        <span className="mm-quick-stat__value">{usageStats.gymVisits}</span>
-                        <span className="mm-quick-stat__label">Visits</span>
-                    </div>
-                </div>
-                <div className="mm-quick-stat">
-                    <div className="mm-quick-stat__icon mm-quick-stat__icon--green">
-                        <Flame size={16} />
-                    </div>
-                    <div className="mm-quick-stat__info">
-                        <span className="mm-quick-stat__value">{usageStats.streak}</span>
-                        <span className="mm-quick-stat__label">Streak</span>
-                    </div>
-                </div>
-                <div className="mm-quick-stat">
-                    <div className="mm-quick-stat__icon mm-quick-stat__icon--purple">
-                        <Heart size={16} />
-                    </div>
-                    <div className="mm-quick-stat__info">
-                        <span className="mm-quick-stat__value">{(usageStats.calories / 1000).toFixed(1)}k</span>
-                        <span className="mm-quick-stat__label">Calories</span>
-                    </div>
-                </div>
-                <div className="mm-quick-stat">
-                    <div className="mm-quick-stat__icon mm-quick-stat__icon--amber">
-                        <Award size={16} />
-                    </div>
-                    <div className="mm-quick-stat__info">
-                        <span className="mm-quick-stat__value">{usageStats.points}</span>
-                        <span className="mm-quick-stat__label">Points</span>
+                        <div className="mm-hero__stat-item">
+                            <span className="mm-hero__stat-value">{usageStats.streak}</span>
+                            <span className="mm-hero__stat-label">Streak</span>
+                        </div>
+                        <div className="mm-hero__stat-item">
+                            <span className="mm-hero__stat-value">{(usageStats.calories / 1000).toFixed(1)}k</span>
+                            <span className="mm-hero__stat-label">Calories</span>
+                        </div>
+                        <div className="mm-hero__stat-item">
+                            <span className="mm-hero__stat-value">{usageStats.points}</span>
+                            <span className="mm-hero__stat-label">Points</span>
+                        </div>
                     </div>
                 </div>
             </motion.div>

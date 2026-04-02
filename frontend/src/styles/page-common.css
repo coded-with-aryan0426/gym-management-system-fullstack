@@ -1826,3 +1826,39 @@ body.light-mode {
   background: transparent;
   border-color: var(--border-color, rgba(99, 102, 241, 0.15));
 }
+
+/* === Compact Mode Modifier === */
+.page--compact {
+  --compact-pad: 6px;
+  --compact-gap: 6px;
+}
+
+.page--compact .pg-page {
+  padding: 4px 8px 8px;
+}
+
+.page--compact .pg-header {
+  margin-bottom: 4px;
+}
+
+.page--compact .pg-header__row-1 {
+  gap: 8px;
+}
+
+.page--compact .pg-stat-card {
+  padding: 3px 7px;
+  gap: 4px;
+}
+
+.page--compact .pg-stat-card__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.page--compact .pg-stat-card__value {
+  font-size: 13px;
+}
+
+.page--compact .pg-stat-card__label {
+  font-size: 9px;
+}

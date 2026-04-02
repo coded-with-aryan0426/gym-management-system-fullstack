@@ -308,3 +308,30 @@
     padding-top: max(16px, env(safe-area-inset-top));
   }
 }
+
+/* === Compact Dashboard Overrides === */
+@media (max-width: 1024px) {
+  .dash {
+    padding: 6px 8px 12px;
+  }
+  .dash__header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .dash__kpi-row {
+    flex-wrap: wrap;
+  }
+  .dash__kpi {
+    flex: 0 0 calc(33.333% - 4px);
+    min-width: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .dash {
+    padding: 4px 6px 8px;
+  }
+  .dash__kpi {
+    flex: 0 0 calc(50% - 4px);
+  }
+}

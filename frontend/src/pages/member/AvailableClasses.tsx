@@ -13,6 +13,7 @@ import { toast } from 'react-hot-toast';
 import { gymClassApi } from '../../services/api';
 import type { GymClassDTO } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { SkeletonCard } from '../../components/ui/Skeleton';
 import '../../styles/macos-member.css';
 import './AvailableClasses.css';
 
@@ -581,11 +582,20 @@ const AvailableClasses: React.FC = () => {
     if (loading) {
         return (
             <div className="classes-page">
-                <div className="classes-loading">
-                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
-                        <Loader2 size={24} className="classes-loading__icon" />
-                    </motion.div>
-                    <p>Loading classes...</p>
+                <div className="classes-topbar">
+                    <div className="classes-topbar__row">
+                        <div className="classes-topbar__left">
+                            <h1 className="classes-header__title">Class Schedule</h1>
+                            <p className="classes-header__subtitle">Browse and book available sessions</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Skeleton for class cards */}
+                <div className="classes-grid" style={{ marginTop: '24px' }}>
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <SkeletonCard key={i} hasImage={false} lines={4} />
+                    ))}
                 </div>
             </div>
         );

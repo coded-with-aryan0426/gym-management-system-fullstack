@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
-import { memberProgressApi } from '../../services/api';
+import { memberProgressApi, WorkoutLogDTO } from '../../services/api';
+import toast from 'react-hot-toast';
 
 interface Workout {
     id: number;
@@ -17,6 +18,15 @@ interface Workout {
     improvement: number;
 }
 
+interface WorkoutFormData {
+    workoutDate: string;
+    workoutType: string;
+    durationMinutes: number;
+    caloriesBurned: number;
+    intensityLevel: number;
+    notes: string;
+}
+
 const WorkoutsTab: React.FC = () => {
     const { user } = useAuth();
     const memberId = Number(user?.userId || user?.id);
@@ -24,24 +34,109 @@ const WorkoutsTab: React.FC = () => {
     const [workouts, setWorkouts] = useState<Workout[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [showModal, setShowModal] = useState(false);
+    const [editingWorkout, setEditingWorkout] = useState<WorkoutLogDTO | null>(null);
+    const [formData, setFormData] = useState<WorkoutFormData>({
+        workoutDate: new Date().toISOString().split('T')[0],
+        workoutType: 'STRENGTH',
+        durationMinutes: 60,
+        caloriesBurned: 0,
+        intensityLevel: 5,
+        notes: ''
+    });
 
     useEffect(() => {
-        const fetchWorkouts = async () => {
-            if (!memberId) return;
-            
-            try {
-                setLoading(true);
-                const workoutsData = await memberProgressApi.getWorkouts(memberId);
-                setWorkouts(workoutsData);
-            } catch (error) {
-                console.error('Error fetching workouts:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchWorkouts();
     }, [memberId]);
+
+    const fetchWorkouts = async () => {
+        if (!memberId) return;
+        
+        try {
+            setLoading(true);
+            const [personalBests, workoutLogs] = await Promise.all([
+                memberProgressApi.getPersonalBests(memberId),
+                memberProgressApi.getWorkouts(memberId)
+            ]);
+            
+            // Map personal bests to workout format
+            const workoutsData = personalBests.map((pb: any) => ({
+                id: pb.id,
+                exercise: pb.exercise,
+                weightValue: pb.weightValue,
+                reps: pb.reps || 0,
+                unit: pb.unit || 'kg',
+                recordDate: pb.recordDate,
+                category: pb.category || 'push',
+                notes: pb.notes || '',
+                pbValue: pb.weightValue,
+                pbDate: pb.recordDate,
+                improvement: pb.previousBest ? pb.weightValue - pb.previousBest : 0
+            }));
+            
+            setWorkouts(workoutsData);
+        } catch (error) {
+            console.error('Error fetching workouts:', error);
+            toast.error('Failed to load workouts');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!memberId) return;
+        
+        try {
+            const dto: WorkoutLogDTO = {
+                workoutDate: formData.workoutDate,
+                workoutType: formData.workoutType,
+                durationMinutes: formData.durationMinutes,
+                caloriesBurned: formData.caloriesBurned,
+                intensityLevel: formData.intensityLevel,
+                notes: formData.notes
+            };
+
+            await memberProgressApi.createWorkout(memberId, dto);
+            toast.success('Workout logged successfully!');
+            setShowModal(false);
+            resetForm();
+            fetchWorkouts();
+        } catch (error) {
+            console.error('Error logging workout:', error);
+            toast.error('Failed to log workout');
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!memberId || !confirm('Delete this workout?')) return;
+        
+        try {
+            await memberProgressApi.deleteWorkout(memberId, id);
+            toast.success('Workout deleted');
+            fetchWorkouts();
+        } catch (error) {
+            console.error('Error deleting workout:', error);
+            toast.error('Failed to delete workout');
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({
+            workoutDate: new Date().toISOString().split('T')[0],
+            workoutType: 'STRENGTH',
+            durationMinutes: 60,
+            caloriesBurned: 0,
+            intensityLevel: 5,
+            notes: ''
+        });
+        setEditingWorkout(null);
+    };
+
+    const openModal = () => {
+        resetForm();
+        setShowModal(true);
+    };
 
     const getCategoryName = (category: string) => {
         const categories: Record<string, string> = {
@@ -151,7 +246,7 @@ const WorkoutsTab: React.FC = () => {
                             <option value="cardio">Cardio</option>
                         </select>
                     </div>
-                    <button className="btn-primary btn-sm">
+                    <button className="btn-primary btn-sm" onClick={openModal}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <line x1="12" y1="5" x2="12" y2="19"/>
                             <line x1="5" y1="12" x2="19" y2="12"/>
@@ -217,7 +312,7 @@ const WorkoutsTab: React.FC = () => {
                                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                             </svg>
                                         </button>
-                                        <button className="workout-action-btn">
+                                        <button className="workout-action-btn" onClick={() => handleDelete(workout.id)}>
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <polyline points="3 6 5 6 21 6"/>
                                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -265,6 +360,120 @@ const WorkoutsTab: React.FC = () => {
                     )}
                 </div>
             )}
+
+            {/* Workout Form Modal */}
+            <AnimatePresence>
+                {showModal && (
+                    <motion.div 
+                        className="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowModal(false)}
+                    >
+                        <motion.div 
+                            className="modal-content"
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="modal-header">
+                                <h3>Log Workout</h3>
+                                <button className="modal-close" onClick={() => setShowModal(false)}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"/>
+                                        <line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <form onSubmit={handleSubmit} className="modal-form">
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Date</label>
+                                        <input
+                                            type="date"
+                                            value={formData.workoutDate}
+                                            onChange={(e) => setFormData({...formData, workoutDate: e.target.value})}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Workout Type</label>
+                                        <select
+                                            value={formData.workoutType}
+                                            onChange={(e) => setFormData({...formData, workoutType: e.target.value})}
+                                            required
+                                        >
+                                            <option value="STRENGTH">Strength Training</option>
+                                            <option value="CARDIO">Cardio</option>
+                                            <option value="HIIT">HIIT</option>
+                                            <option value="YOGA">Yoga</option>
+                                            <option value="CROSSFIT">CrossFit</option>
+                                            <option value="SPORTS">Sports</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Duration (minutes)</label>
+                                        <input
+                                            type="number"
+                                            value={formData.durationMinutes}
+                                            onChange={(e) => setFormData({...formData, durationMinutes: Number(e.target.value)})}
+                                            min="1"
+                                            max="300"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Calories Burned</label>
+                                        <input
+                                            type="number"
+                                            value={formData.caloriesBurned}
+                                            onChange={(e) => setFormData({...formData, caloriesBurned: Number(e.target.value)})}
+                                            min="0"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Intensity Level (1-10)</label>
+                                    <input
+                                        type="range"
+                                        value={formData.intensityLevel}
+                                        onChange={(e) => setFormData({...formData, intensityLevel: Number(e.target.value)})}
+                                        min="1"
+                                        max="10"
+                                    />
+                                    <div className="intensity-display">{formData.intensityLevel}/10</div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Notes</label>
+                                    <textarea
+                                        value={formData.notes}
+                                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                                        rows={3}
+                                        placeholder="How did the workout feel? Any achievements?"
+                                    />
+                                </div>
+
+                                <div className="modal-footer">
+                                    <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="btn-primary">
+                                        Log Workout
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 };

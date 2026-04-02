@@ -29,12 +29,13 @@ import {
   Moon,
   Sun,
   Monitor
+  CheckSquare
 } from "lucide-react"
 import { Logo } from "../ui/Logo"
 import { usePermissionBasedNavigation } from '../../contexts/MultiRoleAuthContext'
 import { useMultiRoleAuth } from '../../contexts/MultiRoleAuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
-import { ADMIN_ICONS, TRAINER_ICONS, MEMBER_ICONS } from "../icons"
+
 import "./CommandRail.css"
 
 interface MultiRoleCommandRailProps {
@@ -45,21 +46,51 @@ interface MultiRoleCommandRailProps {
 const iconMap: Record<string, any> = {
   dashboard: LayoutDashboard,
   members: Users,
+  member-management: Users,
+  member-registration: Users,
+  membership-plans: CreditCard,
   trainers: UserCheck,
+  trainer-management: UserCheck,
+  trainer-assignment: UserCheck,
+  staff: UserCog,
+  staff-management: UserCog,
+  staff-schedules: CalendarDays,
+  performance: BarChart3,
   sessions: Activity,
   billing: CreditCard,
+  financial-management: CreditCard,
+  payments: CreditCard,
+  refunds: CreditCard,
   analytics: BarChart3,
-  equipment: Dumbbell,
-  settings: Settings,
   reports: FileText,
-  staff: UserCog,
+  equipment: Dumbbell,
+  equipment-management: Dumbbell,
+  maintenance: Dumbbell,
+  classes: BookOpen,
+  attendance: CheckSquare,
+  tasks: CheckSquare,
   profile: User,
+  settings: Settings,
   messages: Mail,
   notifications: Bell,
-  classes: BookOpen,
   bookings: CalendarCheck,
   progress: HeartPulse,
-  membership: CreditCard
+  membership: CreditCard,
+  financials: CreditCard,
+  schedule: CalendarDays,
+  my-schedule: CalendarDays,
+  my-members: Users,
+  my-classes: BookOpen,
+  progress-notes: FileText,
+  notes: FileText,
+  progress-tracking: HeartPulse,
+  trainer-progress: HeartPulse,
+  trainer-profile: User,
+  my-profile: User,
+  trainer-dashboard: LayoutDashboard,
+  member-dashboard: LayoutDashboard,
+  owner-dashboard: LayoutDashboard,
+  admin-dashboard: LayoutDashboard
 }
 
 const colorMap: Record<string, string> = {
@@ -109,33 +140,7 @@ const MultiRoleCommandRail: React.FC<MultiRoleCommandRailProps> = ({
       return '/notifications';
     };
   
-    const getIconMap = () => {
-      if (role === 'TRAINER') return TRAINER_ICONS;
-      if (role === 'MEMBER' || role === 'CUSTOMER') return MEMBER_ICONS;
-      return ADMIN_ICONS;
-    };
 
-    const getIcon = (id: string, color: string, isActive: boolean) => {
-      const icons = getIconMap();
-      const IconComponent = icons[id] || iconMap[id] || Settings;
-      
-      // Check if it's a custom animated icon (function) or Lucide icon (class)
-      if (typeof IconComponent === 'function') {
-        return React.createElement(IconComponent, {
-          size: isActive ? 20 : 18,
-          className: isActive ? "opacity-100" : "opacity-80",
-          style: { color }
-        });
-      }
-      
-      return (
-        <IconComponent 
-          size={isActive ? 20 : 18} 
-          strokeWidth={isActive ? 2.5 : 2}
-          style={{ color: isActive ? color : 'inherit' }} 
-        />
-      );
-    }
 
   const renderNavItems = (items: any[]) => {
     return items.map((item) => {
@@ -154,7 +159,16 @@ const MultiRoleCommandRail: React.FC<MultiRoleCommandRailProps> = ({
           } as React.CSSProperties)}
         >
           <span className="command-rail__icon">
-            {getIcon(item.id, color, isActive)}
+            {(() => {
+              const IconComponent = iconMap[item.id] || Settings;
+              return (
+                <IconComponent
+                  size={isActive ? 20 : 18}
+                  strokeWidth={isActive ? 2.5 : 2}
+                  style={{ color: isActive ? color : 'inherit' }}
+                />
+              );
+            })()}
           </span>
           
           <AnimatePresence mode="wait">

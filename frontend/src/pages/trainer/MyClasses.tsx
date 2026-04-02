@@ -3,8 +3,8 @@ import {
     ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon,
     List, Clock, MapPin, Users, Download, MoreVertical,
     Play, CheckCircle, AlertCircle, XCircle, UserCheck, Bell, Clipboard,
-    TrendingUp, Zap, Target, Loader2, Edit, Trash2, FileText,
-    Activity, Star, Dumbbell, PersonStanding, BarChart2
+    TrendingUp, Zap, Target, Loader2, Edit, Trash2, FileText, Copy,
+    Activity, Star, Dumbbell, PersonStanding, BarChart2, X
 } from 'lucide-react';
 import { trainerApi } from '../../services/trainerApi';
 import type { TrainerClassItem } from '../../services/trainerApi';
@@ -55,6 +55,9 @@ const MyClasses: React.FC = () => {
     const [reportClassItem, setReportClassItem] = useState<TrainerClassItem | null>(null);
     const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
     const [editingClass, setEditingClass] = useState<TrainerClassItem | null>(null);
+    const [duplicatingClass, setDuplicatingClass] = useState<TrainerClassItem | null>(null);
+    const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+    const [duplicateDate, setDuplicateDate] = useState<string>('');
 
     useEffect(() => { localStorage.setItem('trainer_classes_view_mode', viewMode); }, [viewMode]);
 
@@ -137,6 +140,7 @@ const MyClasses: React.FC = () => {
         setActionLoading(id);
         try {
             await trainerApi.deleteClass(id);
+            showToast.success('Class deleted successfully');
             await fetchClasses();
         } catch (e) {
             console.error('Delete failed:', e);
@@ -144,6 +148,30 @@ const MyClasses: React.FC = () => {
         } finally {
             setActionLoading(null);
             setActiveMenuId(null);
+        }
+    };
+
+    const handleDuplicate = (cls: TrainerClassItem) => {
+        setDuplicatingClass(cls);
+        setDuplicateDate(new Date().toISOString().split('T')[0]);
+        setShowDuplicateModal(true);
+        setActiveMenuId(null);
+    };
+
+    const confirmDuplicate = async () => {
+        if (!duplicatingClass || !duplicateDate) return;
+        setActionLoading(duplicatingClass.id);
+        try {
+            await trainerApi.duplicateClass(duplicatingClass.id, duplicateDate);
+            showToast.success('Class duplicated successfully');
+            setShowDuplicateModal(false);
+            setDuplicatingClass(null);
+            await fetchClasses();
+        } catch (e) {
+            console.error('Duplicate failed:', e);
+            showToast.error('Failed to duplicate class. Please try again.');
+        } finally {
+            setActionLoading(null);
         }
     };
 
@@ -442,6 +470,7 @@ const MyClasses: React.FC = () => {
                                         {activeMenuId === cls.id && (
                                             <div className="mc__dropdown">
                                                 <button onClick={() => handleEdit(cls)}><Edit size={12} /> Edit</button>
+                                                <button onClick={() => handleDuplicate(cls)}><FileText size={12} /> Duplicate</button>
                                                 <button onClick={() => handleViewReport(cls)}><FileText size={12} /> Details</button>
                                                 <button className="mc__dropdown-danger" onClick={() => handleDelete(cls.id)}><Trash2 size={12} /> Delete</button>
                                             </div>
@@ -484,6 +513,54 @@ const MyClasses: React.FC = () => {
                 onClose={() => setIsReportModalOpen(false)}
                 classItem={reportClassItem}
             />
+
+            {/* Duplicate Modal */}
+            {showDuplicateModal && (
+                <div className="ccm-overlay" onClick={() => setShowDuplicateModal(false)}>
+                    <div className="ccm" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+                        <div className="ccm__header">
+                            <div className="ccm__header-left">
+                                <h2 className="ccm__title">Duplicate Class</h2>
+                                <p className="ccm__subtitle">Choose a new date for the duplicated class</p>
+                            </div>
+                            <button className="ccm__close" onClick={() => setShowDuplicateModal(false)}><X size={18}/></button>
+                        </div>
+                        <div className="ccm__body" style={{ padding: '20px' }}>
+                            {duplicatingClass && (
+                                <div style={{ marginBottom: '20px', padding: '12px', background: 'rgba(139,92,246,0.1)', borderRadius: '8px' }}>
+                                    <div style={{ fontWeight: 500, marginBottom: '4px' }}>{duplicatingClass.title}</div>
+                                    <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+                                        {duplicatingClass.startTime} – {duplicatingClass.endTime} • {duplicatingClass.room}
+                                    </div>
+                                </div>
+                            )}
+                            <div className="ccm__field">
+                                <label className="ccm__field-label">New Date</label>
+                                <div className="ccm__input-wrap">
+                                    <input
+                                        type="date"
+                                        className="ccm__input"
+                                        value={duplicateDate}
+                                        onChange={e => setDuplicateDate(e.target.value)}
+                                        min={new Date().toISOString().split('T')[0]}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="ccm__footer">
+                            <button type="button" className="ccm__btn-cancel" onClick={() => setShowDuplicateModal(false)}>Cancel</button>
+                            <button 
+                                type="button" 
+                                className="ccm__btn-submit" 
+                                onClick={confirmDuplicate}
+                                disabled={!duplicateDate || actionLoading === duplicatingClass?.id}
+                            >
+                                {actionLoading === duplicatingClass?.id ? 'Duplicating...' : 'Duplicate Class'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

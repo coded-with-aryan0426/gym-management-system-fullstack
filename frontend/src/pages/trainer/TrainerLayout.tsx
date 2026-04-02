@@ -19,7 +19,7 @@ const TrainerLayout: React.FC<TrainerLayoutProps> = ({ children }) => {
         { path: '/trainer', label: 'Dashboard', key: 'dashboard', color: '#EF4444', end: true },
         { path: '/trainer/profile', label: 'My Profile', key: 'profile', color: '#3B82F6' },
         { path: '/trainer/members', label: 'My Members', key: 'my-members', color: '#8B5CF6' },
-        { path: '/trainer/member-attendance', label: 'Member Attendance', key: 'myprogress', color: '#10B981' },
+        { path: '/trainer/member-attendance', label: 'Member Attendance', key: 'member-attendance', color: '#10B981' },
         { path: '/trainer/classes', label: 'My Classes', key: 'my-classes', color: '#10B981' },
         { path: '/trainer/schedule', label: 'My Schedule', key: 'my-schedule', color: '#F59E0B' },
         { path: '/trainer/progress-notes', label: 'Progress Notes', key: 'progress-notes', color: '#EC4899' },

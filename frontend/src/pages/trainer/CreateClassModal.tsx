@@ -74,6 +74,28 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // Validation
+        if (!formData.title.trim()) {
+            showToast.error('Please enter a class title');
+            return;
+        }
+        
+        if (formData.capacity < 1) {
+            showToast.error('Capacity must be at least 1');
+            return;
+        }
+        
+        if (formData.duration < 15) {
+            showToast.error('Duration must be at least 15 minutes');
+            return;
+        }
+        
+        if (!formData.room.trim()) {
+            showToast.error('Please enter a room/location');
+            return;
+        }
+        
         setLoading(true);
         try {
             const [hours, mins] = formData.startTime.split(':').map(Number);
@@ -83,22 +105,24 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
             const endTime = endDate.toTimeString().slice(0, 5);
 
             const payload = {
-                title: formData.title,
+                title: formData.title.trim(),
                 date: formData.date,
                 startTime: formData.startTime,
                 endTime,
                 duration: formData.duration,
-                room: formData.room,
+                room: formData.room.trim(),
                 capacity: formData.capacity,
                 type: formData.type,
                 recurring: formData.recurring,
-                notes: formData.notes
+                notes: formData.notes.trim()
             };
 
             if (editData) {
                 await trainerApi.updateClass(editData.id, payload);
+                showToast.success('Class updated successfully');
             } else {
                 await trainerApi.createClass(payload);
+                showToast.success('Class created successfully');
             }
             onClassCreated();
             onClose();

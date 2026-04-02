@@ -30,7 +30,7 @@ public class CheckIn {
     @Column(name = "CHECK_OUT_TIME")
     private LocalDateTime checkOutTime;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = CheckInStatusConverter.class)
     @Column(name = "STATUS", length = 20)
     private CheckInStatus status = CheckInStatus.ACTIVE;
 
@@ -107,5 +107,17 @@ public class CheckIn {
     public void checkOut() {
         this.checkOutTime = LocalDateTime.now();
         this.status = CheckInStatus.CHECKED_OUT;
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void normalizeStatus() {
+        if (this.status != null) {
+            String name = this.status.name();
+            if (name.contains("-") || name.contains(" ")) {
+                String normalized = name.toUpperCase().replace("-", "_").replace(" ", "_");
+                this.status = CheckInStatus.valueOf(normalized);
+            }
+        }
     }
 }

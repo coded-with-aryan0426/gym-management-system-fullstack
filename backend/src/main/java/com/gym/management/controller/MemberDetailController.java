@@ -48,7 +48,7 @@ public class MemberDetailController {
                 map.put("checkInId", c.getCheckInId());
                 map.put("checkInTime", c.getCheckInTime() != null ? c.getCheckInTime().toString() : null);
                 map.put("checkOutTime", c.getCheckOutTime() != null ? c.getCheckOutTime().toString() : null);
-                map.put("status", c.getStatus() != null ? c.getStatus() : "check-in");
+                map.put("status", c.getStatus() != null ? c.getStatus().name() : "ACTIVE");
                 return map;
             }).collect(Collectors.toList());
 

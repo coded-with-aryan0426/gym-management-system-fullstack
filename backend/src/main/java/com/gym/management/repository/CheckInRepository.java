@@ -16,10 +16,10 @@ import java.util.Optional;
 @Repository
 public interface CheckInRepository extends JpaRepository<CheckIn, Long> {
 
-    @Query("SELECT c FROM CheckIn c WHERE c.checkOutTime IS NULL AND c.gymId = :gymId ORDER BY c.checkInTime DESC")
+    @Query("SELECT c FROM CheckIn c JOIN FETCH c.user WHERE c.checkOutTime IS NULL AND c.gymId = :gymId ORDER BY c.checkInTime DESC")
     List<CheckIn> findActiveCheckInsByGymId(@Param("gymId") Long gymId);
 
-    @Query("SELECT c FROM CheckIn c WHERE c.checkOutTime IS NULL ORDER BY c.checkInTime DESC")
+    @Query("SELECT c FROM CheckIn c JOIN FETCH c.user WHERE c.checkOutTime IS NULL ORDER BY c.checkInTime DESC")
     List<CheckIn> findActiveCheckIns();
 
     @Query("SELECT c FROM CheckIn c JOIN FETCH c.user WHERE c.checkInTime >= :startOfDay AND c.gymId = :gymId ORDER BY c.checkInTime DESC")
@@ -56,7 +56,7 @@ public interface CheckInRepository extends JpaRepository<CheckIn, Long> {
     @Query("SELECT COUNT(c) FROM CheckIn c WHERE c.user.userId = :userId AND CAST(c.checkInTime AS DATE) = :date")
     long countByUserIdAndDate(@Param("userId") Long userId, @Param("date") LocalDate date);
 
-    @Query("SELECT c FROM CheckIn c WHERE c.user.userId = :userId AND c.checkInTime BETWEEN :start AND :end ORDER BY c.checkInTime DESC")
+    @Query("SELECT c FROM CheckIn c JOIN FETCH c.user WHERE c.user.userId = :userId AND c.checkInTime BETWEEN :start AND :end ORDER BY c.checkInTime DESC")
     List<CheckIn> findByUserUserIdAndDateRange(
             @Param("userId") Long userId,
             @Param("start") LocalDateTime start,
@@ -78,6 +78,6 @@ public interface CheckInRepository extends JpaRepository<CheckIn, Long> {
             @Param("weekStart") LocalDate weekStart,
             @Param("weekEnd") LocalDate weekEnd);
 
-    @Query("SELECT c FROM CheckIn c WHERE c.user.userId = :userId AND c.checkOutTime IS NOT NULL ORDER BY c.checkInTime DESC")
+    @Query("SELECT c FROM CheckIn c JOIN FETCH c.user WHERE c.user.userId = :userId AND c.checkOutTime IS NOT NULL ORDER BY c.checkInTime DESC")
     List<CheckIn> findCompletedCheckInsByUserId(@Param("userId") Long userId);
 }
