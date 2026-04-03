@@ -2579,49 +2579,6 @@ Git          & 2.x   & Version control \\
 \bottomrule
 \end{tabular}
 
-\subsection{A.2 Frontend Setup}\label{a.2-frontend-setup}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Clone repository}
-\FunctionTok{git}\NormalTok{ clone https://github.com/coded{-}with{-}aryan0426/gym{-}management{-}system{-}fullstack.git}
-\BuiltInTok{cd}\NormalTok{ gym{-}management{-}system{-}fullstack/frontend}
-
-\CommentTok{\# Install dependencies}
-\ExtensionTok{npm}\NormalTok{ install}
-
-\CommentTok{\# Configure environment}
-\FunctionTok{cp}\NormalTok{ .env.example .env}
-\CommentTok{\# Edit .env with your API base URL}
-
-\CommentTok{\# Start development server}
-\ExtensionTok{npm}\NormalTok{ run dev}
-\end{Highlighting}
-\end{Shaded}
-
-The frontend development server starts on \texttt{http://localhost:5173}
-by default.
-
-\subsection{A.3 Backend Setup}\label{a.3-backend-setup}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Navigate to backend directory}
-\BuiltInTok{cd}\NormalTok{ gym{-}management{-}system{-}fullstack/backend}
-
-\CommentTok{\# Configure database in application.properties:}
-\CommentTok{\# spring.datasource.url=jdbc:oracle:thin:@localhost:1521:orcl}
-\CommentTok{\# spring.datasource.username=YOUR\_DB\_USERNAME}
-\CommentTok{\# spring.datasource.password=YOUR\_DB\_PASSWORD}
-
-\CommentTok{\# Build and run}
-\ExtensionTok{./mvnw}\NormalTok{ spring{-}boot:run}
-\end{Highlighting}
-\end{Shaded}
-
-The backend API server starts on \texttt{http://localhost:8080} by
-default.
-
 \subsection{A.4 Environment Variables
 Reference}\label{a.4-environment-variables-reference}
 
@@ -2660,28 +2617,6 @@ Reference}\label{appendix-b-database-schema-reference}
 \texttt{notifications}      & \texttt{notification\_id} & System notifications \\
 \bottomrule
 \end{tabular}
-
-\subsection{B.2 Key Relationships}\label{b.2-key-relationships}
-
-\begin{itemize}
-\tightlist
-\item
-  Each \texttt{users} record is associated with one or more
-  \texttt{roles} via a join table.
-\item
-  Each \texttt{gym} has exactly one \texttt{owner} (foreign key to
-  \texttt{users}).
-\item
-  Each \texttt{membership} references one \texttt{membership\_package}
-  and one \texttt{user}.
-\item
-  Each \texttt{pt\_session} references one trainer \texttt{user}, one
-  member \texttt{user}, and belongs to one \texttt{gym}.
-\item
-  Each \texttt{conversation} contains zero or more \texttt{messages},
-  and involves two or more \texttt{users}.
-\end{itemize}
-
 
 \section*{Appendix C: API Endpoints
 Reference}\label{appendix-c-api-endpoints-reference}
@@ -2773,6 +2708,24 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \bottomrule
 \end{tabular}
 
+\clearpage
+
+\section*{Appendix E: Supplementary Materials}
+\addcontentsline{toc}{section}{Appendix E: Supplementary Materials}
+
+\subsection{E.1 Intern Assessment Form}
+\clearpage
+
+\subsection{E.2 Student Internship Evaluation}
+\clearpage
+
+\subsection{E.3 Final Year Internship Registration Form}
+\clearpage
+
+\subsection{E.4 Weekly Report}
+\clearpage
+
+\subsection{E.5 Research Paper}
 \clearpage
 
 \end{document}
