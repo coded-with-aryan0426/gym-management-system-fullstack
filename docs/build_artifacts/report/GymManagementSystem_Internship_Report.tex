@@ -2719,7 +2719,7 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 
 % ── Helper macro for a scored row ───────────────────────────────────────────
 \newcommand{\scoredrow}[1]{%
-  \noindent\begin{tabular}{|p{5.8cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|}
+  \noindent\begin{tabular}{|p{\dimexpr\textwidth-5cm-12\tabcolsep-7\arrayrulewidth\relax}|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{1cm}|}
   \hline
   #1 & 1 & 2 & 3 & 4 & 5 \\
   \hline
@@ -2729,29 +2729,30 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \vspace*{0.2cm}
 
 \begin{center}
-\begin{minipage}{13.8cm}
+\begin{minipage}{\textwidth}
 
 % ── Info table ──────────────────────────────────────────────────────────────
 \renewcommand{\arraystretch}{1.35}
-\begin{tabular}{@{}p{5.0cm} @{} p{0.3cm} @{} p{8.5cm}@{}}
-Enrolment Number                & : & \underline{\hspace{8.2cm}} \\
-Full Name of Intern             & : & \underline{\hspace{8.2cm}} \\
-Name of Organization            & : & \underline{\hspace{8.2cm}} \\
-External Supervisor             & : & \underline{\hspace{8.2cm}} \\
-Date                            & : & \underline{\hspace{8.2cm}} \\
-Intern's Position or Assignment & : & \underline{\hspace{8.2cm}} \\
-Project Title                   & : & \underline{\hspace{8.2cm}} \\
+\noindent\begin{tabular}{|p{5.0cm} | >{\centering\arraybackslash}p{0.5cm} | p{\dimexpr\textwidth-5.5cm-6\tabcolsep-4\arrayrulewidth\relax} |}
+\hline
+Enrolment Number                & : & \underline{\hspace{\dimexpr\linewidth-0.5cm\relax}} \\ \hline
+Full Name of Intern             & : & \underline{\hspace{\dimexpr\linewidth-0.5cm\relax}} \\ \hline
+Name of Organization            & : & \underline{\hspace{\dimexpr\linewidth-0.5cm\relax}} \\ \hline
+External Supervisor             & : & \underline{\hspace{\dimexpr\linewidth-0.5cm\relax}} \\ \hline
+Date                            & : & \underline{\hspace{\dimexpr\linewidth-0.5cm\relax}} \\ \hline
+Intern's Position or Assignment & : & \underline{\hspace{\dimexpr\linewidth-0.5cm\relax}} \\ \hline
+Project Title                   & : & \underline{\hspace{\dimexpr\linewidth-0.5cm\relax}} \\ \hline
 \end{tabular}
 
 \vspace{0.5cm}
 
 % ── Rating-scale legend ─────────────────────────────────────────────────────
 \renewcommand{\arraystretch}{1.1}
-\begin{tabular}{|>{\centering\arraybackslash}p{2.0cm}
-                |>{\centering\arraybackslash}p{2.0cm}
-                |>{\centering\arraybackslash}p{2.0cm}
-                |>{\centering\arraybackslash}p{2.0cm}
-                |>{\centering\arraybackslash}p{2.0cm}|}
+\noindent\begin{tabular}{|>{\centering\arraybackslash}p{\dimexpr0.2\textwidth-2\tabcolsep-1.2\arrayrulewidth\relax}
+                |>{\centering\arraybackslash}p{\dimexpr0.2\textwidth-2\tabcolsep-1.2\arrayrulewidth\relax}
+                |>{\centering\arraybackslash}p{\dimexpr0.2\textwidth-2\tabcolsep-1.2\arrayrulewidth\relax}
+                |>{\centering\arraybackslash}p{\dimexpr0.2\textwidth-2\tabcolsep-1.2\arrayrulewidth\relax}
+                |>{\centering\arraybackslash}p{\dimexpr0.2\textwidth-2\tabcolsep-1.2\arrayrulewidth\relax}|}
 \hline
 1 & 2 & 3 & 4 & 5 \\
 \hline
@@ -2789,7 +2790,7 @@ Superior Performance \\
 
 % ── Page 2 ──────────────────────────────────────────────────────────────────
 \begin{center}
-\begin{minipage}{13.8cm}
+\begin{minipage}{\textwidth}
 
 \vspace{0.3cm}
 
@@ -2837,7 +2838,7 @@ Superior Performance \\
 
 % ── Page 3 ──────────────────────────────────────────────────────────────────
 \begin{center}
-\begin{minipage}{13.8cm}
+\begin{minipage}{\textwidth}
 
 \vspace{0.3cm}
 
