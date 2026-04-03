@@ -2754,7 +2754,7 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \hline
 Full Name of Student & : Aryan Suthar \\ \hline
 Enrolment Number & : 23C25512 \\ \hline
-Contact No. & : \\ \hline
+Contact No. & : 9712030021 \\ \hline
 Email Address & : aryan.suthar@itmbu.ac.in \\ \hline
 Programme & : B.Tech \\ \hline
 Specialization & : Information Technology \\ \hline
@@ -2776,7 +2776,118 @@ External Supervisor & : Dr. Ashutosh Abhangi \\ \hline
 \clearpage
 
 \subsection{E.4 Weekly Report}
+
+\newcommand{\weeklyreport}[5]{
+\begin{center}
+  \textsf{\textbf{\Large FINAL YEAR INTERNSHIP WEEKLY REPORT}}
+\end{center}
+
+\vspace{0.1cm}
+
+\noindent
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|p{\dimexpr 0.5\textwidth - 2\tabcolsep - 1.5\arrayrulewidth \relax}|p{\dimexpr 0.5\textwidth - 2\tabcolsep - 1.5\arrayrulewidth \relax}|}
+\hline
+Year: 2025-26 & Week No. : #1 \\ \hline
+\multicolumn{2}{|l|}{Student Name and Enrolment Number: Suthar Aryan -- 23C25512} \\ \hline
+\multicolumn{2}{|l|}{Supervisor Name: Dr. Ashutosh Abhangi} \\ \hline
+\multicolumn{2}{|l|}{Project Title: Smart Gym Management System (React + Spring Boot + Oracle)} \\ \hline
+\end{tabular}
+
+\vspace{0.1cm}
+
+\noindent
+\begin{tabular}{|p{\dimexpr \textwidth - 2\tabcolsep - 2\arrayrulewidth \relax}|}
+\hline
+\textbf{1. WORK DONE} \\
+{[}Please write the details of the work done in the last fortnight{]} \\
+#2
+\\ \hline
+\textbf{2. WORK TO BE DONE} \\
+#3
+\\ \hline
+\textbf{3. PROBLEMS ENCOUNTERED} \\
+#4
+\\ \hline
+\textbf{4. SELF EVALUATION OF THE PROGRESS} \\
+#5
+\\ \hline
+\end{tabular}
+
+\vspace{0.6cm}
+
+\noindent \begin{tabular}{@{}p{0.5\textwidth} p{0.5\textwidth}@{}}
+\noindent \rule{5cm}{0.4pt} & \noindent \rule{5cm}{0.4pt} \\
+Supervisor Signature & Student Signature
+\end{tabular}
+
 \clearpage
+}
+
+% --- REVIEW PHASE 1 ---
+\weeklyreport{Review Phase-1}%
+{- Project Planning: Defined project scope for a B2B SaaS Gym Management System covering members, trainers, sessions, and financials.\newline
+- Multi-Role System Design: Designed a single-user multi-role system (Admin, Trainer, Member) with permission-based access.\newline
+- Database Architecture Design: Created initial database structure supporting multiple roles without duplication.\newline
+- Access Control Strategy: Shifted from role-based to permission-based system for flexibility and scalability.\newline
+- System Research: Studied real-world SaaS systems and workflows to align project with practical industry scenarios.}%
+{- ER Diagram Design: Create complete entity-relationship model.\newline
+- UML \& DFD Creation: Develop system diagrams for better structure understanding.\newline
+- Architecture Finalization: Define full system architecture and tech stack.}%
+{- Multi-Role Complexity: Designing users with multiple roles without confusion.\newline
+- Data Duplication Risk: Avoiding duplicate records for trainer/member roles.\newline
+- Access Control Design: Ensuring secure and scalable permission handling.}%
+{- Status: Excellent\newline
+- Assessment: A strong foundation was established with scalable database design and multi-role architecture aligned with real-world SaaS systems.}
+
+% --- REVIEW PHASE 2 ---
+\weeklyreport{Review Phase-2}%
+{- ER Diagram Design: Created complete ER diagram covering authentication, gym management, and membership modules.\newline
+- Data Flow Diagrams: Developed Level 0, 1, and 2 DFDs to represent system processes.\newline
+- UML Modeling: Designed Class, Use Case, Sequence, and Activity diagrams.\newline
+- Algorithm Documentation: Defined core workflows like authentication and role-based access.\newline
+- System Architecture: Finalized overall architecture and selected technologies (React, Spring Boot, Oracle).}%
+{- Frontend Development: Start UI implementation (Landing Page \& Authentication).\newline
+- Project Setup: Initialize frontend and backend code structure.\newline
+- Design System: Define UI consistency (colors, typography, components).}%
+{- Complex Relationships: Handling many-to-many relations for roles and permissions.\newline
+- Diagram Management: Making large system diagrams clear and readable.}%
+{- Status: Excellent\newline
+- Assessment: Strong theoretical and architectural base created, reducing future development complexity.}
+
+% --- REVIEW PHASE 3 ---
+\weeklyreport{Review Phase-3}%
+{- UI/UX Design \& Implementation: Designed and built responsive Landing Page with modern sections and animations.\newline
+- Authentication UI: Developed Login and Signup interfaces with validation and feedback.\newline
+- Design System Implementation: Established UI consistency using Tailwind CSS (colors, typography, spacing).\newline
+- Frontend Architecture: Set up React project, routing, and integrated libraries (Framer Motion, Lucide).\newline
+- Reusable Components: Built core UI components (Buttons, Inputs, Cards, Modals).}%
+{- Dashboard UI Development: Create main dashboard with sidebar and topbar.\newline
+- State Management: Implement global state using Context or Redux.\newline
+- Profile Pages: Develop user profile and settings UI.\newline
+- API Integration Setup: Prepare frontend for backend connectivity.}%
+{- Responsive Animations: Optimizing animations across devices.\newline
+- Component Design: Managing reusable component flexibility.\newline
+- Theme Consistency: Handling dark/light mode properly.}%
+{- Status: Excellent\newline
+- Assessment: Built a strong and scalable frontend foundation with modern UI and reusable components.}
+
+% --- REVIEW PHASE 4 ---
+\weeklyreport{Review Phase-4}%
+{- Data Dictionary Creation: Defined all tables, fields, data types, and constraints for core modules.\newline
+- Schema Finalization: Converted ER design into structured relational database schema.\newline
+- Freeform Dynamic Data Design: Designed flexible system for dynamic membership plan creation.\newline
+- Backend Entity Setup: Implemented JPA entities with relationships (@OneToMany, @ManyToMany).\newline
+- Validation Planning: Defined rules for consistent frontend and backend data validation.}%
+{- CRUD API Development: Implement backend APIs for core modules.\newline
+- Dynamic Data Testing: Validate storage and retrieval of flexible data.\newline
+- Security Integration: Implement permission-based access control.\newline
+- Dashboard Integration: Connect backend data with frontend dashboard.}%
+{- Schema Flexibility: Balancing structured database with dynamic features.\newline
+- Dynamic Mapping: Handling flexible data in fixed schema.\newline
+- Constraint Handling: Managing relationships with dynamic configurations.}%
+{- Status: Excellent\newline
+- Assessment: Transitioned from UI to data-driven architecture with strong database foundation and scalable backend structure.}
 
 % Embed the first page of the research paper, injecting the subsection title directly onto it.
 % We shift the PDF up by 11mm to fit perfectly close to the title.
