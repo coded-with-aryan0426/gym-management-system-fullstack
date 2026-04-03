@@ -1826,641 +1826,242 @@ The architecture was designed to accommodate future growth across three dimensio
 \clearpage
 
 
-\chapter{Algorithms - Gym Management
-System}\label{algorithms---gym-management-system}
 
-\section{JWT Authentication
-Algorithm}\label{jwt-authentication-algorithm}
+\chapter{System Logic \& Workflows}\label{system-logic-workflows}
 
-\subsection{Token Generation}\label{token-generation}
+\noindent
+This chapter presents the complete internal logic of the AthlonX Gym Management System. Each section begins with a process flowchart showing the system flow, followed immediately by the corresponding algorithm that implements it --- creating a direct connection between \textit{process} and \textit{logic} for clarity and ease of evaluation.
 
-\begin{lstlisting}[style=algo]
-ALGORITHM: JWT_Token_Generation
-INPUT: User user, Set<Role> roles
-OUTPUT: String jwtToken
+% ─────────────────────────────────────────────────────────────
+\section{User Authentication Flow \& Algorithm}\label{sec-auth}
 
-BEGIN
-    // Create claims payload
-    claims = {
-        "sub": user.username,
-        "userId": user.userId,
-        "email": user.email,
-        "roles": roles.map(r -> r.roleName),
-        "iat": currentTimestamp(),
-        "exp": currentTimestamp() + TOKEN_VALIDITY_MS
-    }
-    
-    // Sign with HMAC-SHA512
-    header = {
-        "alg": "HS512",
-        "typ": "JWT"
-    }
-    
-    signature = HMAC_SHA512(
-        base64Encode(header) + "." + base64Encode(claims),
-        SECRET_KEY
-    )
-    
-    RETURN base64Encode(header) + "." + 
-           base64Encode(claims) + "." + 
-           base64Encode(signature)
-END
-\end{lstlisting}
+\noindent
+The authentication process is the entry point for all users. The flowcharts below show the complete registration and login flow, with the JWT algorithm immediately following.
 
-\subsection{Token Validation}\label{token-validation}
+\subsection{Registration \& Login Flowcharts}\label{wf-auth}
 
-\begin{lstlisting}[style=algo]
-ALGORITHM: JWT_Token_Validation
-INPUT: String token
-OUTPUT: Claims claims OR Exception
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_0.png}
+\caption*{Figure~5-1: User Registration Workflow}
+\end{figure}
 
-BEGIN
-    parts = token.split(".")
-    
-    IF parts.length != 3 THEN
-        THROW InvalidTokenException
-    END IF
-    
-    header = base64Decode(parts[0])
-    claims = base64Decode(parts[1])
-    signature = parts[2]
-    
-    // Verify signature
-    expectedSig = base64Encode(HMAC_SHA512(
-        parts[0] + "." + parts[1],
-        SECRET_KEY
-    ))
-    
-    IF signature != expectedSig THEN
-        THROW SignatureVerificationException
-    END IF
-    
-    // Check expiration
-    IF claims.exp < currentTimestamp() THEN
-        THROW TokenExpiredException
-    END IF
-    
-    RETURN claims
-END
-\end{lstlisting}
+\medskip\noindent
+The registration flow validates user data, hashes the password, creates the account, and triggers an OTP email for verification. After verification, the user is redirected to their role-specific dashboard.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_1.png}
+\caption*{Figure~5-2: Login with Two-Factor Authentication}
+\end{figure}
 
-\section{Role-Based Access Control (RBAC)
-Algorithm}\label{role-based-access-control-rbac-algorithm}
+\medskip\noindent
+On login, the system validates credentials and, if 2FA is enabled, sends a one-time password via email or SMS. The session is only established after successful OTP verification.
 
-\subsection{Permission Check}\label{permission-check}
+\subsection{Algorithm 1: JWT Authentication}\label{algo-jwt}
 
-\begin{lstlisting}[style=algo]
-ALGORITHM: RBAC_Permission_Check
-INPUT: User user, String module, String action
-OUTPUT: Boolean hasPermission
+\noindent\textbf{Purpose:} Securely authenticate a user and issue a stateless JSON Web Token (JWT) for all subsequent API requests.
 
-BEGIN
-    // Get all user roles
-    userRoles = user.getRoles()
-    
-    // Iterate through roles
-    FOR EACH role IN userRoles DO
-        permissions = getPermissionsByRole(role.roleId)
-        
-        FOR EACH permission IN permissions DO
-            IF permission.module == module AND 
-               permission.action == action THEN
-                RETURN TRUE
-            END IF
-            
-            // Check wildcard permissions
-            IF permission.module == "*" OR 
-               permission.action == "*" THEN
-                IF matchesWildcard(permission, module, action) THEN
-                    RETURN TRUE
-                END IF
-            END IF
-        END FOR
-    END FOR
-    
-    RETURN FALSE
-END
+\smallskip
+\noindent\textbf{How it works:}
+\begin{enumerate}
+  \item User submits email and password via the login form.
+  \item System retrieves the user record from the database by email.
+  \item BCrypt compares the submitted password with the stored hash.
+  \item If the match fails, authentication is rejected and an error is returned.
+  \item If the match succeeds, a JWT is created containing: User ID, email, roles, issue time, and expiry time.
+  \item The token is signed using HMAC-SHA512 with the server's secret key.
+  \item The signed token is returned to the client and stored in local storage.
+  \item For all future API requests, the client sends the token in the \texttt{Authorization: Bearer} header.
+  \item The server validates the token signature and expiry before granting access.
+\end{enumerate}
 
-FUNCTION matchesWildcard(permission, module, action):
-    IF permission.module == "*" THEN
-        RETURN permission.action == action OR 
-               permission.action == "*"
-    END IF
-    IF permission.action == "*" THEN
-        RETURN permission.module == module
-    END IF
-    RETURN FALSE
-END FUNCTION
-\end{lstlisting}
+\noindent\textbf{Used in:} Login endpoint, remember-me sessions, and all protected API routes.
 
-\subsection{Role Hierarchy}\label{role-hierarchy}
+% ─────────────────────────────────────────────────────────────
+\section{Role-Based Access Control Flow \& Algorithm}\label{sec-rbac}
 
-\begin{lstlisting}[style=algo]
-ROLE_HIERARCHY = {
-    ADMIN: [OWNER, TRAINER, MEMBER, CUSTOMER],
-    OWNER: [TRAINER, MEMBER],
-    TRAINER: [MEMBER],
-    MEMBER: [CUSTOMER],
-    CUSTOMER: []
-}
+\noindent
+After authentication, the system determines what each user is permitted to do. The flowchart shows the permission-check process; the algorithm defines the logic.
 
-ALGORITHM: Check_Role_Hierarchy
-INPUT: User user, String requiredRole
-OUTPUT: Boolean hasRole
+\subsection{RBAC \& Trainer Assignment Flow}\label{wf-rbac}
 
-BEGIN
-    userRoles = user.getRoles()
-    
-    FOR EACH role IN userRoles DO
-        IF role.name == requiredRole THEN
-            RETURN TRUE
-        END IF
-        
-        // Check inherited roles
-        inheritedRoles = ROLE_HIERARCHY[role.name]
-        IF requiredRole IN inheritedRoles THEN
-            RETURN TRUE
-        END IF
-    END FOR
-    
-    RETURN FALSE
-END
-\end{lstlisting}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_4.png}
+\caption*{Figure~5-3: Role-Based Access Control \& Trainer Assignment Flow}
+\end{figure}
 
+\medskip\noindent
+Gym owners assign trainers to members. The RBAC layer governs which menus, actions, and data each role can access --- ensuring OWNERS, TRAINERS, and MEMBERS each see only their relevant features.
 
-\section{Membership Package Assignment
-Algorithm}\label{membership-package-assignment-algorithm}
+\subsection{Algorithm 2: Role-Based Access Control (RBAC)}\label{algo-rbac}
 
-\begin{lstlisting}[style=algo]
-ALGORITHM: Assign_Membership
-INPUT: User member, MembershipPackage package, Gym gym
-OUTPUT: Membership membership
+\noindent\textbf{Purpose:} Ensure each user can only access features appropriate to their assigned role.
 
-BEGIN
-    // Validate inputs
-    IF member == NULL OR package == NULL OR gym == NULL THEN
-        THROW InvalidInputException
-    END IF
-    
-    // Check for existing active membership
-    existingMembership = findActiveMembership(member.userId, gym.gymId)
-    
-    IF existingMembership != NULL THEN
-        IF existingMembership.endDate > today() THEN
-            // Handle upgrade/extension
-            RETURN handleMembershipUpgrade(existingMembership, package)
-        END IF
-    END IF
-    
-    // Calculate dates
-    startDate = today()
-    endDate = startDate.plusDays(package.durationDays)
-    
-    // Create new membership
-    membership = new Membership()
-    membership.user = member
-    membership.gym = gym
-    membership.membershipPackage = package
-    membership.startDate = startDate
-    membership.endDate = endDate
-    membership.status = PENDING
-    membership.createdAt = now()
-    
-    // Assign PT session credits
-    IF package.includedPTSessions > 0 THEN
-        createPTSessionCredits(member, package.includedPTSessions)
-    END IF
-    
-    // Save and return
-    save(membership)
-    sendNotification(gym.owner, "New membership request")
-    
-    RETURN membership
-END
+\smallskip
+\noindent\textbf{Role Hierarchy (highest to lowest):}
 
-FUNCTION handleMembershipUpgrade(existing, newPackage):
-    // Calculate remaining value
-    remainingDays = existing.endDate - today()
-    remainingValue = (remainingDays / existing.package.durationDays) 
-                     * existing.package.price
-    
-    // Apply credit to new package
-    newPrice = newPackage.price - remainingValue
-    
-    // Extend end date
-    existing.membershipPackage = newPackage
-    existing.endDate = today().plusDays(newPackage.durationDays)
-    
-    save(existing)
-    RETURN existing
-END FUNCTION
-\end{lstlisting}
+\noindent\texttt{SUPER\_ADMIN $\rightarrow$ OWNER $\rightarrow$ TRAINER $\rightarrow$ MEMBER}
 
+\smallskip
+\noindent\textbf{How it works:}
+\begin{enumerate}
+  \item When a user makes an API request, the system reads their role from the JWT token.
+  \item The requested module and action are compared against the permissions table in the database.
+  \item If the user's role has a direct permission match, access is granted immediately.
+  \item If not, the system checks inherited roles (e.g., OWNER inherits TRAINER permissions).
+  \item If no match is found after checking all inherited roles, access is denied with HTTP 403.
+\end{enumerate}
 
-\section{Session Rating Calculation
-Algorithm}\label{session-rating-calculation-algorithm}
+\noindent\textbf{Example:} An OWNER viewing trainer schedules is granted access because OWNER inherits TRAINER-level permissions.
 
-\begin{lstlisting}[style=algo]
-ALGORITHM: Calculate_Trainer_Rating
-INPUT: Long trainerId
-OUTPUT: TrainerStats stats
+% ─────────────────────────────────────────────────────────────
+\section{Membership Management Flow \& Algorithm}\label{sec-membership}
 
-BEGIN
-    // Fetch all ratings for trainer
-    ratings = findRatingsByTrainerId(trainerId)
-    
-    IF ratings.isEmpty() THEN
-        RETURN TrainerStats(
-            averageRating: 0.0,
-            totalReviews: 0,
-            ratingDistribution: {}
-        )
-    END IF
-    
-    // Calculate statistics
-    totalSum = 0
-    distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
-    
-    FOR EACH rating IN ratings DO
-        totalSum = totalSum + rating.score
-        distribution[rating.score]++
-    END FOR
-    
-    averageRating = totalSum / ratings.size()
-    
-    // Round to 1 decimal place
-    averageRating = ROUND(averageRating * 10) / 10
-    
-    // Calculate weighted score (recent ratings worth more)
-    weightedSum = 0
-    weightTotal = 0
-    
-    FOR i = 0 TO ratings.size() - 1 DO
-        weight = 1 + (i * 0.1)  // Recent ratings weighted higher
-        weightedSum = weightedSum + (ratings[i].score * weight)
-        weightTotal = weightTotal + weight
-    END FOR
-    
-    weightedAverage = weightedSum / weightTotal
-    
-    RETURN TrainerStats(
-        averageRating: averageRating,
-        weightedRating: ROUND(weightedAverage * 10) / 10,
-        totalReviews: ratings.size(),
-        ratingDistribution: distribution
-    )
-END
-\end{lstlisting}
+\noindent
+Membership is the core business process of the system. The flowcharts below show both the purchase flow and expiry handling, with the assignment algorithm immediately following.
 
+\subsection{Membership Purchase \& Expiry Flows}\label{wf-membership}
 
-\section{Analytics Computation
-Algorithm}\label{analytics-computation-algorithm}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_2.png}
+\caption*{Figure~5-4: Membership Purchase Flow}
+\end{figure}
 
-\subsection{Revenue Calculation}\label{revenue-calculation}
+\medskip\noindent
+A member selects a package, which enters a pending state awaiting owner approval. On approval, the membership is activated and any included PT session credits are allocated to the member.
 
-\begin{lstlisting}[style=algo]
-ALGORITHM: Calculate_Revenue_Analytics
-INPUT: Long gymId, DateRange period
-OUTPUT: RevenueAnalytics analytics
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_3.png}
+\caption*{Figure~5-5: Membership Expiry Handling}
+\end{figure}
 
-BEGIN
-    transactions = findTransactionsByGymAndPeriod(gymId, period)
-    
-    // Calculate totals
-    totalRevenue = 0
-    revenueByType = {}
-    revenueByDay = {}
-    
-    FOR EACH txn IN transactions DO
-        IF txn.status == "COMPLETED" THEN
-            totalRevenue = totalRevenue + txn.amount
-            
-            // Group by type
-            type = txn.type
-            revenueByType[type] = (revenueByType[type] OR 0) + txn.amount
-            
-            // Group by day
-            day = txn.createdAt.toDate()
-            revenueByDay[day] = (revenueByDay[day] OR 0) + txn.amount
-        END IF
-    END FOR
-    
-    // Calculate growth
-    previousPeriod = shiftPeriod(period, -1)
-    previousRevenue = calculateTotalRevenue(gymId, previousPeriod)
-    
-    IF previousRevenue > 0 THEN
-        growthRate = ((totalRevenue - previousRevenue) / previousRevenue) * 100
-    ELSE
-        growthRate = 100
-    END IF
-    
-    // Project monthly
-    daysInPeriod = period.end - period.start
-    dailyAverage = totalRevenue / daysInPeriod
-    projectedMonthly = dailyAverage * 30
-    
-    RETURN RevenueAnalytics(
-        totalRevenue: totalRevenue,
-        growthRate: ROUND(growthRate, 2),
-        revenueByType: revenueByType,
-        revenueByDay: revenueByDay,
-        projectedMonthly: projectedMonthly
-    )
-END
-\end{lstlisting}
+\medskip\noindent
+A background job checks all memberships daily. Memberships past their end date are automatically marked as expired, and renewal notifications are sent to members.
 
-\subsection{Member Statistics}\label{member-statistics}
+\subsection{Algorithm 3: Membership Assignment}\label{algo-membership}
 
-\begin{lstlisting}[style=algo]
-ALGORITHM: Calculate_Member_Statistics
-INPUT: Long gymId
-OUTPUT: MemberStats stats
+\noindent\textbf{Purpose:} Handle the creation, upgrade, and lifecycle tracking of gym memberships.
 
-BEGIN
-    memberships = findMembershipsByGym(gymId)
-    
-    // Count by status
-    activeCount = 0
-    pendingCount = 0
-    expiredCount = 0
-    
-    // Track trends
-    newThisMonth = 0
-    newLastMonth = 0
-    
-    currentMonth = getMonthStart(today())
-    lastMonth = getMonthStart(today().minusMonths(1))
-    
-    FOR EACH membership IN memberships DO
-        SWITCH membership.status:
-            CASE ACTIVE:
-                activeCount++
-                IF membership.createdAt >= currentMonth THEN
-                    newThisMonth++
-                ELSE IF membership.createdAt >= lastMonth THEN
-                    newLastMonth++
-                END IF
-            CASE PENDING:
-                pendingCount++
-            CASE EXPIRED:
-                expiredCount++
-        END SWITCH
-    END FOR
-    
-    // Calculate retention
-    totalMembers = activeCount + expiredCount
-    IF totalMembers > 0 THEN
-        retentionRate = (activeCount / totalMembers) * 100
-    ELSE
-        retentionRate = 0
-    END IF
-    
-    // Calculate growth
-    IF newLastMonth > 0 THEN
-        growthRate = ((newThisMonth - newLastMonth) / newLastMonth) * 100
-    ELSE
-        growthRate = newThisMonth > 0 ? 100 : 0
-    END IF
-    
-    RETURN MemberStats(
-        totalActive: activeCount,
-        totalPending: pendingCount,
-        totalExpired: expiredCount,
-        newThisMonth: newThisMonth,
-        retentionRate: ROUND(retentionRate, 2),
-        monthlyGrowth: ROUND(growthRate, 2)
-    )
-END
-\end{lstlisting}
+\smallskip
+\noindent\textbf{How it works:}
+\begin{enumerate}
+  \item Member selects a membership package and submits a request.
+  \item System checks whether the member already has an active membership at that gym.
+  \item \textbf{If active membership exists:} Remaining days are credited back proportionally and the new package is applied with an extended end date.
+  \item \textbf{If no active membership:} A new membership record is created with status \texttt{PENDING}.
+  \item Start date is set to today; end date is calculated from the package duration.
+  \item If the package includes PT sessions, session credits are added to the member's account.
+  \item Gym owner receives a notification to approve or reject the request.
+  \item On approval, status changes to \texttt{ACTIVE}.
+\end{enumerate}
 
+\noindent\textbf{Used in:} Member dashboard --- Membership Purchase and Renewal flow.
 
-\section{Duplicate Package Cleanup
-Algorithm}\label{duplicate-package-cleanup-algorithm}
+% ─────────────────────────────────────────────────────────────
+\section{PT Session Booking Flow \& Password Security Algorithm}\label{sec-session}
 
-\begin{lstlisting}[style=algo]
-ALGORITHM: Cleanup_Duplicate_Packages
-INPUT: None (scheduled job)
-OUTPUT: Integer deletedCount
+\noindent
+Personal training sessions are booked using credit units allocated at membership purchase. The flowchart shows the session booking lifecycle, and the algorithm below explains how passwords are kept secure throughout every interaction.
 
-BEGIN
-    allPackages = findAllPackages()
-    
-    IF allPackages.size() < 2 THEN
-        RETURN 0
-    END IF
-    
-    // Group by name + duration (case-insensitive)
-    groupedPackages = {}
-    
-    FOR EACH pkg IN allPackages DO
-        key = toLowerCase(trim(pkg.packageName)) + "|" + pkg.durationDays
-        
-        IF groupedPackages[key] == NULL THEN
-            groupedPackages[key] = []
-        END IF
-        
-        groupedPackages[key].add(pkg)
-    END FOR
-    
-    // Find and delete duplicates
-    duplicatesToDelete = []
-    
-    FOR EACH key, packages IN groupedPackages DO
-        IF packages.size() > 1 THEN
-            // Sort by ID (keep oldest)
-            sortById(packages)
-            
-            // Check each duplicate for usage
-            FOR i = 1 TO packages.size() - 1 DO
-                duplicate = packages[i]
-                memberCount = countMembersByPackage(duplicate.packageId)
-                
-                IF memberCount == 0 THEN
-                    duplicatesToDelete.add(duplicate.packageId)
-                END IF
-            END FOR
-        END IF
-    END FOR
-    
-    // Delete unused duplicates
-    IF duplicatesToDelete.size() > 0 THEN
-        deletePackagesByIds(duplicatesToDelete)
-    END IF
-    
-    RETURN duplicatesToDelete.size()
-END
-\end{lstlisting}
+\subsection{PT Session Booking Flow}\label{wf-session}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_6.png}
+\caption*{Figure~5-6: PT Session Booking Workflow}
+\end{figure}
 
-\section{Password Hashing Algorithm}\label{password-hashing-algorithm}
+\medskip\noindent
+Members book personal training sessions using their allocated PT credits. Trainers are notified instantly and can accept or reschedule. The session status is tracked through Scheduled $\rightarrow$ Completed $\rightarrow$ Rated.
 
-\begin{lstlisting}[style=algo]
-ALGORITHM: Hash_Password
-INPUT: String plainPassword
-OUTPUT: String hashedPassword
+\subsection{Algorithm 4: Password Security (BCrypt)}\label{algo-password}
 
-BEGIN
-    // BCrypt configuration
-    SALT_ROUNDS = 12
-    
-    // Generate salt
-    salt = generateRandomBytes(16)
-    salt = bcryptSalt(SALT_ROUNDS)
-    
-    // Hash password
-    hash = bcrypt(plainPassword, salt)
-    
-    // Output format: $2a$12$<22-char-salt><31-char-hash>
-    RETURN hash
-END
+\noindent\textbf{Purpose:} Store passwords securely so that even a database breach does not expose user credentials.
 
-ALGORITHM: Verify_Password
-INPUT: String plainPassword, String storedHash
-OUTPUT: Boolean matches
+\smallskip
+\noindent\textbf{How it works:}
+\begin{enumerate}
+  \item When a user registers or changes their password, the plain-text password is never stored.
+  \item BCrypt generates a random salt and hashes the password with 12 computation rounds.
+  \item The resulting hash (which includes the salt) is stored in the database.
+  \item On login, BCrypt re-hashes the submitted password with the stored salt and compares using a constant-time function to prevent timing attacks.
+\end{enumerate}
 
-BEGIN
-    // BCrypt handles salt extraction internally
-    // Salt is embedded in first 29 characters
-    
-    computedHash = bcrypt(plainPassword, 
-                          extractSalt(storedHash))
-    
-    // Constant-time comparison to prevent timing attacks
-    RETURN secureEquals(computedHash, storedHash)
-END
-\end{lstlisting}
+\noindent\textbf{Security note:} 12 BCrypt rounds means the hash takes $\approx$250ms, making brute-force attacks computationally infeasible.
 
+% ─────────────────────────────────────────────────────────────
+\section{Real-Time Communication Flow \& Rating Algorithm}\label{sec-chat}
 
-\section{Algorithm Complexity
-Analysis}\label{algorithm-complexity-analysis}
+\noindent
+The system provides real-time messaging and event-driven notifications. The flowcharts illustrate both communication channels, followed by the trainer rating algorithm which processes post-session feedback.
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lll@{}}
+\subsection{Messaging \& Notification Flows}\label{wf-chat}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_8.png}
+\caption*{Figure~5-7: Real-Time Messaging Flow}
+\end{figure}
+
+\medskip\noindent
+The system uses WebSockets (STOMP protocol) to deliver messages in real time. Messages are persisted to the database, ensuring they are available when the recipient is offline.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_11.png}
+\caption*{Figure~5-8: Notification Delivery Flow}
+\end{figure}
+
+\medskip\noindent
+System events (membership approval, session reminders, etc.) trigger notifications delivered via the in-app notification centre and optionally via email or SMS through SMTP/Twilio integration.
+
+\subsection{Algorithm 5: Trainer Rating Calculation}\label{algo-rating}
+
+\noindent\textbf{Purpose:} Calculate a fair and recency-weighted performance score for each trainer.
+
+\smallskip
+\noindent\textbf{How it works:}
+\begin{enumerate}
+  \item All session ratings for a trainer are retrieved from the database.
+  \item A simple average is computed across all scores (1--5 scale).
+  \item A weighted average is also computed where more recent ratings carry slightly higher weight.
+  \item Both scores are rounded to one decimal place and stored in the trainer profile.
+  \item The rating distribution (count of 1-star, 2-star, etc.) is also calculated for display.
+\end{enumerate}
+
+\noindent\textbf{Used in:} Trainer profiles visible to members and gym owners.
+
+% ─────────────────────────────────────────────────────────────
+\section{Algorithm Complexity Summary}\label{algo-complexity}
+
+\noindent
+The table below summarises the computational complexity of all five core algorithms presented in this chapter.
+
+{
+\renewcommand{\arraystretch}{1.5}
+\begin{longtable}[]{@{} p{0.30\textwidth} p{0.25\textwidth} p{0.20\textwidth} p{0.20\textwidth} @{}}
 \toprule\noalign{}
-Algorithm & Time Complexity & Space Complexity \\
+\textbf{Algorithm} & \textbf{Purpose} & \textbf{Time} & \textbf{Space} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-JWT Generation & O(1) & O(n) where n = claims size \\
-JWT Validation & O(1) & O(1) \\
-RBAC Check & O(r × p) & O(1) where r = roles, p = permissions \\
-Membership Assignment & O(1) & O(1) \\
-Rating Calculation & O(n) & O(1) where n = ratings count \\
-Revenue Analytics & O(t) & O(d) where t = transactions, d = days \\
-Duplicate Cleanup & O(n log n) & O(n) where n = packages \\
-BCrypt Hash & O(2\^{}rounds) & O(1) \\
+JWT Generation & Issue auth token & O(1) & O(n) \\
+JWT Validation & Verify token & O(1) & O(1) \\
+RBAC Permission Check & Authorise access & O(r \texttimes{} p) & O(1) \\
+Membership Assignment & Create/upgrade plan & O(1) & O(1) \\
+BCrypt Hash & Secure password & O(2\textsuperscript{12}) & O(1) \\
+Trainer Rating & Score calculation & O(n) & O(1) \\
 \end{longtable}
 }
 
 \clearpage
 
-\chapter{System Workflows - Gym Management
-System}\label{system-workflows---gym-management-system}
 
-\section{User Registration \&
-Authentication}\label{user-registration-authentication}
-
-\subsection{Registration Flow}\label{registration-flow}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_0.png}
-\end{figure}
-
-\subsection{Login with 2FA}\label{login-with-2fa}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_1.png}
-\end{figure}
-
-
-\section{Membership Management}\label{membership-management}
-
-\subsection{Purchase Flow}\label{purchase-flow}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_2.png}
-\end{figure}
-
-\subsection{Expiry Handling}\label{expiry-handling}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_3.png}
-\end{figure}
-
-
-\section{Trainer-Member Interaction}\label{trainer-member-interaction}
-
-\subsection{Trainer Assignment}\label{trainer-assignment}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_4.png}
-\end{figure}
-
-\subsection{Progress Tracking}\label{progress-tracking}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_5.png}
-\end{figure}
-
-
-\section{PT Session Booking}\label{pt-session-booking}
-
-\subsection{Session Creation}\label{session-creation}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_6.png}
-\end{figure}
-
-\subsection{Session Lifecycle}\label{session-lifecycle}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_7.png}
-\end{figure}
-
-
-\section{Chat/Messaging}\label{chatmessaging}
-
-\subsection{Conversation}\label{conversation}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_8.png}
-\end{figure}
-
-\subsection{Message Flow}\label{message-flow}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_9.png}
-\end{figure}
-
-\subsection{Message Delivery Status}\label{message-delivery-status}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_10.png}
-\end{figure}
-
-
-\section{Notifications}\label{notifications}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_11.png}
-\end{figure}
-
-\clearpage
 
 \chapter{Features \& Functionality - Gym Management
 System}\label{features-functionality---gym-management-system}
