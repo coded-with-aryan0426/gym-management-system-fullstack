@@ -77,7 +77,7 @@
 \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
 \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
-\usepackage{longtable,booktabs,array}
+\usepackage{longtable,booktabs,array,tabularx}
 \newcounter{none} % for unnumbered tables
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
@@ -325,11 +325,15 @@
 \rule{\textwidth}{0.4pt}
 \vspace{2pt}
 
-\begin{tabular}{@{}p{4.5cm} p{\dimexpr\linewidth-4.5cm-2\tabcolsep}@{}}
+\noindent\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
 \textbf{University:}       & ITM SLS Baroda University \\[2pt]
+\hline
 \textbf{School / Faculty:} & School of Computer Science Engineering \& Technology \\[2pt]
+\hline
 \textbf{Programme:}        & B.Tech (Information Technology) \\
-\end{tabular}
+\hline
+\end{tabularx}
 
 \vspace{3pt}
 
@@ -352,15 +356,15 @@ I hereby declare and authorise the following:
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6190}}
   >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3810}}@{}}
-\toprule\noalign{}
+\hline
 \begin{minipage}[b]{\linewidth}\raggedright
 Declaration
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Status
 \end{minipage} \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 This report contains confidential information & ☐ YES \quad ☑ NO \\
 Permission is granted to the library to make digital copies & ☑ YES
@@ -374,14 +378,21 @@ This work may be made available for loan and photocopying & ☑ YES
 
 \vspace{4pt}
 
-\begin{tabular}{@{}p{5.5cm} p{\dimexpr\linewidth-5.5cm-2\tabcolsep}@{}}
+\noindent\begin{tabularx}{\textwidth}{|p{5.5cm}|X|}
+\hline
 \textbf{Student Name:}       & Suthar Aryan Sujalkumar \\[2pt]
+\hline
 \textbf{Enrolment Number:}   & 23C25512 \\[2pt]
+\hline
 \textbf{Programme:}          & B.Tech (Information Technology) \\[2pt]
+\hline
 \textbf{Semester:}           & Semester 8 \\[2pt]
+\hline
 \textbf{Internship Period:}  & 17th November 2025 -- 17th May 2026 \\[2pt]
+\hline
 \textbf{Organisation:}       & Bharti Soft Tech Pvt. Ltd. \\
-\end{tabular}
+\hline
+\end{tabularx}
 
 \vspace{8pt}
 
@@ -445,11 +456,15 @@ I, \textbf{Suthar Aryan Sujalkumar}, holder of Enrolment Number
 \end{enumerate}
 
 
-\begin{tabular}{@{}p{5cm} p{\dimexpr\linewidth-5cm-2\tabcolsep}@{}}
+\noindent\begin{tabularx}{\textwidth}{|p{5cm}|X|}
+\hline
 \textbf{Student Name:}     & Suthar Aryan Sujalkumar \\[3pt]
+\hline
 \textbf{Enrolment Number:} & 23C25512 \\[3pt]
+\hline
 \textbf{Programme:}        & B.Tech (Information Technology) \\
-\end{tabular}
+\hline
+\end{tabularx}
 
 \vspace{0.25in}
 
@@ -601,16 +616,25 @@ Oracle, Role-Based Access Control, JWT, WebSocket.
 
 \noindent
 
-\begin{tabular}{@{} p{3cm} p{\dimexpr\linewidth-3cm-2\tabcolsep} @{}}
+\noindent\begin{tabularx}{\textwidth}{|p{3cm}|X|}
+\hline
 Chapter 1 & Products and Services of Bharti Soft Tech Pvt.\ Ltd. \\[3pt]
+\hline
 Chapter 3 & Weekly Workflow Schedule \\[3pt]
+\hline
 Chapter 4 & Data Dictionary; Entity Summary; Security Architecture \\[3pt]
+\hline
 Chapter 8 & Achievement of Objectives; Future Work Enhancements \\[3pt]
+\hline
 Appendix A & Prerequisites; Environment Variables Reference \\[3pt]
+\hline
 Appendix B & Core Database Tables Summary \\[3pt]
+\hline
 Appendix C & API Endpoints (Authentication, Membership, PT Sessions) \\[3pt]
+\hline
 Appendix D & Frontend and Backend Technology Dependencies \\
-\end{tabular}
+\hline
+\end{tabularx}
 
 \clearpage
 
@@ -623,14 +647,21 @@ Appendix D & Frontend and Backend Technology Dependencies \\
 
 \noindent
 
-\begin{tabular}{@{} p{3cm} p{\dimexpr\linewidth-3cm-2\tabcolsep} @{}}
+\noindent\begin{tabularx}{\textwidth}{|p{3cm}|X|}
+\hline
 Chapter 4 & High-Level Architecture; Component Architecture; Auth Flow; DB Architecture; Deployment \\[3pt]
+\hline
 Chapter 4 & ER Diagrams (User \& Auth, Gym Mgmt, Training \& Session) \\[3pt]
+\hline
 Chapter 4 & UML Class Diagram; Use Case Diagram; Sequence Diagrams \\[3pt]
+\hline
 Chapter 4 & DFD Level 0 (Context) and Level 1 (Main Processes) \\[3pt]
+\hline
 Chapter 5 & Algorithm Flowcharts (Authentication, Membership, Booking) \\[3pt]
+\hline
 Chapter 6 & System Workflow Diagrams \\
-\end{tabular}
+\hline
+\end{tabularx}
 
 \clearpage
 
@@ -642,11 +673,11 @@ Chapter 6 & System Workflow Diagrams \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}ll@{}}
-\toprule\noalign{}
+\hline
 Symbol & Meaning \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 → & Denotes a directional flow or transition \\
 ↔ & Denotes bi-directional communication \\
@@ -667,11 +698,11 @@ Symbol & Meaning \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}ll@{}}
-\toprule\noalign{}
+\hline
 Abbreviation & Definition \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 2FA & Two-Factor Authentication \\
 ACID & Atomicity, Consistency, Isolation, Durability \\
@@ -791,17 +822,22 @@ Organisation}\label{products-and-main-services-of-the-organisation}
 Bharti Soft Tech Pvt. Ltd.~offers the following core products and
 services:
 
-\begin{tabular}{@{} p{5.2cm} p{\dimexpr\linewidth-5.2cm-2\tabcolsep} @{}}
-\toprule
+\noindent\begin{tabularx}{\textwidth}{|p{5.2cm}|X|}
+\hline
 \textbf{Product / Service} & \textbf{Description} \\
-\midrule
+\hline
+
 Custom Web Application Development & Full-stack web applications built to client specifications \\[4pt]
+\hline
 Mobile Application Development & Cross-platform mobile apps for Android and iOS \\[4pt]
+\hline
 API Development \& Integration & RESTful API design and third-party service integration \\[4pt]
+\hline
 Database Design \& Optimisation & Schema design, query tuning, and migration services \\[4pt]
+\hline
 IT Consultancy & Technical advisory for digital transformation projects \\
-\bottomrule
-\end{tabular}
+\hline
+\end{tabularx}
 
 \medskip
 
@@ -897,17 +933,22 @@ The key deficiencies identified across commercial platforms are
 summarised below:
 
 \vspace{4pt}
-\begin{tabular}{@{} p{3.5cm} p{4.0cm} p{\dimexpr\linewidth-3.5cm-4.0cm-4\tabcolsep} @{}}
-\toprule
+\noindent\begin{tabularx}{\textwidth}{|p{3.5cm}|p{4.0cm}|X|}
+\hline
 \textbf{System} & \textbf{Key Strengths} & \textbf{Critical Limitations} \\
-\midrule
+\hline
+
 Mindbody & Booking, payments, marketing & High cost (USD~139+/mo), complex setup \\[3pt]
+\hline
 Zen Planner & Membership, billing, reporting & Limited customisation \\[3pt]
+\hline
 GymMaster & Access control, POS, member app & Desktop-focused, poor web UX \\[3pt]
+\hline
 PushPress & CRM, automation, mobile app & Pricing tier restrictions (USD~79--159/mo) \\[3pt]
+\hline
 Wodify & CrossFit focus, performance tracking & Niche market, limited general use \\
-\bottomrule
-\end{tabular}
+\hline
+\end{tabularx}
 \vspace{4pt}
 
 This gap analysis directly shaped the foundational vision of the
@@ -1293,15 +1334,18 @@ both the frontend and backend layers of the Smart Gym Management System.
 
 The weekly workflow followed the structure outlined below:
 
-\begin{tabular}{@{} p{3.5cm} p{\dimexpr\linewidth-3.5cm-2\tabcolsep} @{}}
-\toprule
+\noindent\begin{tabularx}{\textwidth}{|p{3.5cm}|X|}
+\hline
 \textbf{Day} & \textbf{Activity} \\
-\midrule
+\hline
+
 Monday & Sprint planning and backlog grooming \\[4pt]
+\hline
 Tuesday -- Thursday & Active feature development and daily stand-ups \\[4pt]
+\hline
 Friday & Code reviews, pull request merges, sprint review, and retrospective \\
-\bottomrule
-\end{tabular}
+\hline
+\end{tabularx}
 
 \medskip
 
@@ -1457,11 +1501,11 @@ The diagram illustrates the three-tier architecture: the browser-based React fro
 
 {\def\LTcaptype{none}
 \begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
+\hline
 Technology & Version & Purpose \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 \textbf{React} & 18.x & UI Library \\
 \textbf{TypeScript} & 5.x & Type Safety \\
@@ -1478,11 +1522,11 @@ Technology & Version & Purpose \\
 
 {\def\LTcaptype{none}
 \begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
+\hline
 Technology & Version & Purpose \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 \textbf{Spring Boot} & 3.x & Application Framework \\
 \textbf{Java} & 17+ & Programming Language \\
@@ -1498,11 +1542,11 @@ Technology & Version & Purpose \\
 
 {\def\LTcaptype{none}
 \begin{longtable}[]{@{}ll@{}}
-\toprule\noalign{}
+\hline
 Technology & Purpose \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 \textbf{Oracle Database} & Primary Data Store \\
 \textbf{Spring Cache} & Response Caching \\
@@ -1582,11 +1626,11 @@ A Trainer-Member Assignment defines the coaching relationship. Each assignment m
 
 {\def\LTcaptype{none}
 \begin{longtable}[]{@{}p{2.5cm}p{3.5cm}p{5.5cm}@{}}
-\toprule\noalign{}
+\hline
 Category & Entities & Key Relationships \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 \textbf{Auth} & Users, Roles & Many-to-many via mapping tables \\
 \textbf{Gym} & Gyms, Memberships, Equipment & Owner one-to-many \\
@@ -1602,11 +1646,11 @@ Category & Entities & Key Relationships \\
 
 {\def\LTcaptype{none}
 \begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
+\hline
 Data Store & Description & Key Fields \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 \texttt{USERS} & All system users & user\_id, email, password\_hash, status \\
 \texttt{ROLES} & Role definitions & role\_id, name (MEMBER/TRAINER/OWNER) \\
@@ -1714,11 +1758,11 @@ The system implements a layered security model aligned with OWASP Top 10 guideli
 
 {\def\LTcaptype{none}
 \begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
+\hline
 Security Layer & Mechanism & Implementation \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 \textbf{Transport} & TLS/HTTPS & SSL Certificate \\
 \textbf{Authentication} & JWT & Spring Security + JJWT \\
@@ -1980,11 +2024,11 @@ The table below summarises the computational complexity of all five core algorit
 {
 \renewcommand{\arraystretch}{1.5}
 \begin{longtable}[]{@{} p{0.30\textwidth} p{0.25\textwidth} p{0.20\textwidth} p{0.20\textwidth} @{}}
-\toprule\noalign{}
+\hline
 \textbf{Algorithm} & \textbf{Purpose} & \textbf{Time} & \textbf{Space} \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 JWT Generation & Issue auth token & O(1) & O(n) \\
 JWT Validation & Verify token & O(1) & O(1) \\
@@ -2012,7 +2056,7 @@ System}\label{features-functionality---gym-management-system}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
-\toprule\noalign{}
+\hline
 \begin{minipage}[b]{\linewidth}\raggedright
 ID
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
@@ -2022,9 +2066,9 @@ Description
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Priority
 \end{minipage} \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 F1.1 & Multi-Role Registration & Users can register as Member, Trainer,
 or Owner & High \\
@@ -2045,7 +2089,7 @@ F1.6 & Account Status & Active, Suspended, Deleted states & Medium \\
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
-\toprule\noalign{}
+\hline
 \begin{minipage}[b]{\linewidth}\raggedright
 ID
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
@@ -2055,9 +2099,9 @@ Description
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Priority
 \end{minipage} \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 F2.1 & Gym Creation & Owners can create and configure gyms & High \\
 F2.2 & Staff Management & Add/remove trainers, set roles & High \\
@@ -2077,7 +2121,7 @@ F2.6 & Invite System & Private gym invite codes & Medium \\
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
-\toprule\noalign{}
+\hline
 \begin{minipage}[b]{\linewidth}\raggedright
 ID
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
@@ -2087,9 +2131,9 @@ Description
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Priority
 \end{minipage} \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 F3.1 & Package Creation & Define membership packages with pricing &
 High \\
@@ -2109,7 +2153,7 @@ F3.6 & Membership Analytics & Track subscriptions, revenue & Medium \\
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
-\toprule\noalign{}
+\hline
 \begin{minipage}[b]{\linewidth}\raggedright
 ID
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
@@ -2119,9 +2163,9 @@ Description
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Priority
 \end{minipage} \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 F4.1 & Trainer Discovery & Browse trainers with ratings/specializations
 & High \\
@@ -2140,11 +2184,11 @@ F4.7 & Session Ratings & Members rate completed sessions & Medium \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
-\toprule\noalign{}
+\hline
 ID & Feature & Description & Priority \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 F5.1 & Body Measurements & Track weight, body fat, dimensions & High \\
 F5.2 & Progress Photos & Upload before/after images & Medium \\
@@ -2159,11 +2203,11 @@ F5.6 & Achievement Badges & Gamification rewards & Low \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
-\toprule\noalign{}
+\hline
 ID & Feature & Description & Priority \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 F6.1 & Real-time Chat & WebSocket-based messaging & High \\
 F6.2 & File Attachments & Share images, documents in chat & Medium \\
@@ -2178,11 +2222,11 @@ F6.6 & Email Alerts & Configurable email notifications & Medium \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
-\toprule\noalign{}
+\hline
 ID & Feature & Description & Priority \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 F7.1 & Owner Dashboard & Revenue, member stats, trends & High \\
 F7.2 & Trainer Reports & Session history, ratings, earnings & Medium \\
@@ -2203,7 +2247,7 @@ F7.5 & Export Reports & Download as PDF/CSV & Low \\
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3023}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3721}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2326}}@{}}
-\toprule\noalign{}
+\hline
 \begin{minipage}[b]{\linewidth}\raggedright
 ID
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
@@ -2213,9 +2257,9 @@ Implementation
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Priority
 \end{minipage} \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 NF1.1 & Authentication & JWT tokens with expiry & Critical \\
 NF1.2 & Authorization & Role-Based Access Control (RBAC) & Critical \\
@@ -2234,11 +2278,11 @@ NF1.9 & XSS Prevention & Content sanitization & High \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
-\toprule\noalign{}
+\hline
 ID & Requirement & Target & Priority \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 NF2.1 & API Response Time & \textless{} 200ms (95th percentile) &
 High \\
@@ -2255,11 +2299,11 @@ NF2.6 & Lazy Loading & JPA relationships optimized & Medium \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
-\toprule\noalign{}
+\hline
 ID & Requirement & Description & Priority \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 NF3.1 & Multi-Tenancy & Isolated data per gym & High \\
 NF3.2 & Stateless Auth & JWT enables horizontal scaling & High \\
@@ -2273,11 +2317,11 @@ NF3.5 & File Storage & External storage ready & Low \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
-\toprule\noalign{}
+\hline
 ID & Requirement & Implementation & Priority \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 NF4.1 & Data Integrity & Database transactions (ACID) & Critical \\
 NF4.2 & Soft Deletes & is\_deleted flag, recoverable data & High \\
@@ -2292,11 +2336,11 @@ NF4.6 & Backup Strategy & Database backup support & High \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
-\toprule\noalign{}
+\hline
 ID & Requirement & Description & Priority \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 NF5.1 & Responsive Design & Works on all screen sizes & High \\
 NF5.2 & Intuitive Navigation & Clear menu structure & High \\
@@ -2311,11 +2355,11 @@ NF5.6 & Internationalization & Multi-language support ready & Low \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
-\toprule\noalign{}
+\hline
 ID & Requirement & Description & Priority \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 NF6.1 & Code Structure & Clean architecture layers & High \\
 NF6.2 & API Documentation & REST endpoints documented & Medium \\
@@ -2330,11 +2374,11 @@ NF6.5 & Code Quality & Lombok for boilerplate reduction & Medium \\
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}lcccc@{}}
-\toprule\noalign{}
+\hline
 Feature & Member & Trainer & Owner & Admin \\
-\midrule\noalign{}
+\hline
 \endhead
-\bottomrule\noalign{}
+\hline
 \endlastfoot
 View Dashboard & Yes & Yes & Yes & Yes \\
 Edit Own Profile & Yes & Yes & Yes & Yes \\
@@ -2567,33 +2611,44 @@ Guide}\label{appendix-a-system-installation-guide}
 The following tools must be installed before setting up the Gym
 Management System locally:
 
-\begin{tabular}{@{} p{4.5cm} p{2.5cm} p{\dimexpr\linewidth-4.5cm-2.5cm-4\tabcolsep} @{}}
-\toprule
+\noindent\begin{tabularx}{\textwidth}{|p{4.5cm}|p{2.5cm}|X|}
+\hline
 \textbf{Tool} & \textbf{Min. Version} & \textbf{Purpose} \\
-\midrule
+\hline
+
 Node.js      & 18.x  & Frontend runtime \\[3pt]
+\hline
 npm          & 9.x   & Package manager \\[3pt]
+\hline
 Java JDK     & 17+   & Backend runtime \\[3pt]
+\hline
 Maven        & 3.8+  & Java build tool \\[3pt]
+\hline
 Oracle Database & 19c+ & Primary data store \\[3pt]
+\hline
 Git          & 2.x   & Version control \\
-\bottomrule
-\end{tabular}
+\hline
+\end{tabularx}
 
 \subsection{A.4 Environment Variables
 Reference}\label{a.4-environment-variables-reference}
 
-\begin{tabular}{@{} p{4.5cm} p{4.0cm} p{\dimexpr\linewidth-4.5cm-4.0cm-4\tabcolsep} @{}}
-\toprule
+\noindent\begin{tabularx}{\textwidth}{|p{4.5cm}|p{4.0cm}|X|}
+\hline
 \textbf{Variable} & \textbf{Description} & \textbf{Example} \\
-\midrule
+\hline
+
 \texttt{VITE\_API\_BASE\_URL} & Backend API URL & \texttt{http://localhost:8080/api} \\[3pt]
+\hline
 \texttt{VITE\_WS\_URL} & WebSocket server URL & \texttt{ws://localhost:8080/ws} \\[3pt]
+\hline
 \texttt{spring.datasource.url} & JDBC connection string & \texttt{jdbc:oracle:thin:@...} \\[3pt]
+\hline
 \texttt{jwt.secret} & JWT signing secret (min 256-bit) & \texttt{[secure-random-string]} \\[3pt]
+\hline
 \texttt{spring.mail.host} & SMTP host for email OTP & \texttt{smtp.gmail.com} \\
-\bottomrule
-\end{tabular}
+\hline
+\end{tabularx}
 
 
 \section*{Appendix B: Database Schema
@@ -2602,22 +2657,32 @@ Reference}\label{appendix-b-database-schema-reference}
 
 \subsection{B.1 Core Tables Summary}\label{b.1-core-tables-summary}
 
-\begin{tabular}{@{} p{4.5cm} p{3.0cm} p{\dimexpr\linewidth-4.5cm-3.0cm-4\tabcolsep} @{}}
-\toprule
+\noindent\begin{tabularx}{\textwidth}{|p{4.5cm}|p{3.0cm}|X|}
+\hline
 \textbf{Table Name} & \textbf{Primary Key} & \textbf{Description} \\
-\midrule
+\hline
+
 \texttt{users}              & \texttt{user\_id}         & All user accounts across roles \\[3pt]
+\hline
 \texttt{roles}              & \texttt{role\_id}         & Role definitions (MEMBER, TRAINER, OWNER, ADMIN) \\[3pt]
+\hline
 \texttt{gyms}               & \texttt{gym\_id}          & Gym tenant records \\[3pt]
+\hline
 \texttt{memberships}        & \texttt{membership\_id}   & Active and historical memberships \\[3pt]
+\hline
 \texttt{membership\_packages} & \texttt{package\_id}   & Configured membership packages \\[3pt]
+\hline
 \texttt{pt\_sessions}       & \texttt{session\_id}      & Personal training session bookings \\[3pt]
+\hline
 \texttt{trainer\_details}   & \texttt{trainer\_id}      & Trainer profile extensions \\[3pt]
+\hline
 \texttt{conversations}      & \texttt{conversation\_id} & Chat conversation threads \\[3pt]
+\hline
 \texttt{messages}           & \texttt{message\_id}      & Individual chat messages \\[3pt]
+\hline
 \texttt{notifications}      & \texttt{notification\_id} & System notifications \\
-\bottomrule
-\end{tabular}
+\hline
+\end{tabularx}
 
 \section*{Appendix C: API Endpoints
 Reference}\label{appendix-c-api-endpoints-reference}
@@ -2626,45 +2691,60 @@ Reference}\label{appendix-c-api-endpoints-reference}
 \subsection{C.1 Authentication
 Endpoints}\label{c.1-authentication-endpoints}
 
-\begin{tabular}{@{} p{1.5cm} p{5.5cm} p{\dimexpr\linewidth-1.5cm-5.5cm-4\tabcolsep} @{}}
-\toprule
+\noindent\begin{tabularx}{\textwidth}{|p{1.5cm}|p{5.5cm}|X|}
+\hline
 \textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
-\midrule
+\hline
+
 POST & \texttt{/api/auth/register}    & Register a new user \\[3pt]
+\hline
 POST & \texttt{/api/auth/login}       & Authenticate and receive JWT \\[3pt]
+\hline
 POST & \texttt{/api/auth/refresh}     & Refresh expired JWT \\[3pt]
+\hline
 POST & \texttt{/api/auth/logout}      & Invalidate session \\[3pt]
+\hline
 POST & \texttt{/api/auth/verify-otp}  & Verify 2FA OTP \\
-\bottomrule
-\end{tabular}
+\hline
+\end{tabularx}
 
 \subsection{C.2 Membership Endpoints}\label{c.2-membership-endpoints}
 
-\begin{tabular}{@{} p{1.5cm} p{5.5cm} p{\dimexpr\linewidth-1.5cm-5.5cm-4\tabcolsep} @{}}
-\toprule
+\noindent\begin{tabularx}{\textwidth}{|p{1.5cm}|p{5.5cm}|X|}
+\hline
 \textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
-\midrule
+\hline
+
 GET & \texttt{/api/memberships/packages}       & List available packages \\[3pt]
+\hline
 POST & \texttt{/api/memberships/request}       & Submit membership purchase request \\[3pt]
+\hline
 PUT & \texttt{/api/memberships/\{id\}/approve} & Owner approves membership \\[3pt]
+\hline
 PUT & \texttt{/api/memberships/\{id\}/reject}  & Owner rejects membership \\[3pt]
+\hline
 GET & \texttt{/api/memberships/my}             & Get current member's membership \\
-\bottomrule
-\end{tabular}
+\hline
+\end{tabularx}
 
 \subsection{C.3 PT Session Endpoints}\label{c.3-pt-session-endpoints}
 
-\begin{tabular}{@{} p{1.5cm} p{5.5cm} p{\dimexpr\linewidth-1.5cm-5.5cm-4\tabcolsep} @{}}
-\toprule
+\noindent\begin{tabularx}{\textwidth}{|p{1.5cm}|p{5.5cm}|X|}
+\hline
 \textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
-\midrule
+\hline
+
 GET  & \texttt{/api/sessions/trainers}         & Browse available trainers \\[3pt]
+\hline
 POST & \texttt{/api/sessions/book}             & Book a PT session \\[3pt]
+\hline
 PUT  & \texttt{/api/sessions/\{id\}/complete}  & Mark session as complete \\[3pt]
+\hline
 PUT  & \texttt{/api/sessions/\{id\}/cancel}    & Cancel a booked session \\[3pt]
+\hline
 POST & \texttt{/api/sessions/\{id\}/rate}      & Submit session rating \\
-\bottomrule
-\end{tabular}
+\hline
+\end{tabularx}
 
 
 \section*{Appendix D: Technology
@@ -2674,40 +2754,58 @@ Dependencies}\label{appendix-d-technology-dependencies}
 \subsection{D.1 Frontend Dependencies
 (Selected)}\label{d.1-frontend-dependencies-selected}
 
-\begin{tabular}{@{} p{4.5cm} p{2.0cm} p{\dimexpr\linewidth-4.5cm-2.0cm-4\tabcolsep} @{}}
-\toprule
+\noindent\begin{tabularx}{\textwidth}{|p{4.5cm}|p{2.0cm}|X|}
+\hline
 \textbf{Package} & \textbf{Version} & \textbf{Licence} \\
-\midrule
+\hline
+
 react              & 18.x   & MIT \\[3pt]
+\hline
 react-dom          & 18.x   & MIT \\[3pt]
+\hline
 react-router-dom   & 6.x    & MIT \\[3pt]
+\hline
 axios              & 1.x    & MIT \\[3pt]
+\hline
 socket.io-client   & 4.x    & MIT \\[3pt]
+\hline
 framer-motion      & 10.x   & MIT \\[3pt]
+\hline
 recharts           & 2.x    & MIT \\[3pt]
+\hline
 lucide-react       & latest & ISC \\[3pt]
+\hline
 typescript         & 5.x    & Apache-2.0 \\[3pt]
+\hline
 vite               & 5.x    & MIT \\
-\bottomrule
-\end{tabular}
+\hline
+\end{tabularx}
 
 \subsection{D.2 Backend Dependencies
 (Selected)}\label{d.2-backend-dependencies-selected}
 
-\begin{tabular}{@{} p{6.5cm} p{2.0cm} p{\dimexpr\linewidth-6.5cm-2.0cm-4\tabcolsep} @{}}
-\toprule
+\noindent\begin{tabularx}{\textwidth}{|p{6.5cm}|p{2.0cm}|X|}
+\hline
 \textbf{Package} & \textbf{Version} & \textbf{Licence} \\
-\midrule
+\hline
+
 spring-boot-starter-web       & 3.x    & Apache-2.0 \\[3pt]
+\hline
 spring-boot-starter-security  & 3.x    & Apache-2.0 \\[3pt]
+\hline
 spring-boot-starter-data-jpa  & 3.x    & Apache-2.0 \\[3pt]
+\hline
 spring-boot-starter-websocket & 3.x    & Apache-2.0 \\[3pt]
+\hline
 jjwt-api                      & 0.11.x & Apache-2.0 \\[3pt]
+\hline
 lombok                        & 1.18.x & MIT \\[3pt]
+\hline
 ojdbc8                        & 21.x   & Oracle \\[3pt]
+\hline
 spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
-\bottomrule
-\end{tabular}
+\hline
+\end{tabularx}
 
 \clearpage
 
@@ -3091,10 +3189,13 @@ Year: 2025-26 & Week No. : #1 \\ \hline
 
 \vspace{0.6cm}
 
-\noindent \begin{tabular}{@{}p{0.5\textwidth} p{0.5\textwidth}@{}}
+\noindent \noindent\begin{tabularx}{\textwidth}{|p{0.5\textwidth}|X|}
+\hline
 \noindent \rule{5cm}{0.4pt} & \noindent \rule{5cm}{0.4pt} \\
+\hline
 Supervisor Signature & Student Signature
-\end{tabular}
+\hline
+\end{tabularx}
 
 \clearpage
 }
