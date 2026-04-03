@@ -115,8 +115,7 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    subgraph Frontend Components
-        direction LR
+    subgraph Frontend["Frontend Components"]
         subgraph Pages
             LP[Landing Page]
             AUTH[Auth Pages]
@@ -138,8 +137,7 @@ flowchart TB
         end
     end
 
-    subgraph Backend Services
-        direction LR
+    subgraph Backend["Backend Services"]
         subgraph Controllers
             AuthC[AuthController]
             UserC[UserController]
@@ -164,7 +162,7 @@ flowchart TB
 
     LP & AUTH & MD & TD & OD --> NAV
     MD & TD --> CHAT & NOTIF
-    
+
     AC --> AuthC
     AuthC --> AuthS --> JWT
     UserC --> UserS --> RBAC
