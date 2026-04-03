@@ -3,44 +3,43 @@
 ## High-Level Architecture
 
 ```mermaid
-flowchart TB
-    subgraph Client Layer
+flowchart LR
+    subgraph Client ["Client Layer"]
+        direction TB
         WEB[Web Browser]
         MOB[Mobile App]
     end
 
-    subgraph Frontend ["Frontend (React + TypeScript)"]
+    subgraph Frontend ["Frontend (React + TS)"]
+        direction TB
         UI[UI Components]
         CTX[Context Providers]
         SVC[API Services]
         WS[WebSocket Client]
     end
 
-    subgraph API Gateway ["API Gateway (Spring Boot)"]
+    subgraph Backend ["Backend (Spring Boot)"]
+        direction TB
         AUTH[Auth Filter]
         CORS[CORS Config]
         CTRL[REST Controllers]
-    end
-
-    subgraph Business Layer ["Business Logic Layer"]
-        SRVC[Services]
+        SRVC[Business Services]
         SEC[Security]
         EVT[Event Publisher]
     end
 
-    subgraph Data Access ["Data Access Layer"]
+    subgraph Data ["Data Layer"]
+        direction TB
         REPO[JPA Repositories]
         CACHE[Spring Cache]
+        ORACLE[(Oracle DB)]
     end
 
-    subgraph External Services
+    subgraph External ["External Services"]
+        direction TB
         OAUTH[OAuth Providers]
         EMAIL[Email Service]
         SMS[SMS Service]
-    end
-
-    subgraph Database
-        ORACLE[(Oracle DB)]
     end
 
     WEB & MOB --> UI
