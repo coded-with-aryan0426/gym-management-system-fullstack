@@ -250,6 +250,8 @@
 \setlength{\headheight}{35.2pt}
 
 \begin{document}
+\pagenumbering{roman}
+\setcounter{page}{1}
 
 \AddToShipoutPictureBG{\redborder}
 
@@ -754,6 +756,9 @@ XSS & Cross-Site Scripting \\
 
 \clearpage
 
+\cleardoublepage
+\pagenumbering{arabic}
+\setcounter{page}{1}
 \chapter{Introduction}\label{introduction}
 
 \needspace{3\baselineskip}
@@ -3189,12 +3194,9 @@ Year: 2025-26 & Week No. : #1 \\ \hline
 
 \vspace{0.6cm}
 
-\noindent \noindent\begin{tabularx}{\textwidth}{|p{0.5\textwidth}|X|}
-\hline
-\noindent \rule{5cm}{0.4pt} & \noindent \rule{5cm}{0.4pt} \\
-\hline
-Supervisor Signature & Student Signature
-\hline
+\noindent \begin{tabularx}{\textwidth}{p{0.5\textwidth} X}
+\rule{5cm}{0.4pt} & \rule{5cm}{0.4pt} \\
+Supervisor Signature & Student Signature \\
 \end{tabularx}
 
 \clearpage

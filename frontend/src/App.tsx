@@ -33,6 +33,7 @@ const ChangePasswordFirst = lazy(() => import('./pages/ChangePasswordFirst'));
 const GoogleCallback = lazy(() => import('./pages/auth/GoogleCallback'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
+const ReportArtifactsViewer = lazy(() => import('./pages/ReportArtifacts/ReportArtifactsViewer'));
 
 // Static Pages
 const AboutPage = lazy(() => import('./pages/static/AboutPage'));
@@ -154,6 +155,7 @@ function App() {
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/report-artifacts" element={<ReportArtifactsViewer />} />
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/member-app" element={<MemberAppPage />} />
                   <Route path="/pricing" element={<PricingPage />} />
