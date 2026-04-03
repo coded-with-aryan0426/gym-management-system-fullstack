@@ -2718,17 +2718,19 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \thispagestyle{fancy}
 {\sffamily
 
-% ── Logo ────────────────────────────────────────────────────────────────────
-\begin{flushright}
-  \includegraphics[width=2.5cm]{styles/university_logo.png}
-\end{flushright}
+% ── Helper macro for a scored row ───────────────────────────────────────────
+\newcommand{\scoredrow}[1]{%
+  \noindent\begin{tabular}{|p{5.8cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|}
+  \hline
+  #1 & 1 & 2 & 3 & 4 & 5 \\
+  \hline
+  \end{tabular}\par\nointerlineskip\vspace{-0.4pt}%
+}
 
-\vspace{0.2cm}
+\vspace*{0.2cm}
 
-% ── Title ───────────────────────────────────────────────────────────────────
-{\large\textbf{INTERN ASSESSMENT FORM}}
-
-\vspace{0.4cm}
+\begin{center}
+\begin{minipage}{13.8cm}
 
 % ── Info table ──────────────────────────────────────────────────────────────
 \renewcommand{\arraystretch}{1.35}
@@ -2768,15 +2770,6 @@ Superior Performance \\
 
 \vspace{0.2cm}
 
-% ── Helper macro for a scored row ───────────────────────────────────────────
-\newcommand{\scoredrow}[1]{%
-  \noindent\begin{tabular}{|p{5.8cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|>{\centering\arraybackslash}p{0.9cm}|}
-  \hline
-  #1 & 1 & 2 & 3 & 4 & 5 \\
-  \hline
-  \end{tabular}\par\nointerlineskip\vspace{-0.4pt}%
-}
-
 % ── Section 1 ───────────────────────────────────────────────────────────────
 \noindent\textbf{1.\quad General Workplace Performance}
 
@@ -2790,12 +2783,14 @@ Superior Performance \\
 \scoredrow{Asks appropriate questions}
 \scoredrow{Self-motivated}
 
+\end{minipage}
+\end{center}
+
 \clearpage
 
 % ── Page 2 ──────────────────────────────────────────────────────────────────
-\begin{flushright}
-  \includegraphics[width=2.5cm]{styles/university_logo.png}
-\end{flushright}
+\begin{center}
+\begin{minipage}{13.8cm}
 
 \vspace{0.3cm}
 
@@ -2836,12 +2831,14 @@ Superior Performance \\
 \vspace{2.2cm}\mbox{}
 \end{minipage}}
 
+\end{minipage}
+\end{center}
+
 \clearpage
 
 % ── Page 3 ──────────────────────────────────────────────────────────────────
-\begin{flushright}
-  \includegraphics[width=2.5cm]{styles/university_logo.png}
-\end{flushright}
+\begin{center}
+\begin{minipage}{13.8cm}
 
 \vspace{0.3cm}
 
@@ -2875,6 +2872,9 @@ Superior Performance \\
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
 \vspace{2.2cm}\mbox{}
 \end{minipage}}
+
+\end{minipage}
+\end{center}
 
 }% end \sffamily
 \clearpage
