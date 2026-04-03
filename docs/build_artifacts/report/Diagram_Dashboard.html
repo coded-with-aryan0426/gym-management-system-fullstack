@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Diagram Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --accent: #f59e0b;
+            --bg: #ffffff;
+            --card-bg: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding: 40px;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px;
+            background: linear-gradient(135deg, var(--card-bg), #fff);
+            border-bottom: 2px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            letter-spacing: -1px;
+            margin-bottom: 15px;
+        }
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            gap: 50px;
+        }
+        .diagram-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: stretch;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .diagram-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            border-color: #cbd5e1;
+        }
+        .diagram-visual {
+            background: var(--card-bg);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-right: 1px solid var(--border);
+        }
+        .diagram-visual img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            background: #fff;
+            padding: 10px;
+        }
+        .title-badge {
+            background: var(--primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            align-self: flex-start;
+        }
+        .diagram-code {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+        }
+        .diagram-code h3 {
+            font-size: 1.25rem;
+            color: var(--text-main);
+            margin-bottom: 5px;
+        }
+        .diagram-code p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        .code-block {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            overflow-y: auto;
+            flex-grow: 1;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            max-height: 500px;
+            white-space: pre;
+        }
+        @media (max-width: 1024px) {
+            .diagram-item { grid-template-columns: 1fr; }
+            .diagram-visual { border-right: none; border-bottom: 1px solid var(--border); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Enterprise Architecture Reference</h1>
+        <p>A comprehensive visual and structural reference of all foundational Mermaid diagrams used in the Gym Management System Report.</p>
+    </div>
+    <div class="container">
+
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">dfd diagrams</span>
+                <img src="mermaid_dfd_diagrams_0.png" alt="Level 0: Context Diagram" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Level 0: Context Diagram</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart LR
+    M((Member))
+    T((Trainer))
+    O((Owner))
+    P((Payment))
+    E((Email))
+    
+    S[Gym Management System]
+    
+    M --&gt;|Register, Book| S
+    S --&gt;|Dashboard, Notify| M
+    
+    T --&gt;|Sessions, Notes| S
+    S --&gt;|Schedule, Data| T
+    
+    O --&gt;|Config, Staff| S
+    S --&gt;|Analytics, Reports| O
+    
+    S --&gt;|Pay Request| P
+    P --&gt;|Status| S
+    
+    S --&gt;|Emails| E
+    E --&gt;|Delivery| S</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">dfd diagrams</span>
+                <img src="mermaid_dfd_diagrams_1.png" alt="Diagram #1" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Diagram #1</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart LR
+    subgraph Actors
+        M((Member))
+        T((Trainer))
+        O((Owner))
+    end
+
+    subgraph Core[Core Processes]
+        P1[1.0 Auth]
+        P2[2.0 Membership]
+        P3[3.0 Training]
+        P4[4.0 Chat]
+        P5[5.0 Analytics]
+        P6[6.0 Admin]
+    end
+
+    subgraph Storage[Data Stores]
+        D1[(Users)]
+        D2[(Members)]
+        D3[(Sessions)]
+        D4[(Messages)]
+    end
+
+    M --&gt; P1
+    T --&gt; P1
+    O --&gt; P1
+    P1 --&gt; D1
+    
+    M --&gt; P2
+    P2 --&gt; D2
+    
+    M --&gt; P3
+    T --&gt; P3
+    P3 --&gt; D3
+    
+    M --&gt; P4
+    T --&gt; P4
+    P4 --&gt; D4
+    
+    O --&gt; P5
+    O --&gt; P6</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">er diagram</span>
+                <img src="mermaid_er_diagram_0.png" alt="User & Authentication Entities" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>User & Authentication Entities</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">erDiagram
+    USERS {
+        bigint user_id PK
+        varchar username UK
+        varchar password
+        varchar full_name
+        varchar email
+        varchar phone
+        varchar avatar_id
+        varchar auth_provider
+        boolean two_factor_enabled
+        timestamp created_at
+        varchar status
+    }
+
+    ROLES {
+        bigint role_id PK
+        varchar role_name UK
+    }
+
+    PERMISSIONS {
+        bigint permission_id PK
+        varchar module
+        varchar action
+    }
+
+    USER_ROLE_MAP {
+        bigint user_id FK
+        bigint role_id FK
+    }
+
+    ROLE_PERMISSIONS {
+        bigint role_id FK
+        bigint permission_id FK
+    }
+
+    USERS ||--o{ USER_ROLE_MAP : has
+    ROLES ||--o{ USER_ROLE_MAP : assigned
+    ROLES ||--o{ ROLE_PERMISSIONS : has
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : granted</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">er diagram</span>
+                <img src="mermaid_er_diagram_1.png" alt="Diagram #1" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Diagram #1</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">erDiagram
+    GYMS {
+        bigint gym_id PK
+        varchar name
+        varchar address
+        varchar city
+        varchar phone
+        varchar email
+        varchar subscription_plan
+        boolean is_public
+        varchar invite_code UK
+        bigint owner_id FK
+    }
+
+    GYM_SETTINGS {
+        bigint gym_id PK
+        varchar business_hours
+        varchar notification_settings
+        varchar branding
+    }
+
+    GYM_STAFF {
+        bigint staff_id PK
+        bigint gym_id FK
+        bigint user_id FK
+        varchar role
+        varchar status
+    }
+
+    EQUIPMENT {
+        bigint equipment_id PK
+        bigint gym_id FK
+        varchar name
+        varchar category
+        integer quantity
+        varchar status
+        date purchase_date
+    }
+
+    GYMS ||--|| GYM_SETTINGS : has
+    GYMS ||--o{ GYM_STAFF : employs
+    GYMS ||--o{ EQUIPMENT : owns</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">er diagram</span>
+                <img src="mermaid_er_diagram_2.png" alt="Gym Management Entities" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Gym Management Entities</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">erDiagram
+    TRAINER_ASSIGNMENTS ||--o{ PT_SESSIONS : "schedules"
+    PT_SESSIONS ||--o| SESSION_RATINGS : "rated"
+    PT_SESSIONS ||--o{ PROGRESS_TRACKING : "tracks"
+
+    TRAINER_ASSIGNMENTS {
+        bigint id PK
+        bigint trainer FK
+        bigint member FK
+        varchar status
+        timestamp date
+    }
+
+    PT_SESSIONS {
+        bigint id PK
+        bigint trainer FK
+        bigint member FK
+        bigint gym FK
+        timestamp date
+        int duration
+        varchar status
+    }
+
+    SESSION_RATINGS {
+        bigint id PK
+        bigint session FK
+        int rating
+        text feedback
+    }
+
+    PROGRESS_TRACKING {
+        bigint id PK
+        bigint member FK
+        date date
+        decimal weight
+        decimal fat
+    }</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">system architecture</span>
+                <img src="mermaid_system_architecture_0.png" alt="High-Level Architecture" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>High-Level Architecture</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart LR
+    subgraph Client ["Client Layer"]
+        direction TB
+        WEB[Web Browser]
+        MOB[Mobile App]
+    end
+
+    subgraph Frontend ["Frontend (React + TS)"]
+        direction TB
+        UI[UI Components]
+        CTX[Context Providers]
+        SVC[API Services]
+        WS[WebSocket Client]
+    end
+
+    subgraph Backend ["Backend (Spring Boot)"]
+        direction TB
+        AUTH[Auth Filter]
+        CORS[CORS Config]
+        CTRL[REST Controllers]
+        SRVC[Business Services]
+        SEC[Security]
+        EVT[Event Publisher]
+    end
+
+    subgraph Data ["Data Layer"]
+        direction TB
+        REPO[JPA Repositories]
+        CACHE[Spring Cache]
+        ORACLE[(Oracle DB)]
+    end
+
+    subgraph External ["External Services"]
+        direction TB
+        OAUTH[OAuth Providers]
+        EMAIL[Email Service]
+        SMS[SMS Service]
+    end
+
+    WEB & MOB --&gt; UI
+    UI --&gt; CTX
+    CTX --&gt; SVC
+    SVC --&gt; CTRL
+    UI &lt;--&gt; WS
+
+    AUTH --&gt; CORS --&gt; CTRL
+    CTRL --&gt; SRVC
+    SRVC --&gt; SEC
+    SRVC --&gt; EVT
+    
+    SRVC --&gt; REPO
+    REPO --&gt; CACHE
+    CACHE --&gt; ORACLE
+
+    SEC &lt;--&gt; OAUTH
+    EVT --&gt; EMAIL & SMS</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">system architecture</span>
+                <img src="mermaid_system_architecture_1.png" alt="Diagram #1" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Diagram #1</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart LR
+    subgraph Frontend Components
+        subgraph Pages
+            LP[Landing Page]
+            AUTH[Auth Pages]
+            MD[Member Dashboard]
+            TD[Trainer Dashboard]
+            OD[Owner Dashboard]
+        end
+
+        subgraph Shared
+            NAV[Navigation]
+            CHAT[Chat Widget]
+            NOTIF[Notifications]
+        end
+
+        subgraph Contexts
+            AC[AuthContext]
+            TC[ThemeContext]
+            NC[NotificationContext]
+        end
+    end
+
+    subgraph Backend Services
+        subgraph Controllers
+            AuthC[AuthController]
+            UserC[UserController]
+            MemC[MembershipController]
+            PTc[PTSessionController]
+            ChatC[ChatController]
+        end
+
+        subgraph Services
+            AuthS[AuthService]
+            UserS[UserService]
+            MemS[MembershipService]
+            PTs[PTSessionService]
+            ChatS[ChatService]
+        end
+
+        subgraph Security
+            JWT[JwtProvider]
+            RBAC[PermissionService]
+        end
+    end
+
+    LP & AUTH & MD & TD & OD --&gt; NAV
+    MD & TD --&gt; CHAT & NOTIF
+    
+    AC --&gt; AuthC
+    AuthC --&gt; AuthS --&gt; JWT
+    UserC --&gt; UserS --&gt; RBAC</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">system architecture</span>
+                <img src="mermaid_system_architecture_2.png" alt="Component Architecture" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Component Architecture</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">sequenceDiagram
+    participant C as Client
+    participant F as Frontend
+    participant G as API Gateway
+    participant A as AuthService
+    participant J as JwtProvider
+    participant D as Database
+
+    C-&gt;&gt;F: Login Request
+    F-&gt;&gt;G: POST /api/auth/login
+    G-&gt;&gt;A: authenticate()
+    A-&gt;&gt;D: findUser()
+    D--&gt;&gt;A: User
+    A-&gt;&gt;A: validatePassword()
+    A-&gt;&gt;J: generateToken(user, roles)
+    J--&gt;&gt;A: JWT Token
+    A--&gt;&gt;G: AuthResponse
+    G--&gt;&gt;F: {token, user, roles}
+    F-&gt;&gt;F: Store in localStorage
+    F--&gt;&gt;C: Redirect to Dashboard
+
+    Note over F,G: Subsequent Requests
+    F-&gt;&gt;G: Request + Bearer Token
+    G-&gt;&gt;J: validateToken()
+    J--&gt;&gt;G: Claims
+    G-&gt;&gt;G: Check Permissions
+    G--&gt;&gt;F: Protected Resource</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">system architecture</span>
+                <img src="mermaid_system_architecture_4.png" alt="Authentication Flow" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Authentication Flow</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart TB
+    subgraph Client
+        BROWSER[Web Browser]
+    end
+
+    subgraph Frontend Hosting
+        STATIC[Static Files - Vercel/Netlify]
+    end
+
+    subgraph Backend Hosting
+        API[Spring Boot App]
+        WS[WebSocket Server]
+    end
+
+    subgraph Database Tier
+        DB[(Oracle Database)]
+    end
+
+    subgraph External
+        GOOGLE[Google OAuth]
+        FB[Facebook OAuth]
+        MAIL[SMTP Server]
+    end
+
+    BROWSER --&gt; STATIC
+    BROWSER --&gt; API
+    BROWSER &lt;--&gt; WS
+    API --&gt; DB
+    API &lt;--&gt; GOOGLE & FB
+    API --&gt; MAIL</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">uml diagrams</span>
+                <img src="mermaid_uml_diagrams_0.png" alt="Class Diagram - Core User & Auth" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Class Diagram - Core User & Auth</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">classDiagram
+    direction LR
+    class User {
+        +Long userId
+        +String username
+        +String email
+        +String fullName
+        +String phone
+        +String avatarId
+        +Boolean twoFactorEnabled
+        +Set~Role~ roles
+    }
+
+    class Role {
+        +Long roleId
+        +String roleName
+        +Set~Permission~ permissions
+    }
+
+    class Permission {
+        +Long id
+        +String module
+        +String action
+    }
+
+    User "1" --&gt; "*" Role : has
+    Role "*" --&gt; "*" Permission : grants</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">uml diagrams</span>
+                <img src="mermaid_uml_diagrams_4.png" alt="Class Diagram - Training & Sessions" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Class Diagram - Training & Sessions</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart TB
+    subgraph Actors
+        M((Member))
+        T((Trainer))
+        O((Owner))
+        S((System))
+    end
+
+    subgraph Auth[Authentication]
+        UC1[Register]
+        UC2[Login]
+        UC3[OAuth]
+        UC4[2FA]
+    end
+
+    subgraph MemberActions[Member Functions]
+        UC5[Dashboard]
+        UC6[Book Session]
+        UC7[Track Progress]
+        UC8[Membership]
+        UC9[Chat]
+    end
+
+    subgraph TrainerActions[Trainer Functions]
+        UC10[Schedule]
+        UC11[View Members]
+        UC12[Create Plans]
+        UC13[Add Notes]
+    end
+
+    subgraph OwnerActions[Owner Functions]
+        UC14[Settings]
+        UC15[Manage Staff]
+        UC16[Equipment]
+        UC17[Analytics]
+        UC18[Approve Members]
+    end
+
+    subgraph SystemActions[System Functions]
+        UC19[Notifications]
+        UC20[Auto-Expire]
+        UC21[Reports]
+    end
+
+    M --&gt; Auth
+    M --&gt; MemberActions
+    T --&gt; UC2
+    T --&gt; TrainerActions
+    T --&gt; UC9
+    O --&gt; UC2
+    O --&gt; OwnerActions
+    S --&gt; SystemActions</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">uml diagrams</span>
+                <img src="mermaid_uml_diagrams_5.png" alt="Diagram #5" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Diagram #5</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant A as AuthController
+    participant S as AuthService
+    participant D as Database
+
+    U-&gt;&gt;F: Enter credentials
+    F-&gt;&gt;A: POST /api/auth/login
+    A-&gt;&gt;S: authenticate()
+    S-&gt;&gt;D: findByUsername()
+    D--&gt;&gt;S: User entity
+    S-&gt;&gt;S: validatePassword()
+    alt Valid
+        S--&gt;&gt;A: JWT Token
+        A--&gt;&gt;F: 200 OK
+        F--&gt;&gt;U: Dashboard
+    else Invalid
+        S--&gt;&gt;A: 401 Error
+        A--&gt;&gt;F: Unauthorized
+        F--&gt;&gt;U: Error message
+    end</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">uml diagrams</span>
+                <img src="mermaid_uml_diagrams_6.png" alt="Class Diagram - Communication" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Class Diagram - Communication</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">sequenceDiagram
+    participant M as Member
+    participant F as Frontend
+    participant C as Controller
+    participant S as Service
+    participant D as Database
+
+    M-&gt;&gt;F: Select Package
+    F-&gt;&gt;C: GET /api/packages
+    C-&gt;&gt;S: getActivePackages()
+    S-&gt;&gt;D: findActive()
+    D--&gt;&gt;S: List
+    S--&gt;&gt;C: PackageDTOs
+    C--&gt;&gt;F: Packages
+    F--&gt;&gt;M: Display
+
+    M-&gt;&gt;F: Confirm Purchase
+    F-&gt;&gt;C: POST /api/memberships
+    C-&gt;&gt;S: createMembership()
+    S-&gt;&gt;D: save()
+    S--&gt;&gt;C: Created
+    C--&gt;&gt;F: 201 Success
+    F--&gt;&gt;M: Confirmation</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">workflows</span>
+                <img src="mermaid_workflows_0.png" alt="Registration Flow" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Registration Flow</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart TB
+    A[Start] --&gt; B{Method}
+    
+    B --&gt;|Email| C[Fill Form]
+    B --&gt;|Google| D[OAuth]
+    B --&gt;|Facebook| D
+    
+    C --&gt; E{Valid?}
+    E --&gt;|No| C
+    E --&gt;|Yes| F{Exists?}
+    F --&gt;|Yes| C
+    F --&gt;|No| G[Hash Password]
+    
+    D --&gt; H{Linked?}
+    H --&gt;|Yes| I[Login]
+    H --&gt;|No| G
+    
+    G --&gt; J[Create User]
+    J --&gt; K[Assign Role]
+    K --&gt; L[Generate JWT]
+    I --&gt; L
+    L --&gt; M[Dashboard]</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">workflows</span>
+                <img src="mermaid_workflows_1.png" alt="Diagram #1" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Diagram #1</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart TB
+    A[Enter Credentials] --&gt; B{Valid?}
+    B --&gt;|No| A
+    B --&gt;|Yes| C{Locked?}
+    C --&gt;|Yes| D[Account Blocked]
+    C --&gt;|No| E{2FA Enabled?}
+    E --&gt;|No| F[Generate JWT]
+    E --&gt;|Yes| G[Send OTP]
+    G --&gt; H[Enter OTP]
+    H --&gt; I{Verify}
+    I --&gt;|No| J{Retry?}
+    J --&gt;|Yes| H
+    J --&gt;|No| K[Lock Account]
+    I --&gt;|Yes| F
+    F --&gt; L[Go to Dashboard]</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">workflows</span>
+                <img src="mermaid_workflows_2.png" alt="Login with 2FA" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Login with 2FA</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart TB
+    A[Login] --&gt; B[Browse Packages]
+    B --&gt; C[Select Package]
+    C --&gt; D{Active Member?}
+    D --&gt;|Yes| E[Upgrade Request]
+    D --&gt;|No| F[New Request]
+    E --&gt; G[Pending Approval]
+    F --&gt; G
+    G --&gt; H[Notify Owner]
+    H --&gt; I{Decision}
+    I --&gt;|Approve| J[Activate Membership]
+    I --&gt;|Reject| K[Send Rejection]
+    J --&gt; L[Confirmation Email]</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">workflows</span>
+                <img src="mermaid_workflows_3.png" alt="Diagram #3" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Diagram #3</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart TB
+    A[Daily Scheduler] --&gt; B[Query All Memberships]
+    B --&gt; C{Expired?}
+    C --&gt;|No| D[Skip]
+    C --&gt;|Yes| E[Update Status]
+    E --&gt; F[Revoke Access]
+    F --&gt; G[Notify Member]
+    G --&gt; H{Grace Period?}
+    H --&gt;|Yes| I[Limited Access]
+    H --&gt;|No| J[Full Block]</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">workflows</span>
+                <img src="mermaid_workflows_4.png" alt="Purchase Flow" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Purchase Flow</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart TB
+    A[Browse Trainers] --&gt; B[View Profile]
+    B --&gt; C[Send Request]
+    C --&gt; D[Notify Trainer]
+    D --&gt; E{Response}
+    E --&gt;|Accept| F[Add to Client List]
+    E --&gt;|Decline| G[Suggest Others]
+    E --&gt;|Timeout| G
+    F --&gt; H[Enable Chat]
+    H --&gt; I[Notify Member]</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">workflows</span>
+                <img src="mermaid_workflows_6.png" alt="Expiry Handling" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Expiry Handling</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart TB
+    A[Select Trainer] --&gt; B[Open Calendar]
+    B --&gt; C[Pick Time Slot]
+    C --&gt; D{Available?}
+    D --&gt;|No| B
+    D --&gt;|Yes| E[Confirm Booking]
+    E --&gt; F[Create Session]
+    F --&gt; G[Deduct Credits]
+    G --&gt; H[Notify Both]
+    H --&gt; I[Add to Calendar]</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">workflows</span>
+                <img src="mermaid_workflows_8.png" alt="Trainer Assignment" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Trainer Assignment</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart TB
+    A[Open Chat] --&gt; B{Exists?}
+    B --&gt;|Yes| C[Load History]
+    B --&gt;|No| D[Select User]
+    D --&gt; E{Allowed?}
+    E --&gt;|No| F[Show Error]
+    E --&gt;|Yes| G[Create Conversation]
+    C --&gt; H[Connect WebSocket]
+    G --&gt; H
+    H --&gt; I[Show Chat UI]</div>
+            </div>
+        </div>
+    
+        <div class="diagram-item">
+            <div class="diagram-visual">
+                <span class="title-badge">workflows</span>
+                <img src="mermaid_workflows_11.png" alt="Diagram #11" loading="lazy">
+            </div>
+            <div class="diagram-code">
+                <h3>Diagram #11</h3>
+                <p>Mermaid Structural Code Definition</p>
+                <div class="code-block">flowchart TB
+    A[System Event] --&gt; B{Event Type}
+    B --&gt;|Session| C[Session Notification]
+    B --&gt;|Message| D[Message Notification]
+    B --&gt;|Membership| E[Membership Notification]
+    C --&gt; F[Save to DB]
+    D --&gt; F
+    E --&gt; F
+    F --&gt; G{User Online?}
+    G --&gt;|Yes| H[Push via WebSocket]
+    G --&gt;|No| I{Email Enabled?}
+    I --&gt;|Yes| J[Send Email]
+    I --&gt;|No| K[Queue for Later]</div>
+            </div>
+        </div>
+    
+    </div>
+</body>
+</html>

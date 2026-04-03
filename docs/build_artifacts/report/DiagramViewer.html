@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AthlonX — System Diagram Reference</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .mermaid svg { max-width: 100%; height: auto; }
+  .diagram-card:hover { transform: translateY(-4px); }
+  .badge-glow { box-shadow: 0 0 20px rgba(99,102,241,0.3); }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+  .fade-up { animation: fadeUp 0.5s ease both; }
+  .fade-up:nth-child(2){animation-delay:.1s} .fade-up:nth-child(3){animation-delay:.2s}
+  .fade-up:nth-child(4){animation-delay:.3s} .fade-up:nth-child(5){animation-delay:.4s}
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<!-- Header -->
+<div class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+  <div class="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-2.5 rounded-xl shadow-lg shadow-blue-200">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-slate-900 tracking-tight">AthlonX — Architecture Reference</h1>
+        <p class="text-xs text-slate-500 font-semibold tracking-widest uppercase">Smart Gym Management System · All Diagrams</p>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button id="exportAllBtn" onclick="exportAll()" class="flex items-center gap-2 bg-slate-900 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-700 transition-all shadow-md">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Export All PNGs
+      </button>
+    </div>
+  </div>
+  <!-- Nav Tabs -->
+  <div class="max-w-7xl mx-auto px-8 flex gap-1 pb-3 overflow-x-auto">
+    <button onclick="filterDiagrams('all')" data-cat="all" class="cat-btn px-4 py-1.5 rounded-lg text-sm font-semibold bg-blue-600 text-white transition-all">All</button>
+    <button onclick="filterDiagrams('er')" data-cat="er" class="cat-btn px-4 py-1.5 rounded-lg text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">ER Diagrams</button>
+    <button onclick="filterDiagrams('arch')" data-cat="arch" class="cat-btn px-4 py-1.5 rounded-lg text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Architecture</button>
+    <button onclick="filterDiagrams('uml')" data-cat="uml" class="cat-btn px-4 py-1.5 rounded-lg text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">UML</button>
+    <button onclick="filterDiagrams('dfd')" data-cat="dfd" class="cat-btn px-4 py-1.5 rounded-lg text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">DFD</button>
+    <button onclick="filterDiagrams('workflow')" data-cat="workflow" class="cat-btn px-4 py-1.5 rounded-lg text-sm font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">Workflows</button>
+  </div>
+</div>
+
+<!-- Grid -->
+<div class="max-w-7xl mx-auto px-8 py-10">
+  <div id="diagramGrid" class="grid grid-cols-1 xl:grid-cols-2 gap-8"></div>
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#eff6ff', primaryTextColor: '#1e3a8a', primaryBorderColor: '#3b82f6',
+    lineColor: '#6366f1', secondaryColor: '#f0fdf4', tertiaryColor: '#fefce8',
+    nodeBorder: '#3b82f6', clusterBkg: '#f8fafc', titleColor: '#0f172a',
+    edgeLabelBackground: '#ffffff', background: '#ffffff',
+    fontSize: '13px', fontFamily: 'Inter, sans-serif',
+    classText: '#1e40af',
+    fillType0: '#dbeafe', fillType1: '#dcfce7', fillType2: '#fce7f3', fillType3: '#fef3c7',
+    fillType4: '#ede9fe', fillType5: '#cffafe', fillType6: '#fde8d8', fillType7: '#f0fdf4',
+    sequenceNumberColor: '#ffffff', activationBorderColor: '#3b82f6', activationBkgColor: '#dbeafe',
+    noteBorderColor: '#f59e0b', noteBkgColor: '#fef3c7',
+  },
+  flowchart: { curve: 'basis', htmlLabels: true, padding: 20 },
+  sequence: { showSequenceNumbers: true, mirrorActors: false, actorMargin: 60 },
+  er: { diagramPadding: 30, layoutDirection: 'LR', minEntityWidth: 100 }
+});
+
+const DIAGRAMS = [
+  {
+    id: 'd0', cat: 'er', color: 'from-blue-500 to-blue-700', label: 'ER',
+    title: 'User & Authentication Entities',
+    subtitle: 'Users · Roles · Permissions · RBAC mapping tables',
+    code: `erDiagram
+    USERS { bigint user_id PK; varchar username UK; varchar password; varchar full_name; varchar email; varchar phone; varchar auth_provider; boolean two_factor_enabled }
+    ROLES { bigint role_id PK; varchar role_name UK }
+    PERMISSIONS { bigint permission_id PK; varchar module; varchar action }
+    USER_ROLE_MAP { bigint user_id FK; bigint role_id FK }
+    ROLE_PERMISSIONS { bigint role_id FK; bigint permission_id FK }
+    USERS ||--o{ USER_ROLE_MAP : has
+    ROLES ||--o{ USER_ROLE_MAP : assigned
+    ROLES ||--o{ ROLE_PERMISSIONS : has
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : granted`
+  },
+  {
+    id: 'd1', cat: 'er', color: 'from-emerald-500 to-green-700', label: 'ER',
+    title: 'Gym Management Entities',
+    subtitle: 'Gyms · Settings · Staff · Equipment relationships',
+    code: `erDiagram
+    GYMS { bigint gym_id PK; varchar name; varchar city; varchar subscription_plan; varchar invite_code UK; bigint owner_id FK }
+    GYM_SETTINGS { bigint gym_id PK; varchar business_hours; varchar notification_settings }
+    GYM_STAFF { bigint staff_id PK; bigint gym_id FK; bigint user_id FK; varchar role; varchar status }
+    EQUIPMENT { bigint equipment_id PK; bigint gym_id FK; varchar name; varchar category; integer quantity; varchar status }
+    GYMS ||--|| GYM_SETTINGS : has
+    GYMS ||--o{ GYM_STAFF : employs
+    GYMS ||--o{ EQUIPMENT : owns`
+  },
+  {
+    id: 'd2', cat: 'er', color: 'from-purple-500 to-violet-700', label: 'ER',
+    title: 'Training & Session Entities',
+    subtitle: 'Trainer Assignments · PT Sessions · Progress Tracking',
+    code: `erDiagram
+    TRAINER_ASSIGNMENTS ||--o{ PT_SESSIONS : schedules
+    PT_SESSIONS ||--o| SESSION_RATINGS : rated
+    PT_SESSIONS ||--o{ PROGRESS_TRACKING : tracks
+    TRAINER_ASSIGNMENTS { bigint id PK; bigint trainer FK; bigint member FK; varchar status }
+    PT_SESSIONS { bigint id PK; bigint trainer FK; bigint member FK; int duration; varchar status }
+    SESSION_RATINGS { bigint id PK; bigint session FK; int rating; text feedback }
+    PROGRESS_TRACKING { bigint id PK; bigint member FK; decimal weight; decimal fat }`
+  },
+  {
+    id: 'd3', cat: 'arch', color: 'from-blue-600 to-cyan-600', label: 'ARCH',
+    title: 'High-Level System Architecture',
+    subtitle: 'Client → Frontend → Backend → Data → External layers',
+    code: `flowchart LR
+    subgraph Client["Client Layer"]
+        WEB[Web Browser]
+        MOB[Mobile App]
+    end
+    subgraph Frontend["Frontend (React + TS)"]
+        UI[UI Components]
+        CTX[Context Providers]
+        SVC[API Services]
+        WS[WebSocket Client]
+    end
+    subgraph Backend["Backend (Spring Boot)"]
+        AUTH[Auth Filter]
+        CTRL[REST Controllers]
+        SRVC[Business Services]
+        SEC[Security]
+        EVT[Event Publisher]
+    end
+    subgraph Data["Data Layer"]
+        REPO[JPA Repositories]
+        CACHE[Spring Cache]
+        ORACLE[(Oracle DB)]
+    end
+    subgraph External["External Services"]
+        OAUTH[OAuth Providers]
+        EMAIL[Email Service]
+    end
+    WEB & MOB --> UI
+    UI --> CTX --> SVC --> CTRL
+    UI <--> WS
+    AUTH --> CTRL --> SRVC
+    SRVC --> SEC & EVT
+    SRVC --> REPO --> CACHE --> ORACLE
+    SEC <--> OAUTH
+    EVT --> EMAIL`
+  },
+  {
+    id: 'd4', cat: 'arch', color: 'from-indigo-500 to-blue-700', label: 'ARCH',
+    title: 'Component Architecture',
+    subtitle: 'Frontend pages, contexts, backend controllers, services & security',
+    code: `flowchart LR
+    subgraph FE["Frontend"]
+        subgraph Pages
+            LP[Landing] & AUTH[Auth] & MD[Member] & TD[Trainer] & OD[Owner]
+        end
+        subgraph Shared
+            NAV[Navigation] & CHAT[Chat] & NOTIF[Notifs]
+        end
+        subgraph Contexts
+            AC[AuthCtx] & TC[ThemeCtx] & NC[NotifCtx]
+        end
+    end
+    subgraph BE["Backend"]
+        subgraph Controllers
+            AuthC & UserC & MemC & PTc & ChatC
+        end
+        subgraph Services
+            AuthS & UserS & MemS & PTs & ChatS
+        end
+        JWT[JwtProvider]
+        RBAC[PermissionService]
+    end
+    LP & AUTH & MD --> NAV
+    MD & TD --> CHAT & NOTIF
+    AC --> AuthC --> AuthS --> JWT
+    UserC --> UserS --> RBAC`
+  },
+  {
+    id: 'd5', cat: 'arch', color: 'from-teal-500 to-cyan-700', label: 'ARCH',
+    title: 'Authentication Flow (Sequence)',
+    subtitle: 'Client → Frontend → API → AuthService → JwtProvider → Database',
+    code: `sequenceDiagram
+    participant C as Client
+    participant F as Frontend
+    participant G as API Gateway
+    participant A as AuthService
+    participant J as JwtProvider
+    participant D as Database
+    C->>F: Login Request
+    F->>G: POST /api/auth/login
+    G->>A: authenticate()
+    A->>D: findUser()
+    D-->>A: User
+    A->>A: validatePassword()
+    A->>J: generateToken(user, roles)
+    J-->>A: JWT Token
+    A-->>G: AuthResponse
+    G-->>F: {token, user, roles}
+    F->>F: Store localStorage
+    F-->>C: Redirect Dashboard
+    Note over F,G: Subsequent Requests
+    F->>G: Request + Bearer Token
+    G->>J: validateToken()
+    J-->>G: Claims
+    G-->>F: Protected Resource`
+  },
+  {
+    id: 'd6', cat: 'arch', color: 'from-slate-600 to-slate-800', label: 'ARCH',
+    title: 'Database Architecture',
+    subtitle: 'Core · Gym · Membership · Training · Communication table groups',
+    code: `flowchart TB
+    subgraph Core["Core Tables"]
+        USERS[(users)] & ROLES[(roles)] & PERMS[(permissions)]
+    end
+    subgraph Gym["Gym Tables"]
+        GYMS[(gyms)] & SETTINGS[(gym_settings)] & STAFF[(gym_staff)]
+    end
+    subgraph Membership["Membership Tables"]
+        MEMBERSHIPS[(memberships)] & PACKAGES[(packages)]
+    end
+    subgraph Training["Training Tables"]
+        SESSIONS[(pt_sessions)] & TRAINERS[(trainer_details)] & RATINGS[(session_ratings)]
+    end
+    subgraph Comm["Communication"]
+        CONVOS[(conversations)] & MESSAGES[(messages)] & NOTIFS[(notifications)]
+    end
+    USERS --> ROLES & GYMS
+    GYMS --> SETTINGS & STAFF
+    USERS --> MEMBERSHIPS --> PACKAGES
+    USERS --> SESSIONS --> RATINGS
+    USERS --> CONVOS --> MESSAGES
+    USERS --> NOTIFS`
+  },
+  {
+    id: 'd7', cat: 'uml', color: 'from-amber-500 to-orange-600', label: 'UML',
+    title: 'Class Diagram — Core User & Auth',
+    subtitle: 'User · Role · Permission class relationships',
+    code: `classDiagram
+    direction LR
+    class User { +Long userId; +String username; +String email; +String fullName; +Boolean twoFactorEnabled; +Set~Role~ roles }
+    class Role { +Long roleId; +String roleName; +Set~Permission~ permissions }
+    class Permission { +Long id; +String module; +String action }
+    User "1" --> "*" Role : has
+    Role "*" --> "*" Permission : grants`
+  },
+  {
+    id: 'd8', cat: 'uml', color: 'from-rose-500 to-pink-700', label: 'UML',
+    title: 'Class Diagram — Gym & Membership',
+    subtitle: 'Gym · Membership · MembershipPackage domain model',
+    code: `classDiagram
+    direction LR
+    class Gym { +Long gymId; +String name; +String city; +User owner; +Boolean isPublic }
+    class Membership { +Long id; +Gym gym; +User user; +Status status; +Date start; +Date end }
+    class MembershipPackage { +Long id; +String name; +Double price; +Integer days; +Integer sessions }
+    Gym "1" --> "*" Membership : has
+    Membership "*" --> "1" MembershipPackage : uses`
+  },
+  {
+    id: 'd9', cat: 'uml', color: 'from-violet-500 to-purple-700', label: 'UML',
+    title: 'Use Case Diagram',
+    subtitle: 'Member · Trainer · Owner · System actor capabilities',
+    code: `flowchart TB
+    subgraph Actors
+        M((Member)) & T((Trainer)) & O((Owner)) & S((System))
+    end
+    subgraph Auth[Authentication]
+        UC1[Register] & UC2[Login] & UC3[OAuth] & UC4[2FA]
+    end
+    subgraph MemberActions[Member Functions]
+        UC5[Dashboard] & UC6[Book Session] & UC7[Track Progress] & UC8[Membership] & UC9[Chat]
+    end
+    subgraph TrainerActions[Trainer Functions]
+        UC10[Manage Schedule] & UC11[View Members] & UC12[Create Plans]
+    end
+    subgraph OwnerActions[Owner Functions]
+        UC14[Settings] & UC15[Manage Staff] & UC16[Equipment] & UC17[Analytics]
+    end
+    subgraph SystemActions[System]
+        UC19[Notifications] & UC20[Auto-Expire] & UC21[Reports]
+    end
+    M --> Auth & MemberActions
+    T --> UC2 & TrainerActions & UC9
+    O --> UC2 & OwnerActions
+    S --> SystemActions`
+  },
+  {
+    id: 'd10', cat: 'uml', color: 'from-cyan-500 to-teal-700', label: 'UML',
+    title: 'Sequence — User Authentication Flow',
+    subtitle: 'Full login sequence with valid/invalid branches',
+    code: `sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant A as AuthController
+    participant S as AuthService
+    participant D as Database
+    U->>F: Enter credentials
+    F->>A: POST /api/auth/login
+    A->>S: authenticate()
+    S->>D: findByUsername()
+    D-->>S: User entity
+    S->>S: validatePassword()
+    alt Valid
+        S-->>A: JWT Token
+        A-->>F: 200 OK
+        F-->>U: Dashboard
+    else Invalid
+        S-->>A: 401 Error
+        A-->>F: Unauthorized
+        F-->>U: Error message
+    end`
+  },
+  {
+    id: 'd11', cat: 'dfd', color: 'from-lime-500 to-green-700', label: 'DFD',
+    title: 'DFD Level 0 — Context Diagram',
+    subtitle: 'All external actors and their data flows into/from the system',
+    code: `flowchart LR
+    M((Member)) & T((Trainer)) & O((Owner)) & P((Payment)) & E((Email))
+    S[Gym Management System]
+    M -->|Register, Book| S
+    S -->|Dashboard, Notify| M
+    T -->|Sessions, Notes| S
+    S -->|Schedule, Data| T
+    O -->|Config, Staff| S
+    S -->|Analytics, Reports| O
+    S -->|Pay Request| P
+    P -->|Status| S
+    S -->|Emails| E
+    E -->|Delivery| S`
+  },
+  {
+    id: 'd12', cat: 'dfd', color: 'from-emerald-600 to-teal-700', label: 'DFD',
+    title: 'DFD Level 1 — Main Processes',
+    subtitle: 'Auth · Membership · Training · Chat · Analytics · Admin',
+    code: `flowchart LR
+    subgraph Actors
+        M((Member)) & T((Trainer)) & O((Owner))
+    end
+    subgraph Core["Core Processes"]
+        P1[1.0 Auth] & P2[2.0 Membership] & P3[3.0 Training] & P4[4.0 Chat] & P5[5.0 Analytics] & P6[6.0 Admin]
+    end
+    subgraph Storage["Data Stores"]
+        D1[(Users)] & D2[(Members)] & D3[(Sessions)] & D4[(Messages)]
+    end
+    M & T & O --> P1 --> D1
+    M --> P2 --> D2
+    M & T --> P3 --> D3
+    M & T --> P4 --> D4
+    O --> P5 & P6`
+  },
+  {
+    id: 'd13', cat: 'workflow', color: 'from-blue-600 to-indigo-700', label: 'FLOW',
+    title: 'Registration Flow',
+    subtitle: 'Email signup, OAuth, validation and role assignment',
+    code: `flowchart TB
+    A[Start] --> B{Method}
+    B -->|Email| C[Fill Form]
+    B -->|Google| D[OAuth]
+    B -->|Facebook| D
+    C --> E{Valid?}
+    E -->|No| C
+    E -->|Yes| F{Exists?}
+    F -->|Yes| C
+    F -->|No| G[Hash Password]
+    D --> H{Linked?}
+    H -->|Yes| I[Login]
+    H -->|No| G
+    G --> J[Create User]
+    J --> K[Assign Role]
+    K --> L[Generate JWT]
+    I --> L
+    L --> M[Dashboard]`
+  },
+  {
+    id: 'd14', cat: 'workflow', color: 'from-violet-600 to-purple-700', label: 'FLOW',
+    title: 'Login with 2FA',
+    subtitle: 'Credential validation, account lock, OTP verification',
+    code: `flowchart TB
+    A[Enter Credentials] --> B{Valid?}
+    B -->|No| A
+    B -->|Yes| C{Locked?}
+    C -->|Yes| D[Account Blocked]
+    C -->|No| E{2FA Enabled?}
+    E -->|No| F[Generate JWT]
+    E -->|Yes| G[Send OTP]
+    G --> H[Enter OTP]
+    H --> I{Verify}
+    I -->|No| J{Retry?}
+    J -->|Yes| H
+    J -->|No| K[Lock Account]
+    I -->|Yes| F
+    F --> L[Go to Dashboard]`
+  },
+  {
+    id: 'd15', cat: 'workflow', color: 'from-emerald-600 to-green-700', label: 'FLOW',
+    title: 'Membership Purchase Flow',
+    subtitle: 'Browse → Select → Pending Approval → Activation',
+    code: `flowchart TB
+    A[Login] --> B[Browse Packages]
+    B --> C[Select Package]
+    C --> D{Active Member?}
+    D -->|Yes| E[Upgrade Request]
+    D -->|No| F[New Request]
+    E & F --> G[Pending Approval]
+    G --> H[Notify Owner]
+    H --> I{Decision}
+    I -->|Approve| J[Activate Membership]
+    I -->|Reject| K[Send Rejection]
+    J --> L[Confirmation Email]`
+  },
+  {
+    id: 'd16', cat: 'workflow', color: 'from-amber-500 to-orange-600', label: 'FLOW',
+    title: 'Membership Expiry Handling',
+    subtitle: 'Daily scheduler checks, revokes access & notifies members',
+    code: `flowchart TB
+    A[Daily Scheduler] --> B[Query All Memberships]
+    B --> C{Expired?}
+    C -->|No| D[Skip]
+    C -->|Yes| E[Update Status]
+    E --> F[Revoke Access]
+    F --> G[Notify Member]
+    G --> H{Grace Period?}
+    H -->|Yes| I[Limited Access]
+    H -->|No| J[Full Block]`
+  },
+  {
+    id: 'd17', cat: 'workflow', color: 'from-cyan-500 to-blue-600', label: 'FLOW',
+    title: 'PT Session Booking',
+    subtitle: 'Trainer selection → Calendar → Availability → Confirmation',
+    code: `flowchart TB
+    A[Select Trainer] --> B[Open Calendar]
+    B --> C[Pick Time Slot]
+    C --> D{Available?}
+    D -->|No| B
+    D -->|Yes| E[Confirm Booking]
+    E --> F[Create Session]
+    F --> G[Deduct Credits]
+    G --> H[Notify Both]
+    H --> I[Add to Calendar]`
+  },
+  {
+    id: 'd18', cat: 'workflow', color: 'from-rose-500 to-red-700', label: 'FLOW',
+    title: 'Session Lifecycle',
+    subtitle: 'Created → Scheduled → Cancel/Start → Complete → Rate',
+    code: `flowchart TB
+    A[Created] --> B[Scheduled]
+    B --> C{Action}
+    C -->|Cancel| D{24h Notice?}
+    D -->|Yes| E[Full Refund]
+    D -->|No| F[Mark No-Show]
+    C -->|Start| G[In Progress]
+    G --> H[Mark Complete]
+    H --> I[Add Notes]
+    I --> J[Request Rating]
+    J --> K[Update Trainer Rating]`
+  },
+  {
+    id: 'd19', cat: 'workflow', color: 'from-teal-500 to-emerald-700', label: 'FLOW',
+    title: 'Chat Conversation Flow',
+    subtitle: 'Conversation creation, WebSocket connection, UI rendering',
+    code: `flowchart TB
+    A[Open Chat] --> B{Exists?}
+    B -->|Yes| C[Load History]
+    B -->|No| D[Select User]
+    D --> E{Allowed?}
+    E -->|No| F[Show Error]
+    E -->|Yes| G[Create Conversation]
+    C --> H[Connect WebSocket]
+    G --> H
+    H --> I[Show Chat UI]`
+  },
+  {
+    id: 'd20', cat: 'workflow', color: 'from-indigo-500 to-violet-700', label: 'FLOW',
+    title: 'Message Delivery Flow',
+    subtitle: 'Send → Save DB → WebSocket broadcast → Online/push routing',
+    code: `flowchart TB
+    A[Type Message] --> B{Has Attachment?}
+    B -->|Yes| C[Upload File]
+    C --> D[Get URL]
+    D --> E[Create Message]
+    B -->|No| E
+    E --> F[Save to DB]
+    F --> G[Broadcast via WS]
+    G --> H{Recipient Online?}
+    H -->|Yes| I[Show in Chat]
+    H -->|No| J[Send Push Notification]`
+  },
+  {
+    id: 'd21', cat: 'workflow', color: 'from-slate-600 to-gray-800', label: 'FLOW',
+    title: 'Notification System',
+    subtitle: 'Event routing → DB persist → WebSocket push or Email',
+    code: `flowchart TB
+    A[System Event] --> B{Event Type}
+    B -->|Session| C[Session Notification]
+    B -->|Message| D[Message Notification]
+    B -->|Membership| E[Membership Notification]
+    C & D & E --> F[Save to DB]
+    F --> G{User Online?}
+    G -->|Yes| H[Push via WebSocket]
+    G -->|No| I{Email Enabled?}
+    I -->|Yes| J[Send Email]
+    I -->|No| K[Queue for Later]`
+  }
+];
+
+const COLORS = {
+  er: 'bg-blue-100 text-blue-700',
+  arch: 'bg-indigo-100 text-indigo-700',
+  uml: 'bg-amber-100 text-amber-700',
+  dfd: 'bg-green-100 text-green-700',
+  workflow: 'bg-violet-100 text-violet-700',
+};
+
+const grid = document.getElementById('diagramGrid');
+
+function renderCard(d) {
+  return `
+  <div class="diagram-card bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden fade-up" data-cat="${d.cat}" id="card-${d.id}">
+    <div class="bg-gradient-to-br ${d.color} px-6 py-5 flex items-center justify-between">
+      <div>
+        <span class="inline-block text-[10px] font-black tracking-widest uppercase bg-white/20 text-white px-2.5 py-1 rounded-full mb-2">${d.label}</span>
+        <h2 class="text-lg font-bold text-white leading-tight">${d.title}</h2>
+        <p class="text-white/70 text-xs mt-1">${d.subtitle}</p>
+      </div>
+      <button onclick="exportSVG('${d.id}', '${d.title}')" title="Export PNG" class="bg-white/10 hover:bg-white/25 text-white border border-white/20 p-2.5 rounded-xl transition-all ml-4 flex-shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      </button>
+    </div>
+    <div class="p-6 bg-white">
+      <div class="mermaid-wrap bg-slate-50 rounded-xl p-4 border border-slate-100 min-h-40 flex items-center justify-center overflow-auto" id="wrap-${d.id}">
+        <div class="mermaid" id="mmd-${d.id}">${d.code}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+grid.innerHTML = DIAGRAMS.map(renderCard).join('');
+
+mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
+
+function filterDiagrams(cat) {
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.toggle('bg-blue-600', b.dataset.cat === cat || (cat === 'all' && b.dataset.cat === 'all'));
+    b.classList.toggle('text-white', b.dataset.cat === cat || (cat === 'all' && b.dataset.cat === 'all'));
+    b.classList.toggle('bg-slate-100', b.dataset.cat !== cat && !(cat === 'all' && b.dataset.cat === 'all'));
+    b.classList.toggle('text-slate-600', b.dataset.cat !== cat && !(cat === 'all' && b.dataset.cat === 'all'));
+  });
+  document.querySelectorAll('.diagram-card').forEach(card => {
+    card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+  });
+}
+
+async function exportSVG(id, title) {
+  const wrap = document.getElementById('wrap-' + id);
+  const svg = wrap.querySelector('svg');
+  if (!svg) return alert('Diagram not ready yet.');
+  if (!window.html2canvas) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+  wrap.style.background = '#ffffff';
+  const canvas = await window.html2canvas(wrap, { backgroundColor: '#ffffff', scale: 3, logging: false });
+  wrap.style.background = '';
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = title.replace(/[^a-z0-9]/gi, '_') + '.png';
+  a.click();
+}
+
+async function exportAll() {
+  const btn = document.getElementById('exportAllBtn');
+  btn.textContent = 'Exporting...';
+  btn.disabled = true;
+  if (!window.html2canvas) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+  for (const d of DIAGRAMS) {
+    await exportSVG(d.id, d.title);
+    await new Promise(r => setTimeout(r, 600));
+  }
+  btn.textContent = 'Export All PNGs';
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
