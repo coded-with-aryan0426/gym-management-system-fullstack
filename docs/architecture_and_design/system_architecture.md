@@ -114,8 +114,9 @@ flowchart LR
 ## Component Architecture
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph Frontend Components
+        direction LR
         subgraph Pages
             LP[Landing Page]
             AUTH[Auth Pages]
@@ -138,6 +139,7 @@ flowchart LR
     end
 
     subgraph Backend Services
+        direction LR
         subgraph Controllers
             AuthC[AuthController]
             UserC[UserController]
