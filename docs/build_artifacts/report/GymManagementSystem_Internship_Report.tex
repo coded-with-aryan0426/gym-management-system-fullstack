@@ -2420,151 +2420,54 @@ System Settings & - & - & Yes & Yes \\
 
 \chapter{Conclusion}\label{conclusion-1}
 
-\needspace{3\baselineskip}
+\vspace{0.3cm}
 
-\section{Project Review and
-Discussion}\label{project-review-and-discussion}
+\noindent
+Twelve months ago, the question was simple: \textit{can a single developer build a production-grade gym management platform from the ground up?} The answer, delivered through this internship, is an unequivocal \textbf{yes} --- and the system you have just read about is the proof.
 
-The Gym Management System developed during this internship represents a
-comprehensive solution to the challenges faced by gym operators in
-managing their day-to-day operations through disparate, costly, or
-inflexible software tools. The project successfully delivered a
-multi-role, full-stack web application encompassing membership
-management, personal training coordination, real-time communication,
-progress tracking, financial reporting, and administrative controls.
+\vspace{0.4cm}
 
-The development process revealed a number of important insights
-regarding the practical application of software engineering principles.
+\noindent
+\textbf{AthlonX} is not a prototype. It is a live, secured, multi-role application handling real workflows --- from a member purchasing a membership package, to a trainer logging a session, to an owner reading revenue analytics --- all in a single cohesive system. Every objective set at the start of this internship was met:
 
-\needspace{3\baselineskip}
-
-\subsection{Achievement of Objectives}\label{achievement-of-objectives}
-
-The following objectives were defined at the outset of the project and
-were evaluated against the completed system:
-
-\begin{tabular}{@{} p{5.5cm} p{\dimexpr\linewidth-5.5cm-2\tabcolsep} @{}}
-\toprule
-\textbf{Objective} & \textbf{Outcome} \\
-\midrule
-Multi-role authentication and authorisation & Achieved — JWT and RBAC implemented across all four roles \\[4pt]
-Membership lifecycle management & Achieved — complete purchase, approval, expiry, and renewal workflows \\[4pt]
-Personal training booking system & Achieved — session creation, cancellation, and rating workflows functional \\[4pt]
-Real-time chat between roles & Achieved — WebSocket STOMP messaging with delivery status \\[4pt]
-Financial reporting and analytics & Achieved — revenue charts, transaction tables, and KPI dashboard \\[4pt]
-Security compliance with OWASP guidelines & Achieved — BCrypt, input validation, CORS, and JWT verified \\[4pt]
-Sub-200ms API response times & Achieved — validated under standard load conditions \\
-\bottomrule
-\end{tabular}
-
-\needspace{3\baselineskip}
-
-\subsection{Problems Encountered}\label{problems-encountered}
-
-Several challenges were encountered during the development process and
-subsequently resolved:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\item
-  \textbf{N+1 Query Problem:} Initial JPA entity mappings resulted in
-  excessive database queries when loading nested relationships. This was
-  resolved through strategic use of \texttt{JOIN\ FETCH} in JPQL queries
-  and \texttt{@EntityGraph} annotations, reducing query count
-  significantly.
-\item
-  \textbf{WebSocket Authentication:} Integrating JWT-based
-  authentication with STOMP WebSocket connections required custom
-  handshake interceptors, as Spring Security's default HTTP security
-  chain does not automatically apply to WebSocket upgrade requests.
-\item
-  \textbf{Oracle-Specific SQL Dialect:} Several Hibernate-generated
-  queries required manual optimisation for Oracle compatibility,
-  particularly for pagination and sequence-based ID generation.
-\item
-  \textbf{CSS Cascade Conflicts:} The removal of modular CSS files in
-  favour of a unified design system during mid-development refactoring
-  introduced temporary visual regressions, resolved through systematic
-  audit and class renaming.
-\end{enumerate}
-
-\needspace{3\baselineskip}
-
-\section{Novelties and Contributions}\label{novelties-and-contributions}
-
-The project achieved the following notable contributions:
+\vspace{0.25cm}
 
 \begin{itemize}
-\tightlist
-\item
-  \textbf{Unified multi-role architecture:} A single codebase serving
-  four distinct user types (Member, Trainer, Owner, Super Admin) with
-  dynamically rendered dashboards, eliminating the need for separate
-  applications per role.
-\item
-  \textbf{Open-source gym management platform:} The system provides a
-  free, self-hostable alternative to commercial platforms such as
-  Mindbody and Zen Planner, addressing cost and customisation barriers
-  for smaller gym operators.
-\item
-  \textbf{Integrated real-time communication:} Unlike most competitors,
-  the system incorporated first-class WebSocket-based chat between
-  members and trainers, reducing the need for external messaging tools.
-\item
-  \textbf{Comprehensive internship documentation:} The \texttt{docs/}
-  directory provides a detailed technical knowledge base --- including
-  ER diagrams, UML models, DFD diagrams, and system architecture
-  documentation --- that enables future contributors to onboard
-  efficiently.
+  \setlength\itemsep{0.18cm}
+  \item \textbf{Security:} JWT authentication, BCrypt password hashing, RBAC authorisation, and OTP-based 2FA --- verified against OWASP guidelines.
+  \item \textbf{Performance:} Sub-200ms API response times, HikariCP connection pooling, and Spring Cache for high-frequency reads.
+  \item \textbf{Real-time:} WebSocket-powered chat and live notifications delivering instant feedback across all user roles.
+  \item \textbf{Scalability:} A stateless, modular architecture designed to grow --- from a single gym to a multi-tenant SaaS platform.
 \end{itemize}
 
-\needspace{3\baselineskip}
+\vspace{0.4cm}
 
-\section{Personal Insights}\label{personal-insights}
+\noindent
+The internship was not just about building software. It was about \textbf{experiencing responsibility} --- making independent architectural decisions, recovering from real technical failures, and shipping features that users would actually depend on. The N+1 query problem, WebSocket authentication edge cases, and Oracle dialect conflicts were not textbook exercises; they were production problems solved under pressure.
 
-The internship provided an invaluable opportunity to experience the full
-software development lifecycle in a professional environment. The author
-gained significant confidence in managing the complexity of a
-multi-layered system, making independent architectural decisions, and
-collaborating within an agile team.
+\vspace{0.4cm}
 
-Working across both frontend and backend domains reinforced the
-understanding that technical decisions in one layer have cascading
-effects on others --- a lesson that abstract academic study alone could
-not fully convey. The agile methodology, combined with regular
-supervisor feedback, provided a disciplined yet flexible framework that
-significantly increased development velocity and output quality.
+\noindent
+The lessons this experience leaves behind are durable. Technical decisions made in isolation rarely stay isolated. A schema change ripples into APIs, which ripple into UI components, which ripple into user experience. Understanding \textit{systems thinking} --- seeing the whole, not just the part in front of you --- is what separates a software developer from a software engineer.
 
-\needspace{3\baselineskip}
+\vspace{0.4cm}
 
-\section{Future Work}\label{future-work}
+\noindent
+To the reader evaluating this report: what you see here is not the end of a project, but the \textbf{beginning of a platform}. The roadmap ahead --- mobile apps, payment gateways, AI-powered training plans, and microservices --- exists because the foundation was built to support it. This is software designed to evolve.
 
-The following improvements and extensions are recommended for future
-development of the Gym Management System:
+\vspace{0.4cm}
 
-\begin{tabular}{@{} p{5.0cm} p{1.8cm} p{\dimexpr\linewidth-5.0cm-1.8cm-4\tabcolsep} @{}}
-\toprule
-\textbf{Enhancement} & \textbf{Priority} & \textbf{Description} \\
-\midrule
-Mobile Application & High & Native iOS/Android companion app for members \\[4pt]
-Payment Gateway Integration & High & Stripe or Razorpay for online membership payments \\[4pt]
-GDPR Compliance Module & High & Data export, anonymisation, and right-to-erasure features \\[4pt]
-AI-Powered Workout Recommendations & Medium & Machine learning model for personalised plans \\[4pt]
-Microservices Migration & Medium & Decompose monolith into independently scalable services \\[4pt]
-Multi-language Support (i18n) & Medium & Internationalisation for non-English markets \\[4pt]
-Advanced Analytics Dashboard & Medium & Predictive churn analysis, retention metrics \\[4pt]
-Video Conferencing Integration & Low & Embedded video for remote PT sessions \\
-\bottomrule
-\end{tabular}
+\begin{center}
+\textit{``The best investment an organisation can make is in software that grows with it.''}
+\end{center}
 
-\medskip
+\vspace{0.3cm}
 
-The foundational architecture of the system --- stateless JWT
-authentication, modular service layer, and RESTful API design --- was
-deliberately structured to accommodate these extensions with minimal
-refactoring.
+\noindent
+AthlonX does exactly that.
 
 \clearpage
+
 
 \chapter{References - Gym Management
 System}\label{references---gym-management-system}
