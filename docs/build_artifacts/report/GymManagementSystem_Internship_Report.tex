@@ -2727,12 +2727,12 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \clearpage
 
 % Embed the first page of the research paper, injecting the subsection title directly onto it.
-% We scale and shift it down slightly so the title doesn't overlap the paper's content.
+% We shift the PDF up by 11mm to fit perfectly close to the title.
 \includepdf[
   pages=1,
   pagecommand={\thispagestyle{fancy}\subsection{E.5 Research Paper}},
-  scale=0.9,
-  offset=0 -10mm
+  scale=1.0,
+  offset=0 11mm
 ]{research_paper_no_hdr.pdf}
 
 % Embed the remaining pages normally.
