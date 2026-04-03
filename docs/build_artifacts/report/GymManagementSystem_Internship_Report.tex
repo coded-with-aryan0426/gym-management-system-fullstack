@@ -2726,13 +2726,18 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \subsection{E.4 Weekly Report}
 \clearpage
 
-\subsection{E.5 Research Paper}
-
-\clearpage
-
-% Embed the original research paper exactly as is.
+% Embed the first page of the research paper, injecting the subsection title directly onto it.
+% We scale and shift it down slightly so the title doesn't overlap the paper's content.
 \includepdf[
-  pages=-,
+  pages=1,
+  pagecommand={\thispagestyle{fancy}\subsection{E.5 Research Paper}},
+  scale=0.9,
+  offset=0 -10mm
+]{research_paper_no_hdr.pdf}
+
+% Embed the remaining pages normally.
+\includepdf[
+  pages=2-,
   pagecommand={\thispagestyle{fancy}},
   fitpaper=false
 ]{research_paper_no_hdr.pdf}
