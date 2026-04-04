@@ -150,6 +150,7 @@
   {\normalfont\Large\bfseries\color{reportprimary}}{\chaptername\ \thechapter:}{6pt}{\Large\bfseries\color{reportprimary}}
 \titlespacing*{\chapter}{0pt}{-25pt}{12pt}
 
+\newcommand{\sectionbreak}{\needspace{12\baselineskip}}
 \titleformat{\section}{\normalfont\large\bfseries\color{reportprimary}}{\thesection}{1em}{}
 \titlespacing*{\section}{0pt}{10pt plus 2pt}{4pt plus 1pt}
 \titleformat{\subsection}{\normalfont\normalsize\bfseries\color{reportprimary}}{\thesubsection}{1em}{}
@@ -253,17 +254,14 @@
 \pagenumbering{roman}
 \setcounter{page}{1}
 
-\AddToShipoutPictureBG{\redborder}
+\AddToShipoutPictureBG{%
+  \put(\LenToUnit{-0.025\paperwidth},\LenToUnit{-0.025\paperheight}){%
+    \includegraphics[width=1.05\paperwidth,height=1.05\paperheight]{"Background For Cards.jpeg"}%
+  }%
+}
 
 \begin{titlepage}
-\vspace*{\fill}
-\begin{tikzpicture}[remember picture,overlay]
-\node[anchor=north west, shift={(1.85cm,-1.85cm)}, color=gold] at (current page.north west) {\pgfornament[width=2.5cm]{61}};
-\node[anchor=north east, shift={(-1.85cm,-1.85cm)}, color=gold] at (current page.north east) {\pgfornament[width=2.5cm,symmetry=v]{61}};
-\node[anchor=south west, shift={(1.85cm,1.85cm)}, color=gold] at (current page.south west) {\pgfornament[width=2.5cm,symmetry=h]{61}};
-\node[anchor=south east, shift={(-1.85cm,1.85cm)}, color=gold] at (current page.south east) {\pgfornament[width=2.5cm,symmetry=c]{61}};
-\end{tikzpicture}
-
+\vspace*{0.4in}
 \begin{center}
 \vspace*{0.4in}
 
@@ -313,19 +311,13 @@
 \end{titlepage}
 
 \clearpage
+\mbox{}
+\clearpage
 \vspace*{\fill}
-
 \noindent{\normalfont\Large\bfseries\color{reportprimary}Report Status Declaration Form}
 \label{report-status-declaration-form}
 \addcontentsline{toc}{chapter}{Report Status Declaration Form}
-\vspace{12pt}
-
-\vspace{-24pt}
-
-\noindent
-
-\rule{\textwidth}{0.4pt}
-\vspace{2pt}
+\vspace{8pt}
 
 \noindent\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
 \hline
@@ -337,44 +329,37 @@
 \hline
 \end{tabularx}
 
-\vspace{3pt}
+\vspace{16pt}
+\noindent{\Large\bfseries\color{reportprimary}Report Title}
+\vspace{6pt}
 
-\noindent
-
-\rule{\textwidth}{0.4pt}
-\vspace{3pt}
-
-\section{Report Title}\label{report-title}
-
-\textbf{SMART GYM MANAGEMENT SYSTEM: A Full-Stack Web Application for
+\noindent\textbf{SMART GYM MANAGEMENT SYSTEM: A Full-Stack Web Application for
 Comprehensive Gym Operations Management (React + Spring Boot + Oracle)}
 
-\section{Project / Dissertation Status
-Declaration}\label{project-dissertation-status-declaration}
+\vspace{18pt}
+\noindent{\Large\bfseries\color{reportprimary}Project / Dissertation Status Declaration}
+\vspace{6pt}
 
 I hereby declare and authorise the following:
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.6190}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.3810}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.7500}}
+  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.2500}}@{}}
 \hline
 \begin{minipage}[b]{\linewidth}\raggedright
 Declaration
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
 Status
 \end{minipage} \\
 \hline
 \endhead
 \hline
 \endlastfoot
-This report contains confidential information & ☐ YES \quad ☑ NO \\
-Permission is granted to the library to make digital copies & ☑ YES
-\quad ☐ NO \\
-Permission is granted for a copy to be held on the university system & ☑
-YES \quad ☐ NO \\
-This work may be made available for loan and photocopying & ☑ YES
-\quad ☐ NO \\
+This report contains confidential information & $\square$ YES \quad $\blacksquare$ NO \\
+Permission is granted to the library to make digital copies & $\blacksquare$ YES \quad $\square$ NO \\
+Permission is granted for a copy to be held on the university system & $\blacksquare$ YES \quad $\square$ NO \\
+This work may be made available for loan and photocopying & $\blacksquare$ YES \quad $\square$ NO \\
 \end{longtable}
 }
 
@@ -424,7 +409,6 @@ This work may be made available for loan and photocopying & ☑ YES
 \vspace*{\fill}
 \clearpage
 \vspace*{\fill}
-
 \noindent{\normalfont\Large\bfseries\color{reportprimary}Declaration of Originality}
 \label{declaration-of-originality}
 \addcontentsline{toc}{chapter}{Declaration of Originality}
@@ -486,7 +470,6 @@ dishonesty and may result in disciplinary action.}
 \vspace*{\fill}
 \clearpage
 \vspace*{\fill}
-
 \noindent{\normalfont\Large\bfseries\color{reportprimary}Acknowledgements}
 \label{acknowledgements}
 \addcontentsline{toc}{chapter}{Acknowledgements}
@@ -590,7 +573,6 @@ Oracle, Role-Based Access Control, JWT, WebSocket.
 
 \vspace*{\fill}
 \clearpage
-\vspace*{\fill} 
 \ClearShipoutPictureBG
 
 \renewcommand{\headrule}{%
@@ -667,8 +649,6 @@ Chapter 6 & System Workflow Diagrams \\
 
 \clearpage
 
-\clearpage
-
 \chapter*{List of Symbols}\label{list-of-symbols}
 \addcontentsline{toc}{chapter}{List of Symbols}
 
@@ -698,61 +678,35 @@ Symbol & Meaning \\
 \addcontentsline{toc}{chapter}{List of Abbreviations}
 
 
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}ll@{}}
-\hline
-Abbreviation & Definition \\
-\hline
-\endhead
-\hline
-\endlastfoot
-2FA & Two-Factor Authentication \\
-ACID & Atomicity, Consistency, Isolation, Durability \\
-API & Application Programming Interface \\
-BCrypt & Blowfish Crypt (password hashing algorithm) \\
-CORS & Cross-Origin Resource Sharing \\
-CRM & Customer Relationship Management \\
-CSS & Cascading Style Sheets \\
-CRUD & Create, Read, Update, Delete \\
-DB & Database \\
-DTO & Data Transfer Object \\
-E2E & End-to-End (Testing) \\
-ER & Entity-Relationship \\
-GDPR & General Data Protection Regulation \\
-HTML & HyperText Markup Language \\
-HTTP & HyperText Transfer Protocol \\
-HTTPS & HyperText Transfer Protocol Secure \\
-IDE & Integrated Development Environment \\
-JPA & Java Persistence API \\
-JSON & JavaScript Object Notation \\
-JWT & JSON Web Token \\
-MVC & Model-View-Controller \\
-NIST & National Institute of Standards and Technology \\
-OAuth & Open Authorisation \\
-ORM & Object-Relational Mapping \\
-OTP & One-Time Password \\
-OWASP & Open Web Application Security Project \\
-PCI-DSS & Payment Card Industry Data Security Standard \\
-POS & Point of Sale \\
-PT & Personal Training \\
-RBAC & Role-Based Access Control \\
-REST & Representational State Transfer \\
-RFC & Request for Comments \\
-SaaS & Software as a Service \\
-SMS & Short Message Service \\
-SQL & Structured Query Language \\
-STOMP & Simple Text Oriented Messaging Protocol \\
-TLS & Transport Layer Security \\
-TOC & Table of Contents \\
-UI & User Interface \\
-UML & Unified Modelling Language \\
-URL & Uniform Resource Locator \\
-UX & User Experience \\
-WCAG & Web Content Accessibility Guidelines \\
-WS & WebSocket \\
-XSS & Cross-Site Scripting \\
-\end{longtable}
-}
+\noindent\begin{tabularx}{\textwidth}{@{} p{1.8cm} >{\raggedright\arraybackslash}X @{\hspace{0.5in}} p{1.8cm} >{\raggedright\arraybackslash}X @{}}
+\toprule
+\textbf{Abbr.} & \textbf{Definition} & \textbf{Abbr.} & \textbf{Definition} \\
+\midrule
+2FA & Two-Factor Authentication & ORM & Object-Relational Mapping \\
+ACID & Atomicity, Consistency, Isolation, Durability & OTP & One-Time Password \\
+API & Application Programming Interface & OWASP & Open Web Application Security Project \\
+BCrypt & Blowfish Crypt (password hashing algorithm) & PCI-DSS & Payment Card Industry Data Security Standard \\
+CORS & Cross-Origin Resource Sharing & POS & Point of Sale \\
+CRM & Customer Relationship Management & PT & Personal Training \\
+CSS & Cascading Style Sheets & RBAC & Role-Based Access Control \\
+CRUD & Create, Read, Update, Delete & REST & Representational State Transfer \\
+DB & Database & RFC & Request for Comments \\
+DTO & Data Transfer Object & SaaS & Software as a Service \\
+E2E & End-to-End (Testing) & SMS & Short Message Service \\
+ER & Entity-Relationship & SQL & Structured Query Language \\
+GDPR & General Data Protection Regulation & STOMP & Simple Text Oriented Messaging Protocol \\
+HTML & HyperText Markup Language & TLS & Transport Layer Security \\
+HTTP & HyperText Transfer Protocol & TOC & Table of Contents \\
+HTTPS & HyperText Transfer Protocol Secure & UI & User Interface \\
+IDE & Integrated Development Environment & UML & Unified Modelling Language \\
+JPA & Java Persistence API & URL & Uniform Resource Locator \\
+JSON & JavaScript Object Notation & UX & User Experience \\
+JWT & JSON Web Token & WCAG & Web Content Accessibility Guidelines \\
+MVC & Model-View-Controller & WS & WebSocket \\
+NIST & National Institute of Standards and Technology & XSS & Cross-Site Scripting \\
+OAuth & Open Authorisation &  &  \\
+\bottomrule
+\end{tabularx}
 
 \clearpage
 
@@ -1489,7 +1443,7 @@ The Smart Gym Management System is a comprehensive full-stack web application th
 % ─────────────────────────────────────────────────────────────
 \section{High-Level Architecture}\label{high-level-architecture}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_0.png}
 \caption*{Figure~4-1: High-Level System Architecture}
@@ -1565,7 +1519,7 @@ Technology & Purpose \\
 % ─────────────────────────────────────────────────────────────
 \section{Component Architecture}\label{component-architecture}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_1.png}
 \caption*{Figure~4-2: Internal Component Architecture}
@@ -1578,7 +1532,7 @@ The component architecture decomposes the backend into independent feature modul
 % ─────────────────────────────────────────────────────────────
 \section{System Flow}\label{system-flow}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_2.png}
 \caption*{Figure~4-3: Main System Authentication and Request Flow}
@@ -1593,7 +1547,7 @@ This flowchart traces the end-to-end journey of a user request: from login throu
 
 \subsection{ER Diagram --- User \& Authentication Entities}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_0.png}
 \caption*{Figure~4-4: ER Diagram --- User \& Authentication Entities}
@@ -1605,7 +1559,7 @@ The User entity is the root of the system. A user holds one or more roles (MEMBE
 
 \subsection{ER Diagram --- Gym Management Entities}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_1.png}
 \caption*{Figure~4-5: ER Diagram --- Gym Management Entities}
@@ -1617,7 +1571,7 @@ A Gym entity is owned by a single Gym Owner user and can have multiple Staff mem
 
 \subsection{ER Diagram --- Training \& Session Entities}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_2.png}
 \caption*{Figure~4-6: ER Diagram --- Training \& Session Entities}
@@ -1674,7 +1628,7 @@ Data Store & Description & Key Fields \\
 
 \subsection{Class Diagram --- Core User \& Authentication}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_0.png}
 \caption*{Figure~4-7: Class Diagram --- Core User \& Authentication}
@@ -1686,7 +1640,7 @@ The class diagram shows the primary JPA entities and their associations for the 
 
 \subsection{Use Case Diagram}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_4.png}
 \caption*{Figure~4-8: System Use Case Diagram}
@@ -1700,7 +1654,7 @@ The use case diagram captures the functional scope of the system across all four
 
 \subsubsection{User Authentication Flow}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_5.png}
 \caption*{Figure~4-9: Sequence Diagram --- User Authentication Flow}
@@ -1711,7 +1665,7 @@ This sequence illustrates the login process: the client submits credentials, the
 
 \subsubsection{Membership Purchase Flow}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_6.png}
 \caption*{Figure~4-10: Sequence Diagram --- Membership Purchase Flow}
@@ -1726,7 +1680,7 @@ When a Member selects a package, the \texttt{MembershipController} creates a pen
 
 \subsection{Level 0: Context Diagram}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_0.png}
 \caption*{Figure~4-11: DFD Level 0 --- System Context Diagram}
@@ -1738,7 +1692,7 @@ The Level 0 context diagram treats the entire Smart Gym Management System as a s
 
 \subsection{Level 1: Main Processes}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_1.png}
 \caption*{Figure~4-12: DFD Level 1 --- Main System Processes}
@@ -1783,7 +1737,7 @@ Security Layer & Mechanism & Implementation \\
 % ─────────────────────────────────────────────────────────────
 \section{Deployment Architecture}\label{deployment-architecture}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_4.png}
 \caption*{Figure~4-13: Deployment Architecture Diagram}
@@ -1825,7 +1779,7 @@ The authentication process is the entry point for all users. The flowcharts belo
 
 \subsection{Registration \& Login Flowcharts}\label{wf-auth}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_0.png}
 \caption*{Figure~5-1: User Registration Workflow}
@@ -1834,7 +1788,7 @@ The authentication process is the entry point for all users. The flowcharts belo
 \medskip\noindent
 The registration flow validates user data, hashes the password, creates the account, and triggers an OTP email for verification. After verification, the user is redirected to their role-specific dashboard.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_1.png}
 \caption*{Figure~5-2: Login with Two-Factor Authentication}
@@ -1871,7 +1825,7 @@ After authentication, the system determines what each user is permitted to do. T
 
 \subsection{RBAC \& Trainer Assignment Flow}\label{wf-rbac}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_4.png}
 \caption*{Figure~5-3: Role-Based Access Control \& Trainer Assignment Flow}
@@ -1909,7 +1863,7 @@ Membership is the core business process of the system. The flowcharts below show
 
 \subsection{Membership Purchase \& Expiry Flows}\label{wf-membership}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_2.png}
 \caption*{Figure~5-4: Membership Purchase Flow}
@@ -1918,7 +1872,7 @@ Membership is the core business process of the system. The flowcharts below show
 \medskip\noindent
 A member selects a package, which enters a pending state awaiting owner approval. On approval, the membership is activated and any included PT session credits are allocated to the member.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_3.png}
 \caption*{Figure~5-5: Membership Expiry Handling}
@@ -1954,7 +1908,7 @@ Personal training sessions are booked using credit units allocated at membership
 
 \subsection{PT Session Booking Flow}\label{wf-session}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_6.png}
 \caption*{Figure~5-6: PT Session Booking Workflow}
@@ -1986,7 +1940,7 @@ The system provides real-time messaging and event-driven notifications. The flow
 
 \subsection{Messaging \& Notification Flows}\label{wf-chat}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_8.png}
 \caption*{Figure~5-7: Real-Time Messaging Flow}
@@ -1995,7 +1949,7 @@ The system provides real-time messaging and event-driven notifications. The flow
 \medskip\noindent
 The system uses WebSockets (STOMP protocol) to deliver messages in real time. Messages are persisted to the database, ensuring they are available when the recipient is offline.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_11.png}
 \caption*{Figure~5-8: Notification Delivery Flow}
@@ -2616,9 +2570,9 @@ Guide}\label{appendix-a-system-installation-guide}
 The following tools must be installed before setting up the Gym
 Management System locally:
 
-\noindent\begin{tabularx}{\textwidth}{|p{4.5cm}|p{2.5cm}|X|}
+\noindent\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X|c|>{\raggedright\arraybackslash}X|}
 \hline
-\textbf{Tool} & \textbf{Min. Version} & \textbf{Purpose} \\
+\multicolumn{1}{|c|}{\textbf{Tool}} & \multicolumn{1}{c|}{\textbf{Min. Version}} & \multicolumn{1}{c|}{\textbf{Purpose}} \\
 \hline
 
 Node.js      & 18.x  & Frontend runtime \\[3pt]
@@ -2638,9 +2592,9 @@ Git          & 2.x   & Version control \\
 \subsection{A.4 Environment Variables
 Reference}\label{a.4-environment-variables-reference}
 
-\noindent\begin{tabularx}{\textwidth}{|p{4.5cm}|p{4.0cm}|X|}
+\noindent\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
 \hline
-\textbf{Variable} & \textbf{Description} & \textbf{Example} \\
+\multicolumn{1}{|c|}{\textbf{Variable}} & \multicolumn{1}{c|}{\textbf{Description}} & \multicolumn{1}{c|}{\textbf{Example}} \\
 \hline
 
 \texttt{VITE\_API\_BASE\_URL} & Backend API URL & \texttt{http://localhost:8080/api} \\[3pt]
@@ -2656,38 +2610,88 @@ Reference}\label{a.4-environment-variables-reference}
 \end{tabularx}
 
 
-\section*{Appendix B: Database Schema
-Reference}\label{appendix-b-database-schema-reference}
+\section*{Appendix B: Database Schema Reference}
 \addcontentsline{toc}{section}{Appendix B: Database Schema Reference}
 
-\subsection{B.1 Core Tables Summary}\label{b.1-core-tables-summary}
+The following tables detail the 4 core pillars of the Gym Management System database architecture, forming the foundation of the multi-role, multi-tenant system.
 
-\noindent\begin{tabularx}{\textwidth}{|p{4.5cm}|p{3.0cm}|X|}
-\hline
-\textbf{Table Name} & \textbf{Primary Key} & \textbf{Description} \\
-\hline
+\subsection{B.1 USERS Table}
+\label{b.1-users-table}
 
-\texttt{users}              & \texttt{user\_id}         & All user accounts across roles \\[3pt]
+This table manages authentication, identity, and role-based access for all entities in the system.
+
+\noindent\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}X|}
 \hline
-\texttt{roles}              & \texttt{role\_id}         & Role definitions (MEMBER, TRAINER, OWNER, ADMIN) \\[3pt]
+\multicolumn{1}{|c|}{\textbf{Column Name}} & \multicolumn{1}{c|}{\textbf{Data Type}} & \multicolumn{1}{c|}{\textbf{Key}} & \multicolumn{1}{c|}{\textbf{Description}} \\
 \hline
-\texttt{gyms}               & \texttt{gym\_id}          & Gym tenant records \\[3pt]
-\hline
-\texttt{memberships}        & \texttt{membership\_id}   & Active and historical memberships \\[3pt]
-\hline
-\texttt{membership\_packages} & \texttt{package\_id}   & Configured membership packages \\[3pt]
-\hline
-\texttt{pt\_sessions}       & \texttt{session\_id}      & Personal training session bookings \\[3pt]
-\hline
-\texttt{trainer\_details}   & \texttt{trainer\_id}      & Trainer profile extensions \\[3pt]
-\hline
-\texttt{conversations}      & \texttt{conversation\_id} & Chat conversation threads \\[3pt]
-\hline
-\texttt{messages}           & \texttt{message\_id}      & Individual chat messages \\[3pt]
-\hline
-\texttt{notifications}      & \texttt{notification\_id} & System notifications \\
+user\_id & BIGINT & PK & Unique identifier for the user account. \\ \hline
+username & VARCHAR(255) & UK & Unique username for login. \\ \hline
+password\_hash & VARCHAR(255) & - & BCrypt hashed password. \\ \hline
+email & VARCHAR(255) & UK & User's email address for contact and login. \\ \hline
+role\_id & BIGINT & FK & Reference to the \texttt{ROLES} table. \\ \hline
+is\_active & BOOLEAN & - & Soft-delete flag. \\
 \hline
 \end{tabularx}
+
+\vspace{12pt}
+
+\subsection{B.2 GYMS Table}
+\label{b.2-gyms-table}
+
+This table is the core multi-tenant entity. All operational data (memberships, sessions) is segregated by Gym.
+
+\noindent\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}X|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Column Name}} & \multicolumn{1}{c|}{\textbf{Data Type}} & \multicolumn{1}{c|}{\textbf{Key}} & \multicolumn{1}{c|}{\textbf{Description}} \\
+\hline
+gym\_id & BIGINT & PK & Unique identifier for a gym franchise/tenant. \\ \hline
+owner\_id & BIGINT & FK & Reference to \texttt{USERS} (Gym Owner). \\ \hline
+name & VARCHAR(255) & - & Registered name of the gym. \\ \hline
+address & TEXT & - & Physical location details. \\ \hline
+subscription\_plan & VARCHAR(50) & - & SaaS tier the gym is subscribed to. \\
+\hline
+\end{tabularx}
+
+\vspace{12pt}
+
+\subsection{B.3 MEMBERSHIPS Table}
+\label{b.3-memberships-table}
+
+This table handles the business logic and revenue mapping between a User and a specific Gym.
+
+\noindent\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}X|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Column Name}} & \multicolumn{1}{c|}{\textbf{Data Type}} & \multicolumn{1}{c|}{\textbf{Key}} & \multicolumn{1}{c|}{\textbf{Description}} \\
+\hline
+membership\_id & BIGINT & PK & Unique identifier for the membership record. \\ \hline
+user\_id & BIGINT & FK & Reference to the \texttt{USERS} table (Member). \\ \hline
+gym\_id & BIGINT & FK & Reference to the \texttt{GYMS} table. \\ \hline
+start\_date & DATE & - & Date the membership begins. \\ \hline
+end\_date & DATE & - & Expiration date. \\ \hline
+status & VARCHAR(20) & - & Current status (ACTIVE, EXPIRED, CANCELLED). \\
+\hline
+\end{tabularx}
+
+\vspace{12pt}
+
+\subsection{B.4 PT\_SESSIONS Table}
+\label{b.4-pt-sessions-table}
+
+This table tracks transactional workflows between Trainers and Members for scheduled workouts.
+
+\noindent\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}X|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Column Name}} & \multicolumn{1}{c|}{\textbf{Data Type}} & \multicolumn{1}{c|}{\textbf{Key}} & \multicolumn{1}{c|}{\textbf{Description}} \\
+\hline
+session\_id & BIGINT & PK & Unique identifier for the PT booking. \\ \hline
+trainer\_id & BIGINT & FK & Reference to \texttt{USERS} (Role: Trainer). \\ \hline
+member\_id & BIGINT & FK & Reference to \texttt{USERS} (Role: Member). \\ \hline
+session\_date & TIMESTAMP & - & Scheduled date and time. \\ \hline
+status & VARCHAR(20) & - & Workflow state (SCHEDULED, COMPLETED, NO\_SHOW). \\ \hline
+notes & TEXT & - & Optional performance notes by the trainer. \\
+\hline
+\end{tabularx}
+\vspace{12pt}
 
 \section*{Appendix C: API Endpoints
 Reference}\label{appendix-c-api-endpoints-reference}
@@ -2696,9 +2700,9 @@ Reference}\label{appendix-c-api-endpoints-reference}
 \subsection{C.1 Authentication
 Endpoints}\label{c.1-authentication-endpoints}
 
-\noindent\begin{tabularx}{\textwidth}{|p{1.5cm}|p{5.5cm}|X|}
+\noindent\begin{tabularx}{\textwidth}{|c|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}p{7cm}|}
 \hline
-\textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+\multicolumn{1}{|c|}{\textbf{Method}} & \multicolumn{1}{c|}{\textbf{Endpoint}} & \multicolumn{1}{c|}{\textbf{Description}} \\
 \hline
 
 POST & \texttt{/api/auth/register}    & Register a new user \\[3pt]
@@ -2715,9 +2719,9 @@ POST & \texttt{/api/auth/verify-otp}  & Verify 2FA OTP \\
 
 \subsection{C.2 Membership Endpoints}\label{c.2-membership-endpoints}
 
-\noindent\begin{tabularx}{\textwidth}{|p{1.5cm}|p{5.5cm}|X|}
+\noindent\begin{tabularx}{\textwidth}{|c|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}p{7cm}|}
 \hline
-\textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+\multicolumn{1}{|c|}{\textbf{Method}} & \multicolumn{1}{c|}{\textbf{Endpoint}} & \multicolumn{1}{c|}{\textbf{Description}} \\
 \hline
 
 GET & \texttt{/api/memberships/packages}       & List available packages \\[3pt]
@@ -2734,9 +2738,9 @@ GET & \texttt{/api/memberships/my}             & Get current member's membership
 
 \subsection{C.3 PT Session Endpoints}\label{c.3-pt-session-endpoints}
 
-\noindent\begin{tabularx}{\textwidth}{|p{1.5cm}|p{5.5cm}|X|}
+\noindent\begin{tabularx}{\textwidth}{|c|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}p{7cm}|}
 \hline
-\textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+\multicolumn{1}{|c|}{\textbf{Method}} & \multicolumn{1}{c|}{\textbf{Endpoint}} & \multicolumn{1}{c|}{\textbf{Description}} \\
 \hline
 
 GET  & \texttt{/api/sessions/trainers}         & Browse available trainers \\[3pt]
@@ -2752,6 +2756,7 @@ POST & \texttt{/api/sessions/\{id\}/rate}      & Submit session rating \\
 \end{tabularx}
 
 
+\clearpage
 \section*{Appendix D: Technology
 Dependencies}\label{appendix-d-technology-dependencies}
 \addcontentsline{toc}{section}{Appendix D: Technology Dependencies}
@@ -2941,9 +2946,6 @@ Superior Performance \\
 \end{minipage}
 \end{center}
 
-\clearpage
-
-% ── Page 3 ──────────────────────────────────────────────────────────────────
 \begin{center}
 \begin{minipage}{\textwidth}
 
@@ -2960,6 +2962,15 @@ Superior Performance \\
 \end{minipage}}
 
 \vspace{0.7cm}
+
+\end{minipage}
+\end{center}
+
+\clearpage
+
+% ── Page 3 ──────────────────────────────────────────────────────────────────
+\begin{center}
+\begin{minipage}{\textwidth}
 
 % ── Section 4 ───────────────────────────────────────────────────────────────
 \noindent\textbf{4.\quad Briefly comment on the following questions}
