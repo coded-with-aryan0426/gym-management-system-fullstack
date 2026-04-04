@@ -311,9 +311,17 @@
 \end{titlepage}
 
 \clearpage
+\thispagestyle{empty}
+\begin{center}
+    \vspace*{\fill}
+    \includegraphics[width=\textwidth]{"/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Internship Certificate -Aryan Suthar.jpg"}
+    \vspace*{\fill}
+\end{center}
+\clearpage
+
 \mbox{}
 \clearpage
-\vspace*{\fill}
+\vspace*{1cm}
 \noindent{\normalfont\Large\bfseries\color{reportprimary}Report Status Declaration Form}
 \label{report-status-declaration-form}
 \addcontentsline{toc}{chapter}{Report Status Declaration Form}
@@ -381,7 +389,7 @@ This work may be made available for loan and photocopying & $\blacksquare$ YES \
 \hline
 \end{tabularx}
 
-\vspace{8pt}
+\vspace{1.2cm}
 
 \noindent
 \begin{minipage}[t]{0.55\textwidth}
@@ -395,10 +403,7 @@ This work may be made available for loan and photocopying & $\blacksquare$ YES \
 
 \noindent\textbf{Supervisor:} Dr.~Ashutosh Abhangi
 
-\vspace{6pt}
-
 \noindent
-
 \begin{minipage}[t]{0.55\textwidth}
 \textbf{Supervisor Signature:} \underline{\hspace{2.0in}}
 \end{minipage}\hfill
@@ -588,6 +593,7 @@ Oracle, Role-Based Access Control, JWT, WebSocket.
 
 \pdfbookmark[0]{Table of Contents}{toc}
 \tableofcontents
+\vspace{-14pt}
 
 \clearpage
 
@@ -1232,7 +1238,7 @@ challenges were encountered and resolved:
 \end{enumerate}
 
 
-\section{Summary}\label{lit-summary}
+\section*{Summary}\label{lit-summary}
 
 This chapter has presented a comprehensive narrative of the Smart
 Gym Management System's development journey across four structured
@@ -1624,6 +1630,7 @@ A Gym entity is owned by a single Gym Owner user and can have multiple Staff mem
 A Trainer-Member Assignment defines the coaching relationship. Each assignment may have multiple PT Sessions, each of which can receive a Rating from the member upon completion. Progress records are stored periodically to track member fitness improvement over time.
 
 
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
 \subsection{Entity Summary}
 
 {\def\LTcaptype{none}
@@ -1806,7 +1813,9 @@ Security Layer & Mechanism & Implementation \\
 
 
 % ─────────────────────────────────────────────────────────────
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
 \section{Deployment Architecture}\label{deployment-architecture}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{2}}
 
 \begin{figure}[H]
 \centering
@@ -2080,6 +2089,289 @@ Trainer Rating & Score calculation & O(n) & O(1) \\
 
 
 
+\chapter{User Interface Design \& Authentication Workflow}\label{ch-ui-design}
+
+\noindent
+This chapter presents the graphical user interface (GUI) of the Gym Management System, focusing on the initial user onboarding and authentication workflow. The interface is designed with a modern, high-performance aesthetic using React, Tailwind CSS, and Framer Motion.
+
+\vspace{0.8cm}
+
+\section{Authentication Lifecycle: Signup, Login, and OTP}\label{sec-auth-lifecycle}
+
+\noindent
+The following graphical representation illustrates the complete user onboarding and verification lifecycle. By aligning these screens side-by-side, the progressive transition from account creation to identity confirmation is visualized as a cohesive security workflow.
+
+\vspace{0.8cm}
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{ccc}
+% ── SIGNUP SCREEN ──
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=4pt,line width=0.4pt] (signup_box) at (0,0) {\includegraphics[width=0.31\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/Singup.png}};
+\end{tikzpicture} &
+% ── LOGIN SCREEN ──
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=4pt,line width=0.4pt] (login_box) at (0,0) {\includegraphics[width=0.31\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/Login.png}};
+\end{tikzpicture} &
+% ── OTP SCREEN ──
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=4pt,line width=0.4pt] (otp_box) at (0,0) {\includegraphics[width=0.31\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/OTP.png}};
+\end{tikzpicture} \\
+\vspace{0.1cm} \\
+\footnotesize (a) User Registration & \footnotesize (b) Secure Authentication & \footnotesize (c) OTP Identity Confirmation
+\end{tabular}
+\caption*{Figure 6-1: End-to-End Authentication Workflow}
+\end{figure}
+
+\vspace{0.5cm}
+
+\noindent\textbf{Technical Component Analysis:}
+\begin{itemize}
+    \item \textbf{User Registration (a):} Features a comprehensive frontend validator that checks for duplicate emails and password complexity before hitting the Spring Boot API, ensuring high data quality.
+    \item \textbf{Secure Authentication (b):} The primary gateway for starting a session. Upon successful credential match, the backend generates a JWT (JSON Web Token), which is then stored securely in the client's local storage.
+    \item \textbf{OTP Identity Confirmation (c):} An additional security layer that implements a time-sensitive, one-time-password mechanism to confirm the user's physical access to their communication channel.
+\end{itemize}
+
+\vspace{1cm}
+
+\section{Gym Owner Dashboard: Central Command}\label{sec-dashboard-ui}
+
+\noindent
+The Gym Owner Dashboard serves as the central command hub of the application. It provides high-level administrative overviews and data-driven insights into gym operations, enabling the owner to monitor business health in real-time.
+
+\vspace{0.6cm}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=6pt,line width=0.4pt] (dashboard_box) at (0,0) {\includegraphics[width=\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/Dashbord.png}};
+\end{tikzpicture}
+\caption*{Figure 6-2: Gym Owner Dashboard Information Hub}
+\end{figure}
+
+\vspace{0.4cm}
+
+\noindent\textbf{Key Integrated Components:}
+\begin{itemize}
+    \item \textbf{Analytical Visualization:} Real-time charts that display membership growth trends, revenue distribution, and trainer performance metrics through an interactive interface.
+    \item \textbf{Dynamic Activity Cards:} High-impact information tiles showing current stats like active members, expiring plans, and scheduled session summaries.
+    \item \textbf{Role-Sensitive Navigation:} A reactive sidebar that provides prioritized access to audit logs, financial modules, and trainer configuration permitted only for the Owner role.
+\end{itemize}
+
+\vspace{1cm}
+
+\section{Gym Member Management: Member Database}\label{sec-members-ui}
+
+\noindent
+The Member Management screen provides the administrative team with a comprehensive, searchable database of all gym members. It centralizes member profiles, subscription statuses, and operational data into a single, high-performance table view.
+
+\vspace{0.6cm}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=6pt,line width=0.4pt] (members_box) at (0,0) {\includegraphics[width=\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/Memebrs list.png}};
+\end{tikzpicture}
+\caption*{Figure 6-3: Gym Member Management Directory}
+\end{figure}
+
+\vspace{0.4cm}
+
+\noindent\textbf{Administrative Capabilities:}
+\begin{itemize}
+    \item \textbf{Real-Time Status Tracking:} Visual indicators and badges that instantly communicate the status of each membership (Active, Expired, Pending) for rapid oversight.
+    \item \textbf{Centralized Profile Management:} Provides direct links to individual member dossiers where billing, attendance history, and trainer assignments are managed.
+    \item \textbf{Global Data Search:} An integrated search and filtering engine that allows administrators to quickly locate members by name, ID, or enrollment date.
+\end{itemize}
+
+\vspace{1cm}
+
+\section{Gym Trainer Management: Staff Directory}\label{sec-trainers-ui}
+
+\noindent
+The Trainer Management screen centralizes the workforce oversight of the gym. It enables administrators to manage trainer credentials, track their specialized certifications, and monitor their active member load across the entire facility.
+
+\vspace{0.6cm}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=6pt,line width=0.4pt] (trainers_box) at (0,0) {\includegraphics[width=\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/Trainers list.png}};
+\end{tikzpicture}
+\caption*{Figure 6-4: Gym Trainer Credentials \& Specializations}
+\end{figure}
+
+\vspace{0.4cm}
+
+\noindent\textbf{Workforce Management Features:}
+\begin{itemize}
+    \item \textbf{Multi-Gym Assignment Tracking:} Displays which gym branch a trainer is currently assigned to, ensuring efficient resource allocation in a multi-gym SaaS model.
+    \item \textbf{Specialization Profiling:} Clear indicators for each trainer's core competencies (e.g., Strength, Cardio, Nutrition), facilitating expert matching for gym members.
+    \item \textbf{Performance Monitoring:} Provides a high-level view of trainer contact information and availability for manual session overrides or administrative inquiries.
+\end{itemize}
+
+\vfill
+\clearpage
+
+\section{Equipment Inventory: Hardware Management}\label{sec-equipment-ui}
+
+\noindent
+The Equipment Inventory provides a comprehensive tracking of the gym's specific hardware assets. This screen ensures that management can monitor the health and maintenance status of every machine, from weight stacks to functional trainers, within the facility.
+
+\vspace{0.6cm}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=6pt,line width=0.4pt] (equipment_box) at (0,0) {\includegraphics[width=\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/ Equipment page.png}};
+\end{tikzpicture}
+\caption*{Figure 6-5: Owner Equipment Inventory \& Maintenance Log}
+\end{figure}
+
+\vspace{0.4cm}
+
+\noindent\textbf{Inventory Control Components:}
+\begin{itemize}
+    \item \textbf{Real-Time Status Monitoring:} Identifies the operational health of each equipment unit (Operational, Maintenance, Out-of-Order) to prevent gym downtime.
+    \item \textbf{Purchase \& Service Tracking:} Logs critical acquisition dates and maintenance timestamps, aiding in the long-term financial planning for hardware upgrades.
+    \item \textbf{Quantity and Capacity Management:} Provides a comprehensive count of each equipment type, ensuring that gym floor accessibility matches member demand.
+\end{itemize}
+
+\vspace{1cm}
+
+\section{Financial Management: Revenue \& Accounting}\label{sec-financial-ui}
+
+\noindent
+The Financial Management module provides complete administrative oversight over the gym’s revenue streams. This centralized accounting interface allows for real-time tracking of membership payments, invoice statuses, and historical financial data.
+
+\vspace{0.6cm}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=6pt,line width=0.4pt] (financial_box) at (0,0) {\includegraphics[width=\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/Financial.png}};
+\end{tikzpicture}
+\caption*{Figure 6-5: Financial Dashboard \& Transaction Ledger}
+\end{figure}
+
+\vspace{0.4cm}
+
+\noindent\textbf{Fiscal Control Components:}
+\begin{itemize}
+    \item \textbf{Automated Invoice Lifecycle:} Tracks movement from 'Pending' to 'Paid' statuses, ensuring that all membership dues are accurately logged and accounted for in the system.
+    \item \textbf{Revenue Stream Visualization:} Provides clear, itemized breakdowns of payment categories, aiding in the generation of monthly financial reports.
+    \item \textbf{Payment Integrity Management:} Includes detailed timestamps and transaction metadata to ensure transparency and accountability in the gym's fiscal operations.
+\end{itemize}
+
+\vfill
+\clearpage
+
+\section{Administrative Task Management: Todo List}\label{sec-todo-ui}
+
+\noindent
+The Administrative Task Management system provides the gym's operational team with a streamlined interface for tracking daily responsibilities. This integrated Todo list ensures that no critical operational task—such as member follow-ups or equipment checks—is overlooked.
+
+\vspace{0.6cm}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=6pt,line width=0.4pt] (todo_box) at (0,0) {\includegraphics[width=\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/Todo.png}};
+\end{tikzpicture}
+\caption*{Figure 6-6: Administrative Todo \& Task Tracking System}
+\end{figure}
+
+\vspace{0.4cm}
+
+\noindent\textbf{Operational Efficiency Features:}
+\begin{itemize}
+    \item \textbf{Real-Time Task Lifecycle:} Enables instant status updates (Pending to Completed), providing immediate feedback on the gym's daily operational progress.
+    \item \textbf{Priority-Based Organization:} Allows administrators to categorize tasks by urgency, ensuring that high-impact activities are prioritized by the duty staff.
+    \item \textbf{Integrated Staff Coordination:} Serves as a centralized digital logbook that bridges the gap between different shifts, maintaining administrative continuity.
+\end{itemize}
+
+\vspace{1cm}
+
+\section{User Session \& Preferences: Quick Navigation}\label{sec-profile-ui}
+
+\noindent
+The Profile Pop-window provides immediate access to essential user-centric controls without forcing a page transition. This lightweight interface allow administrators to adjust their environment on-the-fly, ensuring that individual preferences match the current operational context.
+
+\vspace{0.6cm}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=6pt,line width=0.4pt] (profile_box) at (0,0) {\includegraphics[width=0.45\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/Profile pop window.png}};
+\end{tikzpicture}
+\caption*{Figure 6-7: User Interface Customization \& Session Controls}
+\end{figure}
+
+\vspace{0.4cm}
+
+\noindent\textbf{Personalization Interface Components:}
+\begin{itemize}
+    \item \textbf{Dynamic Appearance Toggle:} Allows users to switch between Light, Dark, and System-Auto theme modes, optimizing visual comfort for different lighting conditions.
+    \item \textbf{Administrative Identity Status:} Clearly displays the current user's role (e.g., Owner) and online status, reinforcing the role-based access control paradigm.
+    \item \textbf{Streamlined Session Termination:} Provides a prominent, high-contrast Sign Out button that securely destroys the active JWT session across the user device.
+\end{itemize}
+
+\vfill
+\clearpage
+
+\section{System Configuration: Account Settings}\label{sec-settings-ui}
+
+\noindent
+The System Configuration screen centralizes granular control over the user account. This dedicated settings page allows for deeper customization of account security, communication preferences, and notification triggers.
+
+\vspace{0.6cm}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=6pt,line width=0.4pt] (settings_box) at (0,0) {\includegraphics[width=\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/setting page.png}};
+\end{tikzpicture}
+\caption*{Figure 6-8: Comprehensive System Settings \& Configuration}
+\end{figure}
+
+\vspace{0.4cm}
+
+\noindent\textbf{Configuration Capability Matrix:}
+\begin{itemize}
+    \item \textbf{Account Security Management:} Dedicated interface for updating credentials and managing multi-factor authentication preferences to ensure account integrity.
+    \item \textbf{Granular Notification Routing:} Allows users to define which operational events (e.g., new member signups, low equipment stock) trigger real-time alerts.
+    \item \textbf{Profile Localization:} Centralized control for adjusting regional settings and personal information, ensuring a customized experience for every staff member.
+\end{itemize}
+
+\vspace{1cm}
+
+\section{System Notifications: Operational Alerts Hub}\label{sec-notifications-ui}
+
+\noindent
+The System Notifications screen provides a centralized feed for all critical operational event-driven messages. This hub ensures that administrators are immediately aware of high-priority events, such as membership expirations or system-level updates, that require prompt attention.
+
+\vspace{0.6cm}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+    \node[anchor=south west,inner sep=0,draw=black!30,rounded corners=6pt,line width=0.4pt] (notif_box) at (0,0) {\includegraphics[width=\textwidth]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Application_Screenshot/Notification.png}};
+\end{tikzpicture}
+\caption*{Figure 6-9: Real-time System Notification \& Alert Feed}
+\end{figure}
+
+\vspace{0.4cm}
+
+\noindent\textbf{Alerting Framework Features:}
+\begin{itemize}
+    \item \textbf{Event-Driven Messaging Engine:} Implements a reactive alerting mechanism that triggers notifications based on specific backend events, ensuring zero-delay communication.
+    \item \textbf{High-Visibility Operational Alerts:} Uses color-coded categories to distinguish between informative updates and critical operational warnings (e.g., hardware fault or payment failure).
+    \item \textbf{Centralized Alert Ledger:} Provides a chronological history of system communications, allowing administrators to audit past alerts and ensure follow-up actions were completed.
+\end{itemize}
+
+\clearpage
+
 \chapter{Features \& Functionality - Gym Management
 System}\label{features-functionality---gym-management-system}
 
@@ -2217,7 +2509,9 @@ F4.7 & Session Ratings & Members rate completed sessions & Medium \\
 \end{longtable}
 }
 
-\subsection{Progress Tracking}\label{progress-tracking-1}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
+\subsection{Progress Tracking}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{2}}\label{progress-tracking-1}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
@@ -2256,7 +2550,9 @@ F6.6 & Email Alerts & Configurable email notifications & Medium \\
 }
 
 \medskip\nopagebreak
-\subsection{Analytics \& Reporting}\label{analytics-reporting}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
+\subsection{Analytics \& Reporting}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{2}}\label{analytics-reporting}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
@@ -2390,7 +2686,9 @@ NF5.6 & Internationalization & Multi-language support ready & Low \\
 \end{longtable}
 }
 
-\subsection{Maintainability}\label{maintainability}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
+\subsection{Maintainability}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{2}}\label{maintainability}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
@@ -2409,7 +2707,9 @@ NF6.5 & Code Quality & Lombok for boilerplate reduction & Medium \\
 }
 
 
-\subsection{Documentation \& Standards}\label{documentation-standards}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
+\subsection{Documentation \& Standards}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{2}}\label{documentation-standards}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -2750,7 +3050,9 @@ subscription\_plan & VARCHAR(50) & - & SaaS tier the gym is subscribed to. \\
 
 \vspace{12pt}
 
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
 \subsection{B.3 MEMBERSHIPS Table}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{2}}
 \label{b.3-memberships-table}
 
 This table handles the business logic and revenue mapping between a User and a specific Gym.
@@ -2918,7 +3220,6 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \section*{Appendix E: Supplementary Materials}
 \addcontentsline{toc}{section}{Appendix E: Supplementary Materials}
 
-\vspace{1cm}
 \subsection{E.1 Intern Assessment Form}
 \thispagestyle{fancy}
 
@@ -2941,9 +3242,9 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \noindent\begin{tabular}{|p{5.0cm} | >{\centering\arraybackslash}p{0.5cm} | p{\dimexpr\textwidth-5.5cm-6\tabcolsep-4\arrayrulewidth\relax} |}
 \hline
 \textbf{\large Enrolment Number}                & : & 23C25512 \\ \hline
-\textbf{\large Full Name of Intern}             & : & Aryan Suthar \\ \hline
-\textbf{\large Name of Organization}            & : & ITM SLS Baroda University \\ \hline
-\textbf{\large External Supervisor}             & : & Dr. Ashutosh Abhangi \\ \hline
+\textbf{\large Full Name of Intern}             & : & Suthar Aryan Sujalkumar \\ \hline
+\textbf{\large Name of Organization}            & : & Bharti Soft Tech Pvt. Ltd. \\ \hline
+\textbf{\large External Supervisor}             & : & Prashant Mirchandani \\ \hline
 \textbf{\large Date}                            & : & 20-12-2025 \\ \hline
 \textbf{\large Intern's Position}               & : & Full Stack Java Intern \\ \hline
 \textbf{\large Project Title}                   & : & Smart Gym Management System \\ \hline
@@ -2987,8 +3288,7 @@ Above average performance &
 \scoredrow{Setting priorities}
 \scoredrow{Asks appropriate questions}
 \scoredrow{Self-motivated}
-\vfill
-
+\vspace{1.5cm}
 \noindent\begin{tabularx}{\textwidth}{@{}X X@{}}
 \rule{6cm}{0.4pt} & \rule{6cm}{0.4pt} \\
 Supervisor Signature & Student Signature \\
@@ -3120,10 +3420,10 @@ Supervisor Signature & Student Signature \\
 \renewcommand{\arraystretch}{1.35}
 \noindent\begin{tabular}{|p{5.0cm} | >{\centering\arraybackslash}p{0.5cm} | p{\dimexpr\textwidth-5.5cm-6\tabcolsep-4\arrayrulewidth\relax} |}
 \hline
-\textbf{\large Name} & : & Aryan Suthar \\ \hline
+\textbf{\large Name} & : & Suthar Aryan Sujalkumar \\ \hline
 \textbf{\large Date} & : & 20-12-2025 \\ \hline
-\textbf{\large Contact Person} & : & Dr. Ashutosh Abhangi \\ \hline
-\textbf{\large Job Site} & : & ITM SLS Baroda University \\ \hline
+\textbf{\large External Supervisor} & : & Prashant Mirchandani \\ \hline
+\textbf{\large Name of Organization} & : & Bharti Soft Tech Pvt. Ltd. \\ \hline
 \end{tabular}
 
 \vspace{0.4cm}
@@ -3247,15 +3547,15 @@ Supervisor Signature & Student Signature \\
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{|p{0.35\textwidth}|p{0.55\textwidth}|}
 \hline
-Full Name of Student & : Aryan Suthar \\ \hline
+Full Name of Student & : Suthar Aryan Sujalkumar \\ \hline
 Enrolment Number & : 23C25512 \\ \hline
 Contact No. & : 9712030021 \\ \hline
 Email Address & : aryan.suthar@itmbu.ac.in \\ \hline
 Programme & : B.Tech \\ \hline
 Specialization & : Information Technology \\ \hline
 Project Title & : Smart Gym Management System \\ \hline
-Name of Organization & : ITM SLS Baroda University \\ \hline
-External Supervisor & : Dr. Ashutosh Abhangi \\ \hline
+Name of Organization & : Bharti Soft Tech Pvt. Ltd. \\ \hline
+External Supervisor & : Prashant Mirchandani \\ \hline
 \end{tabular}
 \end{center}
 
@@ -3285,8 +3585,8 @@ External Supervisor & : Dr. Ashutosh Abhangi \\ \hline
 \begin{tabular}{|p{\dimexpr 0.5\textwidth - 2\tabcolsep - 1.5\arrayrulewidth \relax}|p{\dimexpr 0.5\textwidth - 2\tabcolsep - 1.5\arrayrulewidth \relax}|}
 \hline
 Year: 2025-26 & Week No. : #1 \\ \hline
-\multicolumn{2}{|l|}{Student Name and Enrolment Number: Suthar Aryan -- 23C25512} \\ \hline
-\multicolumn{2}{|l|}{Supervisor Name: Dr. Ashutosh Abhangi} \\ \hline
+\multicolumn{2}{|l|}{Student Name and Enrolment Number: Suthar Aryan Sujalkumar -- 23C25512} \\ \hline
+\multicolumn{2}{|l|}{External Supervisor Name: Prashant Mirchandani} \\ \hline
 \multicolumn{2}{|l|}{Project Title: Smart Gym Management System (React + Spring Boot + Oracle)} \\ \hline
 \end{tabular}
 
@@ -3296,7 +3596,6 @@ Year: 2025-26 & Week No. : #1 \\ \hline
 \begin{tabular}{|p{\dimexpr \textwidth - 2\tabcolsep - 2\arrayrulewidth \relax}|}
 \hline
 1. WORK DONE \\
-{[}Please write the details of the work done in the last fortnight{]} \\
 #2
 \\ \hline
 2. WORK TO BE DONE \\
@@ -3311,12 +3610,12 @@ Year: 2025-26 & Week No. : #1 \\ \hline
 \end{tabular}
 
 \vfill
-
-\noindent \begin{tabularx}{\textwidth}{@{}X X@{}}
+\vspace{0.8cm}
+\noindent \begin{tabularx}{\textwidth}{@{}X r@{}}
 \rule{6cm}{0.4pt} & \rule{6cm}{0.4pt} \\
 Supervisor Signature & Student Signature \\
 \end{tabularx}
-\vspace*{1cm}
+\vspace*{0.5cm}
 
 \clearpage
 }
