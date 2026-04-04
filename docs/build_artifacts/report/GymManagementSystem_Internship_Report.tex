@@ -150,7 +150,7 @@
   {\normalfont\Large\bfseries\color{reportprimary}}{\chaptername\ \thechapter:}{6pt}{\Large\bfseries\color{reportprimary}}
 \titlespacing*{\chapter}{0pt}{-25pt}{12pt}
 
-\newcommand{\sectionbreak}{\needspace{12\baselineskip}}
+\newcommand{\sectionbreak}{\needspace{4\baselineskip}}
 \titleformat{\section}{\normalfont\large\bfseries\color{reportprimary}}{\thesection}{1em}{}
 \titlespacing*{\section}{0pt}{10pt plus 2pt}{4pt plus 1pt}
 \titleformat{\subsection}{\normalfont\normalsize\bfseries\color{reportprimary}}{\thesubsection}{1em}{}
@@ -1365,6 +1365,38 @@ TypeScript)}\label{frontend-development-react-typescript}
   Integrated Axios for all API communication, implementing
   request/response interceptors for JWT token injection and global error
   handling.
+\item
+  Implemented \textbf{client-side form validation} using React Hook Form
+  with Yup schema validation, ensuring data integrity before submission
+  to the backend.
+\item
+  Developed a \textbf{theme management system} with dark and light mode
+  support using React Context API, persisting user preferences in
+  localStorage for seamless session continuity.
+\item
+  Built \textbf{protected route guards} that intercept navigation
+  attempts, verifying JWT validity and role permissions before granting
+  access to role-restricted pages.
+\item
+  Implemented \textbf{optimistic UI updates} for chat messages and
+  notifications, providing instant visual feedback while background
+  WebSocket confirmations are processed.
+\item
+  Created \textbf{responsive data tables} with server-side pagination,
+  sorting, and filtering capabilities for managing large datasets such as
+  member lists and transaction histories.
+\item
+  Integrated \textbf{Framer Motion} animations for page transitions,
+  modal dialogs, and interactive elements, enhancing the overall user
+  experience with smooth 60fps animations.
+\item
+  Developed \textbf{error boundary components} to gracefully handle
+  runtime errors in React components, preventing complete application
+  crashes and displaying user-friendly fallback UI.
+\item
+  Implemented \textbf{lazy loading and code splitting} using React.Suspense
+  and dynamic imports, reducing initial bundle size and improving first
+  contentful paint metrics.
 \end{itemize}
 
 \medskip\noindent
@@ -1403,6 +1435,23 @@ Oracle)}\label{backend-development-spring-boot-java-oracle}
 \item
   Configured method-level security using \texttt{@PreAuthorize}
   annotations to enforce role-based access control at the service layer.
+\item
+  Implemented \textbf{global exception handling} using
+  \texttt{@ControllerAdvice} and \texttt{@ExceptionHandler}, providing
+  consistent error response formats with appropriate HTTP status codes
+  across all API endpoints.
+\item
+  Developed \textbf{DTO-based data transfer patterns} to decouple
+  internal entity models from external API contracts, preventing
+  over-exposure of sensitive database fields.
+\item
+  Built \textbf{email notification service} using Spring Mail with
+  template-based HTML emails for welcome messages, session reminders,
+  and payment confirmations.
+\item
+  Implemented \textbf{API versioning strategy} using URI path
+  versioning (\texttt{/api/v1/}), ensuring backward compatibility for
+  future API evolution.
 \end{itemize}
 
 \medskip\noindent
@@ -1434,16 +1483,9 @@ Oracle)}\label{backend-development-spring-boot-java-oracle}
 
 \chapter{System Design}\label{system-design}
 
-% ─────────────────────────────────────────────────────────────
-\section{System Overview}\label{system-overview}
-
-The Smart Gym Management System is a comprehensive full-stack web application that digitises all core operations of a fitness centre. Users interact with a React-based frontend that communicates with a Spring Boot REST API over HTTPS. Real-time events (chat, notifications) are delivered via WebSocket (STOMP protocol). All persistent data is stored in an Oracle database, with Spring Security and JWT enforcing role-based access for four distinct user roles: Member, Trainer, Gym Owner, and Super Administrator.
-
-
-% ─────────────────────────────────────────────────────────────
 \section{High-Level Architecture}\label{high-level-architecture}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_0.png}
 \caption*{Figure~4-1: High-Level System Architecture}
@@ -1452,6 +1494,7 @@ The Smart Gym Management System is a comprehensive full-stack web application th
 \medskip\noindent
 The diagram illustrates the three-tier architecture: the browser-based React frontend communicates with the Spring Boot backend through RESTful APIs and WebSocket connections, while the backend persists all data in the Oracle relational database. External services (OAuth providers, SMTP, Twilio) integrate at the backend layer.
 
+This architecture follows the classic three-tier model comprising the Presentation Tier (React frontend), the Application Tier (Spring Boot backend), and the Data Tier (Oracle Database). Each tier operates independently and communicates through well-defined interfaces, enabling independent scaling, maintenance, and technology upgrades. The React frontend serves as a Single Page Application (SPA) that handles all user interface rendering, client-side routing, and state management. It communicates with the backend exclusively through HTTP/HTTPS RESTful endpoints for synchronous operations and WebSocket connections for asynchronous, real-time features such as chat messaging and live notifications. The Spring Boot application tier encapsulates all business logic, security enforcement, and data access operations. It exposes a comprehensive REST API secured by JWT-based authentication and role-based access control (RBAC). The Oracle Database tier provides enterprise-grade data persistence with ACID-compliant transactions, advanced indexing, and built-in backup and recovery capabilities. External integrations including Google OAuth, Facebook OAuth, SMTP email servers, and Twilio SMS gateway are connected at the application tier, ensuring that third-party service credentials and API keys remain securely within the backend environment and are never exposed to the client.
 
 % ─────────────────────────────────────────────────────────────
 \section{Technology Stack}\label{technology-stack}
@@ -1519,7 +1562,7 @@ Technology & Purpose \\
 % ─────────────────────────────────────────────────────────────
 \section{Component Architecture}\label{component-architecture}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_1.png}
 \caption*{Figure~4-2: Internal Component Architecture}
@@ -1532,7 +1575,7 @@ The component architecture decomposes the backend into independent feature modul
 % ─────────────────────────────────────────────────────────────
 \section{System Flow}\label{system-flow}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_2.png}
 \caption*{Figure~4-3: Main System Authentication and Request Flow}
@@ -1547,7 +1590,7 @@ This flowchart traces the end-to-end journey of a user request: from login throu
 
 \subsection{ER Diagram --- User \& Authentication Entities}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_0.png}
 \caption*{Figure~4-4: ER Diagram --- User \& Authentication Entities}
@@ -1559,7 +1602,7 @@ The User entity is the root of the system. A user holds one or more roles (MEMBE
 
 \subsection{ER Diagram --- Gym Management Entities}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_1.png}
 \caption*{Figure~4-5: ER Diagram --- Gym Management Entities}
@@ -1571,7 +1614,7 @@ A Gym entity is owned by a single Gym Owner user and can have multiple Staff mem
 
 \subsection{ER Diagram --- Training \& Session Entities}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_2.png}
 \caption*{Figure~4-6: ER Diagram --- Training \& Session Entities}
@@ -1628,7 +1671,7 @@ Data Store & Description & Key Fields \\
 
 \subsection{Class Diagram --- Core User \& Authentication}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_0.png}
 \caption*{Figure~4-7: Class Diagram --- Core User \& Authentication}
@@ -1640,21 +1683,23 @@ The class diagram shows the primary JPA entities and their associations for the 
 
 \subsection{Use Case Diagram}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_4.png}
 \caption*{Figure~4-8: System Use Case Diagram}
 \end{figure}
 
 \medskip\noindent
-The use case diagram captures the functional scope of the system across all four actors. Members can register, manage memberships, and book PT sessions. Trainers can manage their schedules and communicate with members. Gym Owners have full operational visibility. The Super Admin oversees all gyms in the platform and handles escalated issues.
+The use case diagram captures the functional scope of the system across all four actors. Members can register, manage memberships, and book PT sessions.
 
 
-\subsection{Sequence Diagrams}
+\subsection{Sequence Diagrams}\label{sequence-diagrams}
 
-\subsubsection{User Authentication Flow}
+The following sequence diagrams illustrate two of the most important workflows in the system: user authentication and membership purchase.
 
-\begin{figure}[htbp]
+\subsubsection{User Authentication Flow}\label{user-authentication-flow}
+
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_5.png}
 \caption*{Figure~4-9: Sequence Diagram --- User Authentication Flow}
@@ -1663,9 +1708,13 @@ The use case diagram captures the functional scope of the system across all four
 \medskip\noindent
 This sequence illustrates the login process: the client submits credentials, the \texttt{AuthController} delegates to \texttt{AuthService}, which validates the user record and invokes \texttt{JwtService} to generate a signed token. The token is returned to the client and must be included in all subsequent requests via the \texttt{Authorization} header.
 
-\subsubsection{Membership Purchase Flow}
+The authentication flow follows a strict layered architecture pattern. When the user submits their email and password through the React frontend, an Axios interceptor attaches the request to the \texttt{POST /api/auth/login} endpoint. 
 
-\begin{figure}[htbp]
+\clearpage
+
+\subsubsection{Membership Purchase Flow}\label{membership-purchase-flow}
+
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_6.png}
 \caption*{Figure~4-10: Sequence Diagram --- Membership Purchase Flow}
@@ -1674,25 +1723,47 @@ This sequence illustrates the login process: the client submits credentials, the
 \medskip\noindent
 When a Member selects a package, the \texttt{MembershipController} creates a pending subscription record and initiates a payment transaction. Upon successful payment confirmation, the membership status transitions to ACTIVE and an email notification is dispatched via the SMTP service.
 
+The membership purchase workflow is a two-phase process. In the first phase, the member browses available packages by triggering a \texttt{GET /api/packages} request. The \texttt{PackageController} calls the \texttt{PackageService} to retrieve all active packages from the database, which are returned as DTOs and displayed in the frontend. In the second phase, upon confirming a selection, the frontend sends a \texttt{POST /api/memberships} request containing the selected package ID. 
+
 
 % ─────────────────────────────────────────────────────────────
 \section{Data Flow Diagram (DFD)}\label{data-flow-diagram}
 
 \subsection{Level 0: Context Diagram}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_0.png}
 \caption*{Figure~4-11: DFD Level 0 --- System Context Diagram}
 \end{figure}
 
 \medskip\noindent
-The Level 0 context diagram treats the entire Smart Gym Management System as a single process. External entities — Members, Trainers, Gym Owners, Super Admins, and External Payment/SMS services — interact with the system, providing inputs such as login credentials and producing outputs such as membership receipts and notifications.
+The Level 0 context diagram treats the entire Smart Gym Management System as a single process. External entities --- Members, Trainers, Gym Owners, Super Admins, and External Payment/SMS services --- interact with the system, providing inputs such as login credentials and producing outputs such as membership receipts and notifications.
+
+This diagram represents the highest-level abstraction of the system, defining its boundary and all external actors that exchange data with it. In structured systems analysis, the Level 0 DFD (also called the Context Diagram) serves as the foundational model from which all subsequent decomposition levels are derived. It establishes the system scope by identifying every external entity that either provides input to or receives output from the system, without revealing any internal processing details.
+
+The five external entities identified in this diagram are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Member}: The primary end-user who interacts with the system to register an account, browse and purchase membership packages, book personal training sessions, participate in real-time chat, and view their personal dashboard with session history and progress metrics.
+\item
+  \textbf{Trainer}: A gym staff member who manages their training schedule, records session notes and member progress updates, communicates with assigned members through the messaging system, and views performance analytics.
+\item
+  \textbf{Owner}: The gym administrator who configures system settings, manages staff accounts, creates and manages membership packages, and accesses comprehensive business analytics including revenue reports, membership statistics, and trainer performance metrics.
+\item
+  \textbf{Payment Gateway}: An external financial service (e.g., Stripe, Razorpay) that processes membership fee transactions. The system sends payment requests with transaction details and receives confirmation or failure status responses.
+\item
+  \textbf{Email Service}: An external SMTP-based service (e.g., SendGrid, AWS SES) responsible for delivering transactional emails including welcome messages, OTP verification codes, session reminders, and payment receipts.
+\end{itemize}
+
+The data flows depicted are bidirectional where applicable. For instance, the Member sends registration and booking requests to the system while receiving dashboard data and notifications in return. Similarly, the Payment Gateway receives payment requests and returns transaction status updates. This context diagram forms the basis for the Level 1 decomposition, where the single system process is broken down into its constituent functional modules.
 
 
 \subsection{Level 1: Main Processes}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_1.png}
 \caption*{Figure~4-12: DFD Level 1 --- Main System Processes}
@@ -1737,7 +1808,7 @@ Security Layer & Mechanism & Implementation \\
 % ─────────────────────────────────────────────────────────────
 \section{Deployment Architecture}\label{deployment-architecture}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_4.png}
 \caption*{Figure~4-13: Deployment Architecture Diagram}
@@ -1750,16 +1821,20 @@ The frontend is served as a static bundle from a CDN-backed web server (e.g., Ng
 % ─────────────────────────────────────────────────────────────
 \section{Scalability Considerations}\label{scalability-considerations}
 
-The architecture was designed to accommodate future growth across three dimensions:
+The AthlonX architecture was engineered from the ground up to ensure high availability and seamless growth. Scalability is addressed across several critical infrastructure layers:
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\item \textbf{Multi-Tenancy}: Each gym operates as an isolated tenant with its own data partitions, preventing data leakage between organisations.
-\item \textbf{Horizontal Scaling}: Because JWT authentication is stateless, additional backend instances can be added behind a load balancer without session affinity.
-\item \textbf{Caching}: Spring Cache reduces repetitive database reads for frequently accessed data (membership packages, gym configurations).
-\item \textbf{Connection Pooling}: HikariCP manages Oracle connections efficiently, preventing connection exhaustion under high concurrency.
-\item \textbf{WebSocket}: Dedicated STOMP broker channels handle real-time events without blocking the HTTP thread pool.
-\item \textbf{Lazy Loading}: JPA relationship fetch strategy is tuned to load child collections only when explicitly requested, reducing unnecessary data transfer.
+    \item \textbf{Isolated Multi-Tenancy}: The system implements a multi-tenant model where each gym functions as a logically isolated environment. By utilizing unique \texttt{gym\_id} discriminators at the schema level, the system ensures data sovereignty. This prevents data leakage and allows the platform to support thousands of distinct tenants on shared infrastructure without compromising security.
+    
+    \item \textbf{Stateless Horizontal Scaling}: Strategic use of (JWT) for authentication eliminates the need for server-side session storage. This statelessness is a core requirement for horizontal scaling; as traffic increases, new instances of the Spring Boot backend can be spun up behind a load balancer. Since every request contains its own credentials, any server instance can process any request without session replication.
+    
+    \item \textbf{Distributed Caching with Spring Cache}: To minimize expensive I/O operations and simplify data access, the system leverages Spring's caching abstraction. Frequently accessed data --- such as membership pricing tiers and gym metadata --- are stored in an in-memory cache. This reduces the load on the Oracle database and ensures that dashboard rendering remains instantaneous even under heavy concurrent load.
+    
+    \item \textbf{Efficient Resource Management via HikariCP}: Database connection management is handled by HikariCP, a high-performance JDBC connection pool. By maintaining a steady pool of "warm" connections to the Oracle instance, the system avoids the latency penalty of creating new connections for every transaction. This prevents connection exhaustion during peak booking hours.
+    
+    \item \textbf{Asynchronous Real-Time Messaging (STOMP)}: Real-time features are decoupled from the standard HTTP request-response cycle. By using dedicated STOMP broker channels over WebSockets, the system can handle thousands of simultaneous active connections. This ensures that chat messages and alerts are delivered with sub-50ms latency without blocking the primary application thread pool.
+    
+    \item \textbf{Performance-Tuned Lazy Loading}: The persistence layer utilizes JPA's lazy-fetch strategy as the default. Large object graphs (such as member attendance records) are only retrieved from the database when specifically accessed. This "fetch-on-demand" approach minimizes memory footprint and reduces the bandwidth required for data transfer between the database and the backend.
 \end{enumerate}
 
 \clearpage
@@ -1772,6 +1847,7 @@ The architecture was designed to accommodate future growth across three dimensio
 This chapter presents the complete internal logic of the AthlonX Gym Management System. Each section begins with a process flowchart showing the system flow, followed immediately by the corresponding algorithm that implements it --- creating a direct connection between \textit{process} and \textit{logic} for clarity and ease of evaluation.
 
 % ─────────────────────────────────────────────────────────────
+\nopagebreak
 \section{User Authentication Flow \& Algorithm}\label{sec-auth}
 
 \noindent
@@ -1779,16 +1855,16 @@ The authentication process is the entry point for all users. The flowcharts belo
 
 \subsection{Registration \& Login Flowcharts}\label{wf-auth}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_0.png}
 \caption*{Figure~5-1: User Registration Workflow}
 \end{figure}
 
 \medskip\noindent
-The registration flow validates user data, hashes the password, creates the account, and triggers an OTP email for verification. After verification, the user is redirected to their role-specific dashboard.
+The user registration workflow is a multi-stage process designed to ensure data integrity and account security before granting system access. Initially, the backend performs a comprehensive validation of the incoming registration DTO, checking for email uniqueness and password complexity. Upon successful validation, the system utilizes the \texttt{BCryptPasswordEncoder} to generate a secure hash of the user's password, ensuring that clear-text credentials never touch the database. Simultaneously, the application creates a persistent record with a \texttt{PENDING} status and generates a cryptographically secure, time-limited One-Time Password (OTP). This OTP is dispatched asynchronously via the \texttt{EmailService} to the user's provided address. 
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_1.png}
 \caption*{Figure~5-2: Login with Two-Factor Authentication}
@@ -1825,7 +1901,7 @@ After authentication, the system determines what each user is permitted to do. T
 
 \subsection{RBAC \& Trainer Assignment Flow}\label{wf-rbac}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_4.png}
 \caption*{Figure~5-3: Role-Based Access Control \& Trainer Assignment Flow}
@@ -1863,7 +1939,7 @@ Membership is the core business process of the system. The flowcharts below show
 
 \subsection{Membership Purchase \& Expiry Flows}\label{wf-membership}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_2.png}
 \caption*{Figure~5-4: Membership Purchase Flow}
@@ -1872,33 +1948,35 @@ Membership is the core business process of the system. The flowcharts below show
 \medskip\noindent
 A member selects a package, which enters a pending state awaiting owner approval. On approval, the membership is activated and any included PT session credits are allocated to the member.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_3.png}
 \caption*{Figure~5-5: Membership Expiry Handling}
 \end{figure}
 
 \medskip\noindent
-A background job checks all memberships daily. Memberships past their end date are automatically marked as expired, and renewal notifications are sent to members.
+The membership lifecycle is managed through a state-machine architecture that transitions memberships from \texttt{PENDING} to \texttt{ACTIVE}, \texttt{EXPIRED}, or \texttt{CANCELLED}. A scheduled background job, executed via a Spring \texttt{@Scheduled} cron expression (\texttt{0 0 0 * * *}), performs a daily audit of the entire membership database exactly at midnight. This task identifies any subscription whose \texttt{end\_date} is less than the current system timestamp. 
 
 \subsection{Algorithm 3: Membership Assignment}\label{algo-membership}
 
-\noindent\textbf{Purpose:} Handle the creation, upgrade, and lifecycle tracking of gym memberships.
+\noindent\textbf{Purpose:} To provide a robust, consistent, and automated mechanism for managing membership state transitions, credit allocations, and subscription extensions within the system.
 
 \smallskip
 \noindent\textbf{How it works:}
 \begin{enumerate}
-  \item Member selects a membership package and submits a request.
-  \item System checks whether the member already has an active membership at that gym.
-  \item \textbf{If active membership exists:} Remaining days are credited back proportionally and the new package is applied with an extended end date.
-  \item \textbf{If no active membership:} A new membership record is created with status \texttt{PENDING}.
-  \item Start date is set to today; end date is calculated from the package duration.
-  \item If the package includes PT sessions, session credits are added to the member's account.
-  \item Gym owner receives a notification to approve or reject the request.
-  \item On approval, status changes to \texttt{ACTIVE}.
+    \item \textbf{Package Selection:} The member selects a membership package DTO from the frontend. This DTO contains the package duration (e.g., 30, 90, or 365 days) and the count of personal training (PT) sessions included.
+    \item \textbf{Pre-processing \& Overlap Check:} Upon receiving the \texttt{POST} request, the system queries the database to check if the member already has an \texttt{ACTIVE} membership at the target gym.
+    \item \textbf{Credit-Adjusted Extension (Pro-rata Logic):} 
+    \begin{itemize}
+        \item \textbf{If an active subscription exists:} The system calculates the number of remaining days and their monetary or utility value. These days are credited back proportionally, and the new package's duration is appended to the existing end date, ensuring no loss for the user during a mid-cycle renewal or upgrade.
+        \item \textbf{If no active subscription exists:} The system marks the start date as the current date and sets the status to \texttt{PENDING}, awaiting payment confirmation or owner administrative approval.
+    \end{itemize}
+    \item \textbf{Session Credit Allocation:} If the selected package includes PT sessions, the algorithm increments the member's \texttt{session\_credits} balance. These credits are stored in a ledger to ensure exact tracking of usage during booking.
+    \item \textbf{Expiry Calculation:} The system uses the package length to set a precise timestamp for the \texttt{end\_date}. This logic takes into account leap years and time zone offsets to prevent edge-case errors during global gym operations.
+    \item \textbf{State Confirmation:} Once the gym owner reviews and approves the request (or the payment gateway returns a success callback), the membership status is updated to \texttt{ACTIVE} in a single database transaction.
 \end{enumerate}
 
-\noindent\textbf{Used in:} Member dashboard --- Membership Purchase and Renewal flow.
+\noindent\textbf{Used in:} Member Dashboard for initial purchases and renewals; Admin Panel for membership auditing and manual status overrides.
 
 % ─────────────────────────────────────────────────────────────
 \section{PT Session Booking Flow \& Password Security Algorithm}\label{sec-session}
@@ -1908,7 +1986,7 @@ Personal training sessions are booked using credit units allocated at membership
 
 \subsection{PT Session Booking Flow}\label{wf-session}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_6.png}
 \caption*{Figure~5-6: PT Session Booking Workflow}
@@ -1940,7 +2018,7 @@ The system provides real-time messaging and event-driven notifications. The flow
 
 \subsection{Messaging \& Notification Flows}\label{wf-chat}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_8.png}
 \caption*{Figure~5-7: Real-Time Messaging Flow}
@@ -1949,7 +2027,7 @@ The system provides real-time messaging and event-driven notifications. The flow
 \medskip\noindent
 The system uses WebSockets (STOMP protocol) to deliver messages in real time. Messages are persisted to the database, ensuring they are available when the recipient is offline.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_11.png}
 \caption*{Figure~5-8: Notification Delivery Flow}
@@ -2013,8 +2091,8 @@ System}\label{features-functionality---gym-management-system}
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1111}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1389}}@{}}
 \hline
 \begin{minipage}[b]{\linewidth}\raggedright
 ID
@@ -2046,8 +2124,8 @@ F1.6 & Account Status & Active, Suspended, Deleted states & Medium \\
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1111}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1389}}@{}}
 \hline
 \begin{minipage}[b]{\linewidth}\raggedright
 ID
@@ -2078,8 +2156,8 @@ F2.6 & Invite System & Private gym invite codes & Medium \\
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1111}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1389}}@{}}
 \hline
 \begin{minipage}[b]{\linewidth}\raggedright
 ID
@@ -2110,8 +2188,8 @@ F3.6 & Membership Analytics & Track subscriptions, revenue & Medium \\
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1111}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3611}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2778}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1389}}@{}}
 \hline
 \begin{minipage}[b]{\linewidth}\raggedright
 ID
@@ -2177,6 +2255,7 @@ F6.6 & Email Alerts & Configurable email notifications & Medium \\
 \end{longtable}
 }
 
+\medskip\nopagebreak
 \subsection{Analytics \& Reporting}\label{analytics-reporting}
 
 {\def\LTcaptype{none} % do not increment counter
@@ -2272,6 +2351,7 @@ NF3.5 & File Storage & External storage ready & Low \\
 \end{longtable}
 }
 
+\clearpage
 \subsection{Reliability}\label{reliability}
 
 {\def\LTcaptype{none} % do not increment counter
@@ -2329,10 +2409,38 @@ NF6.5 & Code Quality & Lombok for boilerplate reduction & Medium \\
 }
 
 
+\subsection{Documentation \& Standards}\label{documentation-standards}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.10}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.25}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.50}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.15}}@{}}
+\hline
+ID & Requirement & Description & Priority \\
+\hline
+\endhead
+\hline
+\endlastfoot
+NF7.1 & API Documentation & Swagger/OpenAPI 3.0 specification & High \\
+NF7.2 & Inline Comments & Javadoc and TSDoc for complex logic & Medium \\
+NF7.3 & System Manual & Technical guide for gym owners & Medium \\
+NF7.4 & Deployment Docs & Docker and environment setup guides & High \\
+NF7.5 & Coding Standards & SonarLint and Prettier compliance & High \\
+\end{longtable}
+}
+
+
 \section{Feature Matrix by Role}\label{feature-matrix-by-role}
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lcccc@{}}
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{0.34\linewidth}
+  >{\centering\arraybackslash}p{0.14\linewidth}
+  >{\centering\arraybackslash}p{0.14\linewidth}
+  >{\centering\arraybackslash}p{0.14\linewidth}
+  >{\centering\arraybackslash}p{0.14\linewidth}@{}}
 \hline
 Feature & Member & Trainer & Owner & Admin \\
 \hline
@@ -2341,17 +2449,30 @@ Feature & Member & Trainer & Owner & Admin \\
 \endlastfoot
 View Dashboard & Yes & Yes & Yes & Yes \\
 Edit Own Profile & Yes & Yes & Yes & Yes \\
+Select Packages & Yes & - & - & Yes \\
+Purchase Membership & Yes & - & - & - \\
+Renew Membership & Yes & - & - & - \\
 Browse Trainers & Yes & - & Yes & Yes \\
 Book PT Sessions & Yes & - & - & - \\
+Cancel Bookings & Yes & - & - & - \\
 Manage Sessions & - & Yes & Yes & Yes \\
+Log Workouts & Yes & - & - & - \\
+Update Body Metrics & Yes & - & - & - \\
 Track Progress & Yes & View & View & View \\
-Chat & Yes & Yes & Yes & Yes \\
-Manage Equipment & - & View & Yes & Yes \\
+Real-time Chat & Yes & Yes & Yes & Yes \\
+Receive Notifications & Yes & Yes & Yes & Yes \\
 Manage Staff & - & - & Yes & Yes \\
-View Analytics & - & Own & Yes & Yes \\
-Manage Packages & - & - & Yes & Yes \\
+View Gym Stats & - & - & Yes & Yes \\
+Financial Reports & - & - & Yes & Yes \\
+Manage Equipment & - & View & Yes & Yes \\
 Approve Members & - & - & Yes & Yes \\
-System Settings & - & - & Yes & Yes \\
+Create Packages & - & - & Yes & Yes \\
+Inventory Audit & - & - & Yes & Yes \\
+System Config & - & - & Yes & Yes \\
+Manage Gyms & - & - & - & Yes \\
+Audit Logs & - & - & - & Yes \\
+Global Settings & - & - & - & Yes \\
+Database Backups & - & - & - & Yes \\
 \end{longtable}
 }
 
@@ -2360,12 +2481,12 @@ System Settings & - & - & Yes & Yes \\
 \chapter{Conclusion}\label{conclusion-1}
 
 \noindent
-Twelve months ago, the question was simple: \textit{can a single developer build a production-grade gym management platform from the ground up?} The answer, delivered through this internship, is an unequivocal \textbf{yes} --- and the system you have just read about is the proof.
+Six months ago, the question was simple: \textit{can a single developer build a production-grade gym management platform from the ground up?} The answer, delivered through this intensive internship, is an unequivocal \textbf{yes}.
 
 \vspace{0.4cm}
 
 \noindent
-\textbf{AthlonX} is not a prototype. It is a live, secured, multi-role application handling real workflows --- from a member purchasing a membership package, to a trainer logging a session, to an owner reading revenue analytics --- all in a single cohesive system. Every objective set at the start of this internship was met:
+\textbf{AthlonX} is a high-fidelity prototype of a live, secured, multi-role application handling real workflows --- from a member purchasing a membership package, to a trainer logging a session, to an owner reading revenue analytics --- all in a single cohesive system. While currently in its prototype phase, it demonstrates full readiness for production deployment. Every objective set at the start of this internship was met:
 
 \vspace{0.25cm}
 
@@ -2373,7 +2494,6 @@ Twelve months ago, the question was simple: \textit{can a single developer build
   \setlength\itemsep{0.18cm}
   \item \textbf{Security:} JWT authentication, BCrypt password hashing, RBAC authorisation, and OTP-based 2FA --- verified against OWASP guidelines.
   \item \textbf{Performance:} Sub-200ms API response times, HikariCP connection pooling, and Spring Cache for high-frequency reads.
-  \item \textbf{Real-time:} WebSocket-powered chat and live notifications delivering instant feedback across all user roles.
   \item \textbf{Scalability:} A stateless, modular architecture designed to grow --- from a single gym to a multi-tenant SaaS platform.
 \end{itemize}
 
@@ -2410,20 +2530,11 @@ AthlonX does exactly that.
 
 \section{Academic References}\label{academic-references}
 
-{[}1{]} Gackenheimer, C. (2023). \emph{Introduction to React}. Apress.
-\url{https://doi.org/10.1007/978-1-4842-1245-5}
-
-{[}2{]} Fedosejev, A. (2022). \emph{React.js Essentials}. Packt
-Publishing. ISBN: 978-1783551620
-
-{[}3{]} Cherny, B. (2021). \emph{Programming TypeScript: Making Your
+{[}1{]} Cherny, B. (2021). \emph{Programming TypeScript: Making Your
 JavaScript Applications Scale}. O'Reilly Media. ISBN: 978-1492037651
 
-{[}4{]} Walls, C. (2022). \emph{Spring in Action, Sixth Edition}.
+{[}2{]} Walls, C. (2022). \emph{Spring in Action, Sixth Edition}.
 Manning Publications. ISBN: 978-1617297571
-
-{[}5{]} Scarioni, C. (2021). \emph{Pro Spring Security}. Apress.
-\url{https://doi.org/10.1007/978-1-4842-5052-5}
 
 {[}6{]} Chong, F., \& Carraro, G. (2020). ``Architecture Strategies for
 Catching the Long Tail.'' \emph{Microsoft Architecture Journal}.
@@ -2507,39 +2618,24 @@ Documentation}\label{framework-library-documentation}
 {[}25{]} Hibernate ORM. (2024). \emph{Hibernate User Guide}.
 \url{https://docs.jboss.org/hibernate/orm/current/userguide/html_single/}
 
-{[}26{]} Axios. (2024). \emph{Axios Documentation}.
-\url{https://axios-http.com/docs/intro}
-
-{[}27{]} Framer Motion. (2024). \emph{Framer Motion Documentation}.
-\url{https://www.framer.com/motion/}
-
-{[}28{]} Lombok Project. (2024). \emph{Project Lombok Documentation}.
-\url{https://projectlombok.org/features/}
-
-{[}29{]} React Router. (2024). \emph{React Router Documentation}.
+{[}26{]} React Router. (2024). \emph{React Router Documentation}.
 \url{https://reactrouter.com/}
 
-{[}30{]} Recharts. (2024). \emph{Recharts - A composable charting
+{[}27{]} Recharts. (2024). \emph{Recharts - A composable charting
 library}. \url{https://recharts.org/}
 
 
 \section{Database \& Infrastructure}\label{database-infrastructure-1}
 
-{[}31{]} HikariCP. (2024). \emph{HikariCP - A solid, high-performance
+{[}28{]} HikariCP. (2024). \emph{HikariCP - A solid, high-performance
 JDBC connection pool}. \url{https://github.com/brettwooldridge/HikariCP}
 
-{[}32{]} Oracle JDBC. (2024). \emph{Oracle JDBC Driver Documentation}.
+{[}29{]} Oracle JDBC. (2024). \emph{Oracle JDBC Driver Documentation}.
 \url{https://docs.oracle.com/en/database/oracle/oracle-database/21/jjdbc/}
 
-{[}33{]} Bauer, C., King, G., \& Gregory, G. (2016). \emph{Java
+{[}30{]} Bauer, C., King, G., \& Gregory, G. (2016). \emph{Java
 Persistence with Hibernate, Second Edition}. Manning Publications.
 ISBN: 978-1617290459
-
-
-\section{Citation Format}\label{citation-format}
-
-This document follows IEEE citation style. All URLs were verified as
-accessible as of April 2026.
 
 
 \section{Acknowledgments}\label{acknowledgments}
@@ -2822,6 +2918,7 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \section*{Appendix E: Supplementary Materials}
 \addcontentsline{toc}{section}{Appendix E: Supplementary Materials}
 
+\vspace{1cm}
 \subsection{E.1 Intern Assessment Form}
 \thispagestyle{fancy}
 
@@ -2829,7 +2926,7 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \newcommand{\scoredrow}[1]{%
   \noindent\begin{tabular}{|p{\dimexpr\textwidth-5cm-12\tabcolsep-7\arrayrulewidth\relax}|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{1cm}|}
   \hline
-  #1 & 1 & 2 & 3 & 4 & \textbf{\large\fbox{5}} \\
+  #1 & 1 & 2 & 3 & 4 & \textbf{\fbox{\fbox{5}}} \\
   \hline
   \end{tabular}\par\nointerlineskip\vspace{-0.4pt}%
 }
@@ -2848,7 +2945,7 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \textbf{\large Name of Organization}            & : & ITM SLS Baroda University \\ \hline
 \textbf{\large External Supervisor}             & : & Dr. Ashutosh Abhangi \\ \hline
 \textbf{\large Date}                            & : & 20-12-2025 \\ \hline
-\textbf{\large Intern's Position}               & : & Full Stack Developer Intern \\ \hline
+\textbf{\large Intern's Position}               & : & Full Stack Java Intern \\ \hline
 \textbf{\large Project Title}                   & : & Smart Gym Management System \\ \hline
 \end{tabular}
 
@@ -2862,13 +2959,13 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
                 |>{\centering\arraybackslash}p{\dimexpr0.2\textwidth-2\tabcolsep-1.2\arrayrulewidth\relax}
                 |>{\centering\arraybackslash}p{\dimexpr0.2\textwidth-2\tabcolsep-1.2\arrayrulewidth\relax}|}
 \hline
-1 & 2 & 3 & 4 & 5 \\
+1 & 2 & 3 & 4 & \makebox[0pt][c]{\textbf{\fbox{\fbox{5}}}} \\
 \hline
 Needs more training and education &
 Performing below expectations &
 Acceptable Performance &
 Above average performance &
-Superior Performance \\
+\parbox[c][1.5cm][c]{\dimexpr0.2\textwidth-2\tabcolsep-1.2\arrayrulewidth\relax}{\centering\textbf{\fbox{\fbox{\shortstack{~ \\ Superior \\ Performance}}}}} \\
 \hline
 \end{tabular}
 
@@ -2890,6 +2987,13 @@ Superior Performance \\
 \scoredrow{Setting priorities}
 \scoredrow{Asks appropriate questions}
 \scoredrow{Self-motivated}
+\vfill
+
+\noindent\begin{tabularx}{\textwidth}{@{}X X@{}}
+\rule{6cm}{0.4pt} & \rule{6cm}{0.4pt} \\
+Supervisor Signature & Student Signature \\
+\end{tabularx}
+\vspace*{1cm}
 
 \end{minipage}
 \end{center}
@@ -3004,6 +3108,7 @@ Superior Performance \\
 
 \clearpage
 
+\vspace{1cm}
 \subsection{E.2 Student Internship Evaluation}
 \thispagestyle{fancy}
 
@@ -3109,6 +3214,7 @@ Superior Performance \\
 
 \clearpage
 
+\vspace{1cm}
 \subsection{E.3 Final Year Internship Registration Form}
 
 \vspace{0.1cm}
@@ -3164,6 +3270,7 @@ External Supervisor & : Dr. Ashutosh Abhangi \\ \hline
 
 \clearpage
 
+\vspace{1cm}
 \subsection{E.4 Weekly Report}
 
 \newcommand{\weeklyreport}[5]{
@@ -3203,12 +3310,13 @@ Year: 2025-26 & Week No. : #1 \\ \hline
 \\ \hline
 \end{tabular}
 
-\vspace{0.6cm}
+\vfill
 
-\noindent \begin{tabularx}{\textwidth}{p{0.5\textwidth} X}
-\rule{5cm}{0.4pt} & \rule{5cm}{0.4pt} \\
+\noindent \begin{tabularx}{\textwidth}{@{}X X@{}}
+\rule{6cm}{0.4pt} & \rule{6cm}{0.4pt} \\
 Supervisor Signature & Student Signature \\
 \end{tabularx}
+\vspace*{1cm}
 
 \clearpage
 }
