@@ -6,7 +6,7 @@
   a4paperpaper,
 ]{report}
 \usepackage{xcolor}
-\usepackage[a4paper,left=0.70in,right=0.70in,top=0.7in,bottom=0.7in,headheight=35.2pt,headsep=0in,footskip=0.4in]{geometry}
+\usepackage[a4paper,left=1.5in,right=1.0in,top=1.0in,bottom=1.0in,headheight=0.5in,headsep=0.2in,footskip=0.4in]{geometry}
 \usepackage{amsmath,amssymb}
 \setcounter{secnumdepth}{5}
 \usepackage{iftex}
@@ -90,7 +90,7 @@
 \makesavenoteenv{longtable}
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}\setlength{\topsep}{2pt}\setlength{\partopsep}{0pt}}
 %% =============================================================================
 %% University Internship Report — Header Include
 %% Included via pandoc -H flag (does NOT replace pandoc's default template)
@@ -116,16 +116,16 @@
 \setmainfont{Times New Roman}
 \setmonofont{Courier New}[Scale=0.85]
 
-%% ---- 1.4 Line Spacing (slightly tighter than 1.5) ----
-\setstretch{1.4}
+%% ---- 1.5 Line Spacing ----
+\setstretch{1.5}
 
-%% ---- Paragraph ----
+%% ---- Paragraph (tighter for space efficiency) ----
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{4pt plus 1pt minus 1pt}
+\setlength{\parskip}{3pt plus 1pt minus 1pt}
 
-%% ---- LongTable pre/post spacing ----
-\setlength{\LTpre}{6pt}
-\setlength{\LTpost}{6pt}
+%% ---- LongTable pre/post spacing (minimal) ----
+\setlength{\LTpre}{2pt}
+\setlength{\LTpost}{2pt}
 
 %% ---- Header / Footer ----
 \pagestyle{fancy}
@@ -133,34 +133,34 @@
 \fancyhead[L]{\small\nouppercase{\leftmark}}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0pt}
-\fancyfoot[L]{\fontsize{9}{11}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
-\fancyfoot[R]{\fontsize{9}{11}\selectfont\thepage}
+\fancyfoot[L]{\fontsize{10}{12}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
+\fancyfoot[R]{\fontsize{10}{12}\selectfont\thepage}
 
 \fancypagestyle{plain}{%
   \fancyhf{}
-  \fancyfoot[L]{\fontsize{9}{11}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
-  \fancyfoot[R]{\fontsize{9}{11}\selectfont\thepage}
+  \fancyfoot[L]{\fontsize{10}{12}\selectfont BTech IT \enspace School of Computer Science Engineering \& Technology}
+  \fancyfoot[R]{\fontsize{10}{12}\selectfont\thepage}
   \renewcommand{\headrulewidth}{0pt}
 }
 
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter:\ #1}{}}
 
-%% ---- Chapter Heading ----
+%% ---- Chapter Heading (12pt as required, tighter spacing) ----
 \titleformat{\chapter}[hang]
-  {\normalfont\Large\bfseries\color{reportprimary}}{\chaptername\ \thechapter:}{6pt}{\Large\bfseries\color{reportprimary}}
-\titlespacing*{\chapter}{0pt}{-25pt}{12pt}
+  {\normalfont\fontsize{12}{18}\selectfont\bfseries\color{reportprimary}}{\chaptername\ \thechapter:}{6pt}{\fontsize{12}{18}\selectfont\bfseries\color{reportprimary}}
+\titlespacing*{\chapter}{0pt}{-30pt}{8pt}
 
-\newcommand{\sectionbreak}{\needspace{4\baselineskip}}
-\titleformat{\section}{\normalfont\large\bfseries\color{reportprimary}}{\thesection}{1em}{}
-\titlespacing*{\section}{0pt}{10pt plus 2pt}{4pt plus 1pt}
-\titleformat{\subsection}{\normalfont\normalsize\bfseries\color{reportprimary}}{\thesubsection}{1em}{}
-\titlespacing*{\subsection}{0pt}{8pt plus 2pt}{3pt plus 1pt}
-\titleformat{\subsubsection}{\normalfont\normalsize\bfseries\color{reportprimary}}{\thesubsubsection}{1em}{}
-\titlespacing*{\subsubsection}{0pt}{6pt plus 1pt}{2pt}
+\newcommand{\sectionbreak}{\needspace{2\baselineskip}}
+\titleformat{\section}{\normalfont\fontsize{12}{18}\selectfont\bfseries\color{reportprimary}}{\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{8pt plus 2pt}{3pt plus 1pt}
+\titleformat{\subsection}{\normalfont\fontsize{12}{18}\selectfont\bfseries\color{reportprimary}}{\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{6pt plus 2pt}{2pt plus 1pt}
+\titleformat{\subsubsection}{\normalfont\fontsize{12}{18}\selectfont\bfseries\color{reportprimary}}{\thesubsubsection}{1em}{}
+\titlespacing*{\subsubsection}{0pt}{5pt plus 1pt}{1pt}
 
 %% ---- Captions (Chapter-Number style: Figure 2-3) ----
-\captionsetup[table]{labelsep=endash, font=small, justification=centering, position=below}
-\captionsetup[figure]{labelsep=endash, font=small, justification=centering, position=below}
+\captionsetup[table]{labelsep=endash, font={size=12}, justification=centering, position=below}
+\captionsetup[figure]{labelsep=endash, font={size=12}, justification=centering, position=below}
 
 \makeatletter
 \renewcommand{\thetable}{\thechapter-\arabic{table}}
@@ -254,7 +254,7 @@
 \pagenumbering{roman}
 \setcounter{page}{1}
 
-% Background image removed
+% Background image removed as per requirements
 % \AddToShipoutPictureBG{%
 %   \put(\LenToUnit{-0.025\paperwidth},\LenToUnit{-0.025\paperheight}){%
 %     \includegraphics[width=1.05\paperwidth,height=1.05\paperheight]{"Background For Cards.jpeg"}%
@@ -316,7 +316,7 @@
     \includegraphics[width=\textwidth]{"/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Internship Certificate -Aryan Suthar.jpg"}
     \vspace*{\fill}
 \end{center}
-\clearpage
+
 
 \vspace*{1cm}
 \noindent{\normalfont\Large\bfseries\color{reportprimary}Report Status Declaration Form}
@@ -335,13 +335,6 @@
 \end{tabularx}
 
 \vspace{16pt}
-\noindent{\Large\bfseries\color{reportprimary}Report Title}
-\vspace{6pt}
-
-\noindent\textbf{SMART GYM MANAGEMENT SYSTEM: A Full-Stack Web Application for
-Comprehensive Gym Operations Management (React + Spring Boot + Oracle)}
-
-\vspace{18pt}
 \noindent{\Large\bfseries\color{reportprimary}Project / Dissertation Status Declaration}
 \vspace{6pt}
 
@@ -409,7 +402,7 @@ This work may be made available for loan and photocopying & $\blacksquare$ YES \
 \end{minipage}
 
 \vspace*{\fill}
-\clearpage
+
 \vspace*{\fill}
 \noindent{\normalfont\Large\bfseries\color{reportprimary}Declaration of Originality}
 \label{declaration-of-originality}
@@ -470,7 +463,7 @@ I, \textbf{Suthar Aryan Sujalkumar}, holder of Enrolment Number
 dishonesty and may result in disciplinary action.}
 
 \vspace*{\fill}
-\clearpage
+
 \vspace*{\fill}
 \noindent{\normalfont\Large\bfseries\color{reportprimary}Acknowledgements}
 \label{acknowledgements}
@@ -515,7 +508,7 @@ programme.
 Finally, sincere gratitude is extended to family and friends for their
 unwavering encouragement and moral support throughout the internship
 \vspace*{\fill}
-\clearpage
+
 \vspace*{\fill}
 
 \noindent{\normalfont\Large\bfseries\color{reportprimary}Abstract}
@@ -566,7 +559,7 @@ in full-stack development, agile project management, and professional
 software engineering, significantly reinforcing skills acquired during
 the B.Tech (IT) programme.
 
-\medskip\noindent
+\smallskip\noindent
 
 \rule{\textwidth}{0.4pt}
 
@@ -574,7 +567,7 @@ the B.Tech (IT) programme.
 Oracle, Role-Based Access Control, JWT, WebSocket.
 
 \vspace*{\fill}
-\clearpage
+
 \ClearShipoutPictureBG
 
 \renewcommand{\headrule}{%
@@ -595,7 +588,7 @@ Oracle, Role-Based Access Control, JWT, WebSocket.
 \tableofcontents
 \vspace{-14pt}
 
-\clearpage
+
 
 \addcontentsline{toc}{chapter}{List of Tables}
 \listoftables
@@ -626,7 +619,7 @@ Appendix D & Frontend and Backend Technology Dependencies \\
 \hline
 \end{tabularx}
 
-\clearpage
+
 
 \addcontentsline{toc}{chapter}{List of Figures}
 \listoffigures
@@ -653,7 +646,7 @@ Chapter 6 & System Workflow Diagrams \\
 \hline
 \end{tabularx}
 
-\clearpage
+
 
 \chapter*{List of Symbols}\label{list-of-symbols}
 \addcontentsline{toc}{chapter}{List of Symbols}
@@ -714,72 +707,47 @@ OAuth & Open Authorisation &  &  \\
 \bottomrule
 \end{tabularx}
 
-\clearpage
+
 
 \cleardoublepage
 \pagenumbering{arabic}
 \setcounter{page}{1}
 \chapter{Introduction}\label{introduction}
 
-\needspace{3\baselineskip}
+\needspace{2\baselineskip}
 
 \section{Background of the
 Organisation}\label{background-of-the-organisation}
 
-Bharti Soft Tech Pvt. Ltd.~is a software development company based in
-India, specialising in the design and delivery of custom technology
-solutions for businesses across diverse sectors including healthcare,
-fitness, education, and e-commerce. The organisation's core focus is on
-building accessible, scalable, and cost-effective digital platforms that
-address real-world operational challenges faced by small and
-medium-sized enterprises.
+Bharti Soft Tech Pvt. Ltd. is a software development company based in India, specialising in custom technology solutions for businesses across healthcare, fitness, education, and e-commerce sectors. The organisation focuses on building accessible, scalable platforms addressing operational challenges for SMEs.
 
-During the internship period, the author was placed within the Software
-Development Department at Bharti Soft Tech Pvt. Ltd.~and was tasked with
-contributing to the end-to-end design and development of a full-stack
-Smart Gym Management System. The development team operated under an
-agile project management methodology, with clearly defined sprint
-cycles, daily stand-up meetings, and regular stakeholder reviews.
+The internship involved contributing to end-to-end design and development of a Smart Gym Management System within the Software Development Department. The team operated under agile methodology with sprint cycles, daily stand-ups, and stakeholder reviews. Under supervision of Dr. Ashutosh Abhangi, the intern gained exposure to professional development practices and architectural decision-making.
 
-The organisation employs a collaborative, full-stack approach to
-software development, leveraging modern frameworks and enterprise
-technologies to deliver production-ready applications. Under the
-supervision of Dr.~Ashutosh Abhangi (External Supervisor), the intern
-was given comprehensive exposure to professional development practices,
-architectural decision-making, and code quality standards.
-
-\needspace{3\baselineskip}
+\needspace{2\baselineskip}
 
 \section{Objectives of the
 Organisation}\label{objectives-of-the-organisation}
 
-The primary objectives of Bharti Soft Tech Pvt. Ltd.~are as follows:
+Primary objectives of Bharti Soft Tech Pvt. Ltd.:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  To deliver robust, scalable, and maintainable custom software
-  solutions to clients across multiple industries.
+  Deliver robust, scalable custom software solutions across multiple industries.
 \item
-  To reduce the cost and complexity of enterprise software adoption for
-  small and medium-sized businesses.
+  Reduce cost and complexity of enterprise software adoption for SMEs.
 \item
-  To adhere to industry best practices in security, performance, and
-  software architecture.
+  Adhere to best practices in security, performance, and software architecture.
 \item
-  To provide mentorship and real-world project exposure to interns and
-  junior developers.
+  Provide mentorship and real-world project exposure to interns and junior developers.
 \item
-  To continuously adopt modern technology stacks that align with current
-  industry trends.
+  Adopt modern technology stacks aligned with industry trends.
 \end{enumerate}
 
-These objectives directly shaped the technical and functional
-requirements of the Smart Gym Management System developed during this
-internship.
+These objectives shaped the technical and functional requirements of the Smart Gym Management System.
 
-\needspace{3\baselineskip}
+\needspace{2\baselineskip}
 
 \section{Products and Main Services of the
 Organisation}\label{products-and-main-services-of-the-organisation}
@@ -811,7 +779,7 @@ represents a flagship product demonstrating the organisation's
 capability in delivering comprehensive, multi-role enterprise web
 applications.
 
-\needspace{3\baselineskip}
+\needspace{2\baselineskip}
 
 \section{Organisation Structure and
 Workflow}\label{organisation-structure-and-workflow}
@@ -846,12 +814,12 @@ hosted on GitHub. Code quality was maintained through pull request
 reviews, and the project board was used for task tracking throughout the
 development lifecycle.
 
-\clearpage
+
 
 \chapter{Literature Review --- Project Development
 Journey}\label{literature-review---project-development-journey}
 
-\needspace{3\baselineskip}
+\needspace{2\baselineskip}
 
 \section{Introduction}\label{introduction-1}
 
@@ -885,14 +853,7 @@ Foundation Building}\label{review-phase-1}
 \subsection{Project Initiation and Stakeholder
 Alignment}\label{project-initiation}
 
-The project commenced with an intensive requirements-gathering and
-feasibility analysis phase (Weeks~1--4 of the internship). Under the
-guidance of Dr.~Ashutosh Abhangi, the author conducted a structured
-literature search examining existing commercial gym management
-solutions to identify functional gaps and motivate the development of
-a purpose-built system. A comparative study of leading platforms ---
-Mindbody, Zen Planner, PushPress, GymMaster, and Wodify --- was
-conducted and documented in the project's analysis plan.
+The project commenced with requirements-gathering and feasibility analysis (Weeks 1--4). Under guidance of Dr. Ashutosh Abhangi, structured literature search examined existing platforms including Mindbody, Zen Planner, PushPress, GymMaster, and Wodify to identify functional gaps.
 
 The key deficiencies identified across commercial platforms are
 summarised below:
@@ -916,33 +877,16 @@ Wodify & CrossFit focus, performance tracking & Niche market, limited general us
 \end{tabularx}
 \vspace{4pt}
 
-This gap analysis directly shaped the foundational vision of the
-AthlonX system: an open-source, self-hosted, cost-free alternative
-capable of matching or exceeding the feature depth of commercial
-competitors {[}14{]}.
+This gap analysis shaped the AthlonX vision: an open-source, self-hosted alternative matching commercial competitors [14].
 
 \subsection{Technology Stack Selection and
 Rationale}\label{technology-stack-rationale}
 
-A critical early decision concerned the selection of the technology
-stack. Following a structured evaluation, the following technologies
-were selected:
+Following structured evaluation, key technologies were selected:
 
-\textbf{Frontend --- React~18 with TypeScript:} React's
-component-based architecture enables the development of reusable,
-maintainable UI components, and its Virtual DOM optimises rendering
-performance for data-intensive dashboards {[}1{]}.
-TypeScript was adopted to add static type safety, which materially
-reduces runtime errors and improves the long-term maintainability of
-a large codebase {[}3{]}. Alternative frameworks, including
-Vue.js and Angular, were evaluated; React was selected for its
-maturity, enterprise adoption, and the richness of its ecosystem
-(React Router, Axios, Framer Motion).
+\textbf{Frontend --- React 18 with TypeScript:} Component-based architecture enables reusable UI components; Virtual DOM optimises rendering for data-intensive dashboards [1]. TypeScript adds static type safety, reducing runtime errors [3]. Selected over Vue.js and Angular for maturity and ecosystem richness.
 
-\textbf{Backend --- Spring Boot~3 with Java~17:} Spring Boot's
-auto-configuration and opinionated defaults enabled rapid set-up of
-enterprise-grade REST APIs. Spring Security~6 provided a proven,
-configurable authentication and authorisation framework, and
+\textbf{Backend --- Spring Boot 3 with Java 17:} Auto-configuration enabled rapid REST API setup. Spring Security 6 provided authentication/authorisation framework.
 JPA/Hibernate offered robust Oracle ORM support {[}4{]}.
 Node.js/Express and Django were considered but rejected due to
 concurrency limitations and ecosystem maturity considerations for
@@ -1254,12 +1198,12 @@ development process validated the combined use of React~18 and
 Spring Boot~3 as a productive and performant full-stack architecture
 for data-intensive web applications {[}4, 1{]}.
 
-\clearpage
+
 
 \chapter{Overall Experience Gained from the
 Internship}\label{overall-experience-gained-from-the-internship}
 
-\needspace{3\baselineskip}
+\needspace{2\baselineskip}
 
 \section{Reason for Selecting the
 Organisation}\label{reason-for-selecting-the-organisation}
@@ -1287,7 +1231,7 @@ mentorship-oriented culture provided an environment conducive to
 professional growth, where constructive feedback and independent
 problem-solving were equally encouraged.
 
-\needspace{3\baselineskip}
+\needspace{2\baselineskip}
 
 \section{Workflow of the Department}\label{workflow-of-the-department}
 
@@ -1325,7 +1269,7 @@ IntelliJ IDEA (backend), and Postman for API testing. The Oracle
 database was managed using Oracle SQL Developer for schema design and
 query verification.
 
-\needspace{3\baselineskip}
+\needspace{2\baselineskip}
 
 \section{Tasks Allotted During the
 Internship}\label{tasks-allotted-during-the-internship}
@@ -1335,7 +1279,7 @@ development, covering all major modules of the Smart Gym Management
 System. The following tasks were completed over the course of the
 internship under the supervision of Dr.~Ashutosh Abhangi.
 
-\medskip\noindent
+\smallskip\noindent
 
 \rule{\textwidth}{0.3pt}
 
@@ -1405,7 +1349,7 @@ TypeScript)}\label{frontend-development-react-typescript}
   contentful paint metrics.
 \end{itemize}
 
-\medskip\noindent
+\smallskip\noindent
 
 \rule{\textwidth}{0.3pt}
 
@@ -1460,7 +1404,7 @@ Oracle)}\label{backend-development-spring-boot-java-oracle}
   future API evolution.
 \end{itemize}
 
-\medskip\noindent
+\smallskip\noindent
 
 \rule{\textwidth}{0.3pt}
 
@@ -1485,7 +1429,7 @@ Oracle)}\label{backend-development-spring-boot-java-oracle}
   modules.
 \end{itemize}
 
-\clearpage
+
 
 \chapter{System Design}\label{system-design}
 
@@ -1493,12 +1437,12 @@ Oracle)}\label{backend-development-spring-boot-java-oracle}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_0.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_0.png}
 \caption*{Figure~4-1: High-Level System Architecture}
 \end{figure}
 
-\medskip\noindent
-The diagram illustrates the three-tier architecture: the browser-based React frontend communicates with the Spring Boot backend through RESTful APIs and WebSocket connections, while the backend persists all data in the Oracle relational database. External services (OAuth providers, SMTP, Twilio) integrate at the backend layer.
+\smallskip\noindent
+Three-tier architecture: React frontend communicates with Spring Boot backend via RESTful APIs and WebSocket, while backend persists data in Oracle database. External services (OAuth, SMTP, Twilio) integrate at backend layer.
 
 This architecture follows the classic three-tier model comprising the Presentation Tier (React frontend), the Application Tier (Spring Boot backend), and the Data Tier (Oracle Database). Each tier operates independently and communicates through well-defined interfaces, enabling independent scaling, maintenance, and technology upgrades. The React frontend serves as a Single Page Application (SPA) that handles all user interface rendering, client-side routing, and state management. It communicates with the backend exclusively through HTTP/HTTPS RESTful endpoints for synchronous operations and WebSocket connections for asynchronous, real-time features such as chat messaging and live notifications. The Spring Boot application tier encapsulates all business logic, security enforcement, and data access operations. It exposes a comprehensive REST API secured by JWT-based authentication and role-based access control (RBAC). The Oracle Database tier provides enterprise-grade data persistence with ACID-compliant transactions, advanced indexing, and built-in backup and recovery capabilities. External integrations including Google OAuth, Facebook OAuth, SMTP email servers, and Twilio SMS gateway are connected at the application tier, ensuring that third-party service credentials and API keys remain securely within the backend environment and are never exposed to the client.
 
@@ -1570,11 +1514,11 @@ Technology & Purpose \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_1.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_1.png}
 \caption*{Figure~4-2: Internal Component Architecture}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 The component architecture decomposes the backend into independent feature modules — Authentication, Membership, Training, Chat, Notifications, and Analytics — each encapsulating its own controllers, services, and repositories. This modular design ensures low coupling and high cohesion, simplifying testing and future extension.
 
 
@@ -1583,11 +1527,11 @@ The component architecture decomposes the backend into independent feature modul
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_2.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_2.png}
 \caption*{Figure~4-3: Main System Authentication and Request Flow}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 This flowchart traces the end-to-end journey of a user request: from login through JWT issuance, to role-based routing, feature interaction, and eventual database persistence. The stateless nature of JWT tokens allows any backend instance to validate requests independently, enabling horizontal scaling.
 
 
@@ -1598,11 +1542,11 @@ This flowchart traces the end-to-end journey of a user request: from login throu
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_0.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_0.png}
 \caption*{Figure~4-4: ER Diagram --- User \& Authentication Entities}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 The User entity is the root of the system. A user holds one or more roles (MEMBER, TRAINER, OWNER, SUPER\_ADMIN), linked through a many-to-many mapping table. Authentication tokens, OTP records, and OAuth provider details are stored as child entities to keep the core User table normalised.
 
 
@@ -1610,11 +1554,11 @@ The User entity is the root of the system. A user holds one or more roles (MEMBE
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_1.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_1.png}
 \caption*{Figure~4-5: ER Diagram --- Gym Management Entities}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 A Gym entity is owned by a single Gym Owner user and can have multiple Staff members, Equipment records, and Membership Packages. Membership subscriptions link a Member user to a specific package and track lifecycle status (PENDING, ACTIVE, EXPIRED).
 
 
@@ -1622,11 +1566,11 @@ A Gym entity is owned by a single Gym Owner user and can have multiple Staff mem
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_2.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_er_diagram_2.png}
 \caption*{Figure~4-6: ER Diagram --- Training \& Session Entities}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 A Trainer-Member Assignment defines the coaching relationship. Each assignment may have multiple PT Sessions, each of which can receive a Rating from the member upon completion. Progress records are stored periodically to track member fitness improvement over time.
 
 
@@ -1653,14 +1597,14 @@ Category & Entities & Key Relationships \\
 
 \subsection{Data Dictionary}
 
-The Data Dictionary provides a definitive technical specification for the relational database schema of the Smart Gym Management System. Each table is designed to maintain relational integrity while supporting the high concurrency required for multi-role SaaS operations.
+The Data Dictionary provides technical specifications for the database schema, designed to maintain relational integrity while supporting multi-role SaaS operations.
 
 % --- USERS TABLE ---
 \subsubsection{Table: USERS}
-As the primary repository for system actors, this table manages authentication, identification, and profile data with appropriate security constraints.
+Primary repository for system actors managing authentication and profile data.
 
 {\def\LTcaptype{none}
-\begin{longtable}[]{@{}lllc p{6cm}@{}}
+\begin{longtable}[]{@{}lllc p{5.5cm}@{}}
 \hline
 \textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
 \hline
@@ -1680,10 +1624,10 @@ As the primary repository for system actors, this table manages authentication, 
 
 % --- ROLES TABLE ---
 \subsubsection{Table: ROLES}
-Defines the functional authorization boundaries within the system to ensure role-based access control.
+Defines functional authorization boundaries for role-based access control.
 
 {\def\LTcaptype{none}
-\begin{longtable}[]{@{}lllc p{6cm}@{}}
+\begin{longtable}[]{@{}lllc p{5.5cm}@{}}
 \hline
 \textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
 \hline
@@ -1702,7 +1646,7 @@ Defines the functional authorization boundaries within the system to ensure role
 Centralizes configuration for gym branches, linking physical locations to their respective administrative owners.
 
 {\def\LTcaptype{none}
-\begin{longtable}[]{@{}lllc p{6cm}@{}}
+\begin{longtable}[]{@{}lllc p{5.5cm}@{}}
 \hline
 \textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
 \hline
@@ -1724,7 +1668,7 @@ Centralizes configuration for gym branches, linking physical locations to their 
 Defines the business logic for subscription tiers, including timeframes, features, and cost.
 
 {\def\LTcaptype{none}
-\begin{longtable}[]{@{}lllc p{6cm}@{}}
+\begin{longtable}[]{@{}lllc p{5.5cm}@{}}
 \hline
 \textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
 \hline
@@ -1746,7 +1690,7 @@ Defines the business logic for subscription tiers, including timeframes, feature
 Tracks active and historical subscription records for members, governing facility access.
 
 {\def\LTcaptype{none}
-\begin{longtable}[]{@{}lllc p{6cm}@{}}
+\begin{longtable}[]{@{}lllc p{5.5cm}@{}}
 \hline
 \textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
 \hline
@@ -1768,7 +1712,7 @@ Tracks active and historical subscription records for members, governing facilit
 Governs the scheduling and professional notes for personal training engagements.
 
 {\def\LTcaptype{none}
-\begin{longtable}[]{@{}lllc p{6cm}@{}}
+\begin{longtable}[]{@{}lllc p{5.5cm}@{}}
 \hline
 \textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
 \hline
@@ -1794,11 +1738,11 @@ Governs the scheduling and professional notes for personal training engagements.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_0.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_0.png}
 \caption*{Figure~4-7: Class Diagram --- Core User \& Authentication}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 The class diagram shows the primary JPA entities and their associations for the authentication domain. The \texttt{User} class aggregates \texttt{Role} objects via a junction table, and the \texttt{JwtService} holds the responsibility for token generation and validation, keeping security logic decoupled from the user entity.
 
 
@@ -1806,11 +1750,11 @@ The class diagram shows the primary JPA entities and their associations for the 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_4.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_4.png}
 \caption*{Figure~4-8: System Use Case Diagram}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 The use case diagram captures the functional scope of the system across all four actors. Members can register, manage memberships, and book PT sessions.
 
 
@@ -1822,26 +1766,26 @@ The following sequence diagrams illustrate two of the most important workflows i
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_5.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_5.png}
 \caption*{Figure~4-9: Sequence Diagram --- User Authentication Flow}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 This sequence illustrates the login process: the client submits credentials, the \texttt{AuthController} delegates to \texttt{AuthService}, which validates the user record and invokes \texttt{JwtService} to generate a signed token. The token is returned to the client and must be included in all subsequent requests via the \texttt{Authorization} header.
 
 The authentication flow follows a strict layered architecture pattern. When the user submits their email and password through the React frontend, an Axios interceptor attaches the request to the \texttt{POST /api/auth/login} endpoint. 
 
-\clearpage
+
 
 \subsubsection{Membership Purchase Flow}\label{membership-purchase-flow}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_6.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_uml_diagrams_6.png}
 \caption*{Figure~4-10: Sequence Diagram --- Membership Purchase Flow}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 When a Member selects a package, the \texttt{MembershipController} creates a pending subscription record and initiates a payment transaction. Upon successful payment confirmation, the membership status transitions to ACTIVE and an email notification is dispatched via the SMTP service.
 
 The membership purchase workflow is a two-phase process. In the first phase, the member browses available packages by triggering a \texttt{GET /api/packages} request. The \texttt{PackageController} calls the \texttt{PackageService} to retrieve all active packages from the database, which are returned as DTOs and displayed in the frontend. In the second phase, upon confirming a selection, the frontend sends a \texttt{POST /api/memberships} request containing the selected package ID. 
@@ -1854,11 +1798,11 @@ The membership purchase workflow is a two-phase process. In the first phase, the
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_0.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_0.png}
 \caption*{Figure~4-11: DFD Level 0 --- System Context Diagram}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 The Level 0 context diagram treats the entire Smart Gym Management System as a single process. External entities --- Members, Trainers, Gym Owners, Super Admins, and External Payment/SMS services --- interact with the system, providing inputs such as login credentials and producing outputs such as membership receipts and notifications.
 
 This diagram represents the highest-level abstraction of the system, defining its boundary and all external actors that exchange data with it. In structured systems analysis, the Level 0 DFD (also called the Context Diagram) serves as the foundational model from which all subsequent decomposition levels are derived. It establishes the system scope by identifying every external entity that either provides input to or receives output from the system, without revealing any internal processing details.
@@ -1886,11 +1830,11 @@ The data flows depicted are bidirectional where applicable. For instance, the Me
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_1.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_dfd_diagrams_1.png}
 \caption*{Figure~4-12: DFD Level 1 --- Main System Processes}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 The Level 1 diagram decomposes the system into its five main processes: Authentication, Membership Management, Training \& Sessions, Communication, and Analytics. Data stores (Users, Memberships, Sessions, Messages, Analytics) are shown with their read/write relationships to each process, making the data flow between components explicit.
 
 
@@ -1933,34 +1877,34 @@ Security Layer & Mechanism & Implementation \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_4.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_system_architecture_4.png}
 \caption*{Figure~4-13: Deployment Architecture Diagram}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 The frontend is served as a static bundle from a CDN-backed web server (e.g., Nginx). The Spring Boot application runs as a self-contained JAR on a Java application server (JVM 17+). The Oracle Database instance is isolated on a dedicated server within a private network, accessible only from the application tier. This separation of concerns allows each tier to be scaled independently.
 
 
 % ─────────────────────────────────────────────────────────────
 \section{Scalability Considerations}\label{scalability-considerations}
 
-The AthlonX architecture was engineered from the ground up to ensure high availability and seamless growth. Scalability is addressed across several critical infrastructure layers:
+The AthlonX architecture ensures high availability and seamless growth through multiple infrastructure layers:
 
 \begin{enumerate}
-    \item \textbf{Isolated Multi-Tenancy}: The system implements a multi-tenant model where each gym functions as a logically isolated environment. By utilizing unique \texttt{gym\_id} discriminators at the schema level, the system ensures data sovereignty. This prevents data leakage and allows the platform to support thousands of distinct tenants on shared infrastructure without compromising security.
+    \item \textbf{Isolated Multi-Tenancy}: Each gym functions as a logically isolated environment using unique \texttt{gym\_id} discriminators, ensuring data sovereignty and supporting thousands of tenants without compromising security.
     
-    \item \textbf{Stateless Horizontal Scaling}: Strategic use of (JWT) for authentication eliminates the need for server-side session storage. This statelessness is a core requirement for horizontal scaling; as traffic increases, new instances of the Spring Boot backend can be spun up behind a load balancer. Since every request contains its own credentials, any server instance can process any request without session replication.
+    \item \textbf{Stateless Horizontal Scaling}: JWT authentication eliminates server-side session storage, enabling new backend instances to be deployed behind a load balancer as traffic increases.
     
-    \item \textbf{Distributed Caching with Spring Cache}: To minimize expensive I/O operations and simplify data access, the system leverages Spring's caching abstraction. Frequently accessed data --- such as membership pricing tiers and gym metadata --- are stored in an in-memory cache. This reduces the load on the Oracle database and ensures that dashboard rendering remains instantaneous even under heavy concurrent load.
+    \item \textbf{Distributed Caching}: Spring's caching abstraction stores frequently accessed data (pricing tiers, gym metadata) in memory, reducing database load and ensuring instantaneous dashboard rendering.
     
-    \item \textbf{Efficient Resource Management via HikariCP}: Database connection management is handled by HikariCP, a high-performance JDBC connection pool. By maintaining a steady pool of "warm" connections to the Oracle instance, the system avoids the latency penalty of creating new connections for every transaction. This prevents connection exhaustion during peak booking hours.
+    \item \textbf{Efficient Resource Management}: HikariCP connection pool maintains warm database connections, avoiding latency penalties and preventing connection exhaustion during peak hours.
     
-    \item \textbf{Asynchronous Real-Time Messaging (STOMP)}: Real-time features are decoupled from the standard HTTP request-response cycle. By using dedicated STOMP broker channels over WebSockets, the system can handle thousands of simultaneous active connections. This ensures that chat messages and alerts are delivered with sub-50ms latency without blocking the primary application thread pool.
+    \item \textbf{Asynchronous Real-Time Messaging}: STOMP broker channels over WebSockets handle thousands of simultaneous connections, delivering messages with sub-50ms latency.
     
-    \item \textbf{Performance-Tuned Lazy Loading}: The persistence layer utilizes JPA's lazy-fetch strategy as the default. Large object graphs (such as member attendance records) are only retrieved from the database when specifically accessed. This "fetch-on-demand" approach minimizes memory footprint and reduces the bandwidth required for data transfer between the database and the backend.
+    \item \textbf{Performance-Tuned Lazy Loading}: JPA's lazy-fetch strategy retrieves large object graphs only when accessed, minimizing memory footprint.
 \end{enumerate}
 
-\clearpage
+
 
 
 
@@ -1980,20 +1924,20 @@ The authentication process is the entry point for all users. The flowcharts belo
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_0.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_0.png}
 \caption*{Figure~5-1: User Registration Workflow}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 The user registration workflow is a multi-stage process designed to ensure data integrity and account security before granting system access. Initially, the backend performs a comprehensive validation of the incoming registration DTO, checking for email uniqueness and password complexity. Upon successful validation, the system utilizes the \texttt{BCryptPasswordEncoder} to generate a secure hash of the user's password, ensuring that clear-text credentials never touch the database. Simultaneously, the application creates a persistent record with a \texttt{PENDING} status and generates a cryptographically secure, time-limited One-Time Password (OTP). This OTP is dispatched asynchronously via the \texttt{EmailService} to the user's provided address. 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_1.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_1.png}
 \caption*{Figure~5-2: Login with Two-Factor Authentication}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 On login, the system validates credentials and, if 2FA is enabled, sends a one-time password via email or SMS. The session is only established after successful OTP verification.
 
 \subsection{Algorithm 1: JWT Authentication}\label{algo-jwt}
@@ -2026,11 +1970,11 @@ After authentication, the system determines what each user is permitted to do. T
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_4.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_4.png}
 \caption*{Figure~5-3: Role-Based Access Control \& Trainer Assignment Flow}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 Gym owners assign trainers to members. The RBAC layer governs which menus, actions, and data each role can access --- ensuring OWNERS, TRAINERS, and MEMBERS each see only their relevant features.
 
 \subsection{Algorithm 2: Role-Based Access Control (RBAC)}\label{algo-rbac}
@@ -2064,39 +2008,35 @@ Membership is the core business process of the system. The flowcharts below show
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_2.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_2.png}
 \caption*{Figure~5-4: Membership Purchase Flow}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 A member selects a package, which enters a pending state awaiting owner approval. On approval, the membership is activated and any included PT session credits are allocated to the member.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_3.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_3.png}
 \caption*{Figure~5-5: Membership Expiry Handling}
 \end{figure}
 
-\medskip\noindent
-The membership lifecycle is managed through a state-machine architecture that transitions memberships from \texttt{PENDING} to \texttt{ACTIVE}, \texttt{EXPIRED}, or \texttt{CANCELLED}. A scheduled background job, executed via a Spring \texttt{@Scheduled} cron expression (\texttt{0 0 0 * * *}), performs a daily audit of the entire membership database exactly at midnight. This task identifies any subscription whose \texttt{end\_date} is less than the current system timestamp. 
+\smallskip\noindent
+The membership lifecycle transitions from \texttt{PENDING} to \texttt{ACTIVE}, \texttt{EXPIRED}, or \texttt{CANCELLED} through state-machine architecture. A Spring \texttt{@Scheduled} cron job (\texttt{0 0 0 * * *}) performs daily audits at midnight, identifying subscriptions with \texttt{end\_date} less than current timestamp. 
 
 \subsection{Algorithm 3: Membership Assignment}\label{algo-membership}
 
-\noindent\textbf{Purpose:} To provide a robust, consistent, and automated mechanism for managing membership state transitions, credit allocations, and subscription extensions within the system.
+\noindent\textbf{Purpose:} Robust mechanism for managing membership state transitions, credit allocations, and subscription extensions.
 
 \smallskip
 \noindent\textbf{How it works:}
 \begin{enumerate}
-    \item \textbf{Package Selection:} The member selects a membership package DTO from the frontend. This DTO contains the package duration (e.g., 30, 90, or 365 days) and the count of personal training (PT) sessions included.
-    \item \textbf{Pre-processing \& Overlap Check:} Upon receiving the \texttt{POST} request, the system queries the database to check if the member already has an \texttt{ACTIVE} membership at the target gym.
-    \item \textbf{Credit-Adjusted Extension (Pro-rata Logic):} 
-    \begin{itemize}
-        \item \textbf{If an active subscription exists:} The system calculates the number of remaining days and their monetary or utility value. These days are credited back proportionally, and the new package's duration is appended to the existing end date, ensuring no loss for the user during a mid-cycle renewal or upgrade.
-        \item \textbf{If no active subscription exists:} The system marks the start date as the current date and sets the status to \texttt{PENDING}, awaiting payment confirmation or owner administrative approval.
-    \end{itemize}
-    \item \textbf{Session Credit Allocation:} If the selected package includes PT sessions, the algorithm increments the member's \texttt{session\_credits} balance. These credits are stored in a ledger to ensure exact tracking of usage during booking.
-    \item \textbf{Expiry Calculation:} The system uses the package length to set a precise timestamp for the \texttt{end\_date}. This logic takes into account leap years and time zone offsets to prevent edge-case errors during global gym operations.
-    \item \textbf{State Confirmation:} Once the gym owner reviews and approves the request (or the payment gateway returns a success callback), the membership status is updated to \texttt{ACTIVE} in a single database transaction.
+    \item \textbf{Package Selection:} Member selects package DTO containing duration and PT session count.
+    \item \textbf{Overlap Check:} System queries database for existing \texttt{ACTIVE} membership.
+    \item \textbf{Credit-Adjusted Extension:} If active subscription exists, remaining days are credited proportionally and new duration appended. Otherwise, status set to \texttt{PENDING}.
+    \item \textbf{Session Credit Allocation:} PT session credits incremented in member's ledger.
+    \item \textbf{Expiry Calculation:} System sets \texttt{end\_date} timestamp accounting for leap years and time zones.
+    \item \textbf{State Confirmation:} Upon approval or payment success, status updated to \texttt{ACTIVE}.
 \end{enumerate}
 
 \noindent\textbf{Used in:} Member Dashboard for initial purchases and renewals; Admin Panel for membership auditing and manual status overrides.
@@ -2105,17 +2045,17 @@ The membership lifecycle is managed through a state-machine architecture that tr
 \section{PT Session Booking Flow \& Password Security Algorithm}\label{sec-session}
 
 \noindent
-Personal training sessions are booked using credit units allocated at membership purchase. The flowchart shows the session booking lifecycle, and the algorithm below explains how passwords are kept secure throughout every interaction.
+Personal training sessions are booked using credit units allocated at membership purchase.
 
 \subsection{PT Session Booking Flow}\label{wf-session}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_6.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_6.png}
 \caption*{Figure~5-6: PT Session Booking Workflow}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 Members book personal training sessions using their allocated PT credits. Trainers are notified instantly and can accept or reschedule. The session status is tracked through Scheduled $\rightarrow$ Completed $\rightarrow$ Rated.
 
 \subsection{Algorithm 4: Password Security (BCrypt)}\label{algo-password}
@@ -2143,20 +2083,20 @@ The system provides real-time messaging and event-driven notifications. The flow
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_8.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_8.png}
 \caption*{Figure~5-7: Real-Time Messaging Flow}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 The system uses WebSockets (STOMP protocol) to deliver messages in real time. Messages are persisted to the database, ensuring they are available when the recipient is offline.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.75\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_11.png}
+\includegraphics[width=0.80\textwidth,height=0.65\textheight,keepaspectratio]{/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/mermaid_workflows_11.png}
 \caption*{Figure~5-8: Notification Delivery Flow}
 \end{figure}
 
-\medskip\noindent
+\smallskip\noindent
 System events (membership approval, session reminders, etc.) trigger notifications delivered via the in-app notification centre and optionally via email or SMS through SMTP/Twilio integration.
 
 \subsection{Algorithm 5: Trainer Rating Calculation}\label{algo-rating}
@@ -2199,7 +2139,7 @@ Trainer Rating & Score calculation & O(n) & O(1) \\
 \end{longtable}
 }
 
-\clearpage
+
 
 
 
@@ -2264,7 +2204,7 @@ The Gym Owner Dashboard serves as the central command hub of the application. It
 \caption*{Figure 6-2: Gym Owner Dashboard Information Hub}
 \end{figure}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent\textbf{Key Integrated Components:}
 \begin{itemize}
@@ -2290,7 +2230,7 @@ The Member Management screen provides the administrative team with a comprehensi
 \caption*{Figure 6-3: Gym Member Management Directory}
 \end{figure}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent\textbf{Administrative Capabilities:}
 \begin{itemize}
@@ -2316,7 +2256,7 @@ The Trainer Management screen centralizes the workforce oversight of the gym. It
 \caption*{Figure 6-4: Gym Trainer Credentials \& Specializations}
 \end{figure}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent\textbf{Workforce Management Features:}
 \begin{itemize}
@@ -2326,7 +2266,7 @@ The Trainer Management screen centralizes the workforce oversight of the gym. It
 \end{itemize}
 
 \vfill
-\clearpage
+
 
 \section{Equipment Inventory: Hardware Management}\label{sec-equipment-ui}
 
@@ -2343,7 +2283,7 @@ The Equipment Inventory provides a comprehensive tracking of the gym's specific 
 \caption*{Figure 6-5: Owner Equipment Inventory \& Maintenance Log}
 \end{figure}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent\textbf{Inventory Control Components:}
 \begin{itemize}
@@ -2369,7 +2309,7 @@ The Financial Management module provides complete administrative oversight over 
 \caption*{Figure 6-5: Financial Dashboard \& Transaction Ledger}
 \end{figure}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent\textbf{Fiscal Control Components:}
 \begin{itemize}
@@ -2379,7 +2319,7 @@ The Financial Management module provides complete administrative oversight over 
 \end{itemize}
 
 \vfill
-\clearpage
+
 
 \section{Administrative Task Management: Todo List}\label{sec-todo-ui}
 
@@ -2396,7 +2336,7 @@ The Administrative Task Management system provides the gym's operational team wi
 \caption*{Figure 6-6: Administrative Todo \& Task Tracking System}
 \end{figure}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent\textbf{Operational Efficiency Features:}
 \begin{itemize}
@@ -2422,7 +2362,7 @@ The Profile Pop-window provides immediate access to essential user-centric contr
 \caption*{Figure 6-7: User Interface Customization \& Session Controls}
 \end{figure}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent\textbf{Personalization Interface Components:}
 \begin{itemize}
@@ -2432,7 +2372,7 @@ The Profile Pop-window provides immediate access to essential user-centric contr
 \end{itemize}
 
 \vfill
-\clearpage
+
 
 \section{System Configuration: Account Settings}\label{sec-settings-ui}
 
@@ -2449,7 +2389,7 @@ The System Configuration screen centralizes granular control over the user accou
 \caption*{Figure 6-8: Comprehensive System Settings \& Configuration}
 \end{figure}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent\textbf{Configuration Capability Matrix:}
 \begin{itemize}
@@ -2475,7 +2415,7 @@ The System Notifications screen provides a centralized feed for all critical ope
 \caption*{Figure 6-9: Real-time System Notification \& Alert Feed}
 \end{figure}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent\textbf{Alerting Framework Features:}
 \begin{itemize}
@@ -2484,7 +2424,7 @@ The System Notifications screen provides a centralized feed for all critical ope
     \item \textbf{Centralized Alert Ledger:} Provides a chronological history of system communications, allowing administrators to audit past alerts and ensure follow-up actions were completed.
 \end{itemize}
 
-\clearpage
+
 
 \chapter{Features \& Functionality - Gym Management
 System}\label{features-functionality---gym-management-system}
@@ -2761,7 +2701,7 @@ NF3.5 & File Storage & External storage ready & Low \\
 \end{longtable}
 }
 
-\clearpage
+
 \subsection{Reliability}\label{reliability}
 
 {\def\LTcaptype{none} % do not increment counter
@@ -2890,19 +2830,19 @@ Database Backups & - & - & - & Yes \\
 \end{longtable}
 }
 
-\clearpage
+
 
 \chapter{Conclusion}\label{conclusion-1}
 
 \noindent
 Six months ago, the question was simple: \textit{can a single developer build a production-grade gym management platform from the ground up?} The answer, delivered through this intensive internship, is an unequivocal \textbf{yes}.
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent
 \textbf{AthlonX} is a high-fidelity prototype of a live, secured, multi-role application handling real workflows --- from a member purchasing a membership package, to a trainer logging a session, to an owner reading revenue analytics --- all in a single cohesive system. While currently in its prototype phase, it demonstrates full readiness for production deployment. Every objective set at the start of this internship was met:
 
-\vspace{0.25cm}
+\vspace{0.15cm}
 
 \begin{itemize}
   \setlength\itemsep{0.18cm}
@@ -2911,22 +2851,22 @@ Six months ago, the question was simple: \textit{can a single developer build a 
   \item \textbf{Scalability:} A stateless, modular architecture designed to grow --- from a single gym to a multi-tenant SaaS platform.
 \end{itemize}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent
 The internship was not just about building software. It was about \textbf{experiencing responsibility} --- making independent architectural decisions, recovering from real technical failures, and shipping features that users would actually depend on. The N+1 query problem, WebSocket authentication edge cases, and Oracle dialect conflicts were not textbook exercises; they were production problems solved under pressure.
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent
-The lessons this experience leaves behind are durable. Technical decisions made in isolation rarely stay isolated. A schema change ripples into APIs, which ripple into UI components, which ripple into user experience. Understanding \textit{systems thinking} --- seeing the whole, not just the part in front of you --- is what separates a software developer from a software engineer.
+The lessons this experience leaves behind are durable. Technical decisions made in isolation rarely stay isolated. A schema change ripples into APIs, which ripple into UI components, which ripple into user experience. Understanding \textit{systems thinking} --- seeing the whole, not just individual parts --- is what separates a software developer from a software engineer.
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \noindent
-To the reader evaluating this report: what you see here is not the end of a project, but the \textbf{beginning of a platform}. The roadmap ahead --- mobile apps, payment gateways, AI-powered training plans, and microservices --- exists because the foundation was built to support it. This is software designed to evolve.
+To the reader evaluating this report: what is presented here is not the end of a project, but the \textbf{beginning of a platform}. The roadmap ahead --- mobile apps, payment gateways, AI-powered training plans, and microservices --- exists because the foundation was built to support it. This is software designed to evolve.
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 \begin{center}
 \textit{``The best investment an organisation can make is in software that grows with it.''}
@@ -2937,7 +2877,7 @@ To the reader evaluating this report: what you see here is not the end of a proj
 \noindent
 AthlonX does exactly that.
 
-\clearpage
+
 
 
 \chapter{References}\label{references}
@@ -3067,7 +3007,7 @@ ISBN: 978-1617290459
   internship period
 \end{itemize}
 
-\clearpage
+
 
 \chapter{Appendices}\label{appendices}
 
@@ -3268,7 +3208,7 @@ POST & \texttt{/api/sessions/\{id\}/rate}      & Submit session rating \\
 \end{tabularx}
 
 
-\clearpage
+
 \section*{Appendix D: Technology
 Dependencies}\label{appendix-d-technology-dependencies}
 \addcontentsline{toc}{section}{Appendix D: Technology Dependencies}
@@ -3329,7 +3269,7 @@ spring-boot-starter-mail      & 3.x    & Apache-2.0 \\
 \hline
 \end{tabularx}
 
-\clearpage
+
 
 \section*{Appendix E: Supplementary Materials}
 \addcontentsline{toc}{section}{Appendix E: Supplementary Materials}
@@ -3384,7 +3324,7 @@ Above average performance &
 \hline
 \end{tabular}
 
-\vspace{0.25cm}
+\vspace{0.15cm}
 
 {\small Please use this scale to evaluate your intern's performance in the following areas.}
 
@@ -3412,7 +3352,7 @@ Supervisor Signature & Student Signature \\
 \end{minipage}
 \end{center}
 
-\clearpage
+
 
 % ── Page 2 ──────────────────────────────────────────────────────────────────
 \begin{center}
@@ -3433,7 +3373,7 @@ Supervisor Signature & Student Signature \\
 \scoredrow{Meeting deadlines}
 \scoredrow{Completing tasks}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 % ── Section 3 ───────────────────────────────────────────────────────────────
 \noindent\textbf{3.\quad Growth on the job}
@@ -3444,9 +3384,9 @@ Supervisor Signature & Student Signature \\
 \vspace{0.15cm}
 \noindent\textbf{\large Examples}\\[0.1cm]
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-\vspace{0.25cm}
+\vspace{0.15cm}
 ~Aryan demonstrated an exceptional learning curve, rapidly mastering Spring Boot and complex Oracle database architectures. He successfully implemented a scalable permission-based access control system from scratch, proving his ability to independently acquire and apply advanced back-end skills in real-world scenarios.
-\vspace{0.25cm}
+\vspace{0.15cm}
 \end{minipage}}
 
 \vspace{0.7cm}
@@ -3456,9 +3396,9 @@ Supervisor Signature & Student Signature \\
 \vspace{0.15cm}
 \noindent\textbf{\large Examples}\\[0.1cm]
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-\vspace{0.25cm}
+\vspace{0.15cm}
 ~He developed a strong understanding of our SaaS application requirements. He proactively aligned the Gym Management System workflows (Admin, Trainer, Member roles) with practical industry standards, ensuring the final architecture met organizational goals perfectly.
-\vspace{0.25cm}
+\vspace{0.15cm}
 \end{minipage}}
 
 \end{minipage}
@@ -3474,9 +3414,9 @@ Supervisor Signature & Student Signature \\
 \vspace{0.15cm}
 \noindent\textbf{\large Examples}\\[0.1cm]
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-\vspace{0.25cm}
+\vspace{0.15cm}
 ~Aryan's contribution was outstanding. His full-stack architecture provided a robust foundation for the project. By consistently delivering high-quality, bug-free code and actively communicating solutions to complex multi-role routing challenges, he significantly accelerated the development timeline.
-\vspace{0.25cm}
+\vspace{0.15cm}
 \end{minipage}}
 
 \vspace{0.7cm}
@@ -3484,7 +3424,7 @@ Supervisor Signature & Student Signature \\
 \end{minipage}
 \end{center}
 
-\clearpage
+
 
 % ── Page 3 ──────────────────────────────────────────────────────────────────
 \begin{center}
@@ -3496,31 +3436,31 @@ Supervisor Signature & Student Signature \\
 \vspace{0.15cm}
 \noindent\textbf{\large What do you consider the major strengths of this intern?}\\[0.1cm]
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-\vspace{0.25cm}
+\vspace{0.15cm}
 ~Analytical problem-solving, full-stack architectural design capabilities, and self-motivation. Aryan tackles complex bugs systematically and is highly proactive in researching industry-grade design patterns rather than settling for simple workarounds.
-\vspace{0.25cm}
+\vspace{0.15cm}
 \end{minipage}}
 
 \vspace{0.7cm}
 \noindent\textbf{\large What areas need improvement?}\\[0.1cm]
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-\vspace{0.25cm}
+\vspace{0.15cm}
 ~While his technical execution is phenomenal, Aryan could benefit from drafting more extensive API documentation and inline comments as he builds out complex modules, to further facilitate team-wide onboarding and handovers.
-\vspace{0.25cm}
+\vspace{0.15cm}
 \end{minipage}}
 
 \vspace{0.7cm}
 \noindent\textbf{\large Other comments, recommendations?}\\[0.1cm]
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-\vspace{0.25cm}
+\vspace{0.15cm}
 ~It has been a pleasure to supervise Aryan. He performs well above the expectations for an intern and operates effectively at the level of a junior full-stack developer. I highly recommend him for future software engineering roles.
-\vspace{0.25cm}
+\vspace{0.15cm}
 \end{minipage}}
 
 \end{minipage}
 \end{center}
 
-\clearpage
+
 
 \vspace{1cm}
 \subsection{E.2 Student Internship Evaluation}
@@ -3540,9 +3480,9 @@ Supervisor Signature & Student Signature \\
 \textbf{\large Name of Organization} & : & Bharti Soft Tech Pvt. Ltd. \\ \hline
 \end{tabular}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 \noindent Instructions: Answer the following questions concerning your internship experience. Please circle the correct response.
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 % ── Yes/No Questions ────────────────────────────────────────────────────────
 \renewcommand{\arraystretch}{1.35}
@@ -3554,16 +3494,16 @@ Supervisor Signature & Student Signature \\
 4 & Are you still interested in this career field & \textbf{\large\fbox{Yes}} & No \\ \hline
 \end{tabular}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 
 % ── Long text Questions (1-3) ───────────────────────────────────────────────
 \noindent\textbf{\large 5.\quad How did the internship relate to your previously expressed career interests?}
 \vspace{0.2cm}
 
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-\vspace{0.25cm}
+\vspace{0.15cm}
 ~The internship perfectly aligned with my goal of becoming a Full-Stack Software Engineer. Building the Smart Gym Management System allowed me to deeply explore React, Spring Boot, and Oracle, turning my academic interests into practical, production-ready skills.
-\vspace{0.25cm}
+\vspace{0.15cm}
 \end{minipage}}
 
 \vspace{0.7cm}
@@ -3572,9 +3512,9 @@ Supervisor Signature & Student Signature \\
 \vspace{0.2cm}
 
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-\vspace{0.25cm}
+\vspace{0.15cm}
 ~It provided invaluable hands-on experience with modern software architecture. I learned how to build a scalable, permission-based access control system from scratch, handle robust backend logic, and efficiently manage state on the frontend.
-\vspace{0.25cm}
+\vspace{0.15cm}
 \end{minipage}}
 
 \vspace{0.7cm}
@@ -3583,15 +3523,15 @@ Supervisor Signature & Student Signature \\
 \vspace{0.2cm}
 
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-\vspace{0.25cm}
+\vspace{0.15cm}
 ~I really enjoyed designing the system architecture and successfully solving complex bugs related to multi-role routing and state management in the frontend. Getting to see a product take shape from an abstract idea into a fully functioning SaaS application was incredibly rewarding.
-\vspace{0.25cm}
+\vspace{0.15cm}
 \end{minipage}}
 
 \end{minipage}
 \end{center}
 
-\clearpage
+
 
 % ── Page 2 of E.2 ───────────────────────────────────────────────────────────
 \begin{flushright}
@@ -3607,9 +3547,9 @@ Supervisor Signature & Student Signature \\
 \vspace{0.2cm}
 
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-\vspace{0.25cm}
+\vspace{0.15cm}
 ~The initial setup and integration of the Oracle database with Spring Boot was quite challenging and consumed more time than anticipated. Additionally, drafting the extensive documentation took time away from raw development, but it ultimately proved to be a vital learning experience in software engineering discipline.
-\vspace{0.25cm}
+\vspace{0.15cm}
 \end{minipage}}
 
 \vspace{0.7cm}
@@ -3618,15 +3558,15 @@ Supervisor Signature & Student Signature \\
 \vspace{0.2cm}
 
 \noindent\fbox{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-\vspace{0.25cm}
+\vspace{0.15cm}
 ~I am extremely grateful for this opportunity. The internship was highly valuable, bridging the gap between theoretical knowledge and industry practices, and giving me the confidence, technical foundation, and professional maturity to actively pursue professional software engineering roles.
-\vspace{0.25cm}
+\vspace{0.15cm}
 \end{minipage}}
 
 \end{minipage}
 \end{center}
 
-\clearpage
+
 
 \vspace{1cm}
 \subsection{E.3 Final Year Internship Registration Form}
@@ -3682,7 +3622,7 @@ External Supervisor & : Prashant Mirchandani \\ \hline
 \noindent Name: Dr. Ashutosh Abhangi\\
 \noindent Date: 20-12-2025
 
-\clearpage
+
 
 \vspace{1cm}
 \subsection{E.4 Weekly Report}
@@ -3731,7 +3671,7 @@ Supervisor Signature & Student Signature \\
 \end{tabularx}
 \vspace*{0.5cm}
 
-\clearpage
+
 }
 
 % --- REVIEW PHASE 1 ---
@@ -3815,6 +3755,6 @@ Supervisor Signature & Student Signature \\
   fitpaper=false
 ]{research_paper_no_hdr.pdf}
 
-\clearpage
+
 
 \end{document}
