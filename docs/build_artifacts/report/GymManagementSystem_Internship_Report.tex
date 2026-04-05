@@ -3804,14 +3804,16 @@ Supervisor Signature & Student Signature \\
   pages=1,
   pagecommand={\thispagestyle{fancy}\subsection{E.5 Research Paper}},
   scale=1.0,
-  offset=0 0
+  trim=11mm 0 0 0,
+  clip
 ]{research_paper_no_hdr.pdf}
 
 % Embed the remaining pages normally.
 \includepdf[
   pages=2-,
   pagecommand={\thispagestyle{fancy}},
-  fitpaper=false
+  trim=11mm 0 0 0,
+  clip
 ]{research_paper_no_hdr.pdf}
 
 \clearpage
