@@ -309,14 +309,14 @@
 \end{center}
 \vspace*{\fill}
 \end{titlepage}
-
 \thispagestyle{empty}
 \begin{center}
     \vspace*{\fill}
-    \includegraphics[width=\textwidth,scale=0.95]{"/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Internship Certificate -Aryan Suthar.jpg"}
+    \includegraphics[width=\textwidth]{"/Volumes/Aryan/Aryan/Sem 8/Intership/gym-management-system-fullstack/docs/build_artifacts/report/Internship Certificate -Aryan Suthar.jpg"}
     \vspace*{\fill}
 \end{center}
 \clearpage
+
 \vspace*{1cm}
 \noindent{\normalfont\Large\bfseries\color{reportprimary}Report Status Declaration Form}
 \label{report-status-declaration-form}
@@ -586,6 +586,9 @@ Oracle, Role-Based Access Control, JWT, WebSocket.
   \pagestyle{fancy}%
 }
 \pagestyle{fancy}
+
+% Adjust margins from Contents onwards: shift content to left by removing 1cm from right and adding 1cm to left
+\newgeometry{a4paper,left=1.09in,right=0.31in,top=0.7in,bottom=0.7in,headheight=35.2pt,headsep=0in,footskip=0.4in}
 
 \pdfbookmark[0]{Table of Contents}{toc}
 \tableofcontents
@@ -1649,22 +1652,136 @@ Category & Entities & Key Relationships \\
 
 \subsection{Data Dictionary}
 
+The Data Dictionary provides a definitive technical specification for the relational database schema of the Smart Gym Management System. Each table is designed to maintain relational integrity while supporting the high concurrency required for multi-role SaaS operations.
+
+% --- USERS TABLE ---
+\subsubsection{Table: USERS}
+As the primary repository for system actors, this table manages authentication, identification, and profile data with appropriate security constraints.
+
 {\def\LTcaptype{none}
-\begin{longtable}[]{@{}lll@{}}
+\begin{longtable}[]{@{}lllc p{6cm}@{}}
 \hline
-Data Store & Description & Key Fields \\
+\textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
 \hline
 \endhead
 \hline
 \endlastfoot
-\texttt{USERS} & All system users & user\_id, email, password\_hash, status \\
-\texttt{ROLES} & Role definitions & role\_id, name (MEMBER/TRAINER/OWNER) \\
-\texttt{GYMS} & Gym profiles & gym\_id, owner\_id, name, location \\
-\texttt{MEMBERSHIPS} & Subscriptions & id, user\_id, package\_id, status, expiry \\
-\texttt{PT\_SESSIONS} & Personal training records & id, trainer\_id, member\_id, date, status \\
-\texttt{MESSAGES} & Chat messages & id, conversation\_id, sender\_id, content \\
-\texttt{TRANSACTIONS} & Payment records & id, user\_id, amount, type, status \\
-\texttt{NOTIFICATIONS} & User alerts & id, user\_id, type, read\_status \\
+\texttt{USER\_ID} & NUMBER(10) & PK & No & Unique identifier for the user. Primary key for account references. \\
+\texttt{EMAIL} & VARCHAR2(100) & UNIQUE & No & Primary communication and login ID. Unique across the system. \\
+\texttt{PASSWORD} & VARCHAR2(255) & - & No & BCrypt-hashed password for secure credential storage. \\
+\texttt{FULL\_NAME} & VARCHAR2(100) & - & No & Display name used for billing, trainer assignment, and profiles. \\
+\texttt{STATUS} & VARCHAR2(20) & - & No & Lifecycle state: \texttt{ACTIVE}, \texttt{INACTIVE}, \texttt{PENDING\_2FA}. \\
+\texttt{PHONE} & VARCHAR2(15) & - & Yes & Formatted mobile number for SMS OTP delivery. \\
+\texttt{CREATED\_AT} & TIMESTAMP & DEFAULT & No & Record of when the user account was first initialized. \\
+\hline
+\end{longtable}
+}
+
+% --- ROLES TABLE ---
+\subsubsection{Table: ROLES}
+Defines the functional authorization boundaries within the system to ensure role-based access control.
+
+{\def\LTcaptype{none}
+\begin{longtable}[]{@{}lllc p{6cm}@{}}
+\hline
+\textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
+\hline
+\endhead
+\hline
+\endlastfoot
+\texttt{ROLE\_ID} & NUMBER(5) & PK & No & Internal sequence-based identifier for the role. \\
+\texttt{NAME} & VARCHAR2(20) & UNIQUE & No & Role identifier: \texttt{SUPER\_ADMIN}, \texttt{OWNER}, \texttt{MEMBER}. \\
+\texttt{DESCRIPTION} & VARCHAR2(255) & - & Yes & Explanation of the permissions associated with this role. \\
+\hline
+\end{longtable}
+}
+
+% --- GYMS TABLE ---
+\subsubsection{Table: GYMS}
+Centralizes configuration for gym branches, linking physical locations to their respective administrative owners.
+
+{\def\LTcaptype{none}
+\begin{longtable}[]{@{}lllc p{6cm}@{}}
+\hline
+\textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
+\hline
+\endhead
+\hline
+\endlastfoot
+\texttt{GYM\_ID} & NUMBER(10) & PK & No & Globally unique identifier for each gym branch. \\
+\texttt{OWNER\_ID} & NUMBER(10) & FK (USERS) & No & Links the branch to its managing \texttt{OWNER} account. \\
+\texttt{NAME} & VARCHAR2(100) & - & No & Professional name of the facility as shown to members. \\
+\texttt{LOCATION} & VARCHAR2(255) & - & No & Validated physical address string for geolocation. \\
+\texttt{PHONE} & VARCHAR2(15) & - & Yes & Direct contact number for the facility front desk. \\
+\texttt{IS\_ACTIVE} & CHAR(1) & CHECK & No & Operational status (Y/N) for branch availability. \\
+\hline
+\end{longtable}
+}
+
+% --- PACKAGES TABLE ---
+\subsubsection{Table: MEMBERSHIP\_PACKAGES}
+Defines the business logic for subscription tiers, including timeframes, features, and cost.
+
+{\def\LTcaptype{none}
+\begin{longtable}[]{@{}lllc p{6cm}@{}}
+\hline
+\textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
+\hline
+\endhead
+\hline
+\endlastfoot
+\texttt{PACKAGE\_ID} & NUMBER(10) & PK & No & Unique identifier for the membership tier. \\
+\texttt{GYM\_ID} & NUMBER(10) & FK (GYMS) & No & Maps the package to its respective gym branch. \\
+\texttt{NAME} & VARCHAR2(50) & - & No & Name of the tier (e.g., Monthly VIP, Saver Annual). \\
+\texttt{PRICE} & NUMBER(10,2) & CHECK $>$ 0 & No & Base price excluding applicable local taxes. \\
+\texttt{DURATION} & NUMBER(3) & - & No & Duration in days/months for subscription calculations. \\
+\texttt{FEATURES} & CLOB & - & Yes & Detailed list of access rights included in this tier. \\
+\hline
+\end{longtable}
+}
+
+% --- MEMBERSHIPS TABLE ---
+\subsubsection{Table: MEMBERSHIPS}
+Tracks active and historical subscription records for members, governing facility access.
+
+{\def\LTcaptype{none}
+\begin{longtable}[]{@{}lllc p{6cm}@{}}
+\hline
+\textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
+\hline
+\endhead
+\hline
+\endlastfoot
+\texttt{M\_ID} & NUMBER(15) & PK & No & Unique subscription instance identifier. \\
+\texttt{USER\_ID} & NUMBER(10) & FK (USERS) & No & Reference to the specific member holding the subscription. \\
+\texttt{P\_ID} & NUMBER(10) & FK (PKGS) & No & The package tier applied to this subscription. \\
+\texttt{START\_DATE} & DATE & - & No & Precise commencement date for membership benefits. \\
+\texttt{END\_DATE} & DATE & - & No & Calculated expiration date based on package duration. \\
+\texttt{STATUS} & VARCHAR2(20) & - & No & current state: \texttt{ACTIVE}, \texttt{EXPIRED}, \texttt{CANCELLED}. \\
+\hline
+\end{longtable}
+}
+
+% --- PT SESSIONS TABLE ---
+\subsubsection{Table: PT\_SESSIONS}
+Governs the scheduling and professional notes for personal training engagements.
+
+{\def\LTcaptype{none}
+\begin{longtable}[]{@{}lllc p{6cm}@{}}
+\hline
+\textbf{Field Name} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Null} & \textbf{Description} \\
+\hline
+\endhead
+\hline
+\endlastfoot
+\texttt{SESSION\_ID} & NUMBER(15) & PK & No & Unique appointment identifier. \\
+\texttt{TRAINER\_ID} & NUMBER(10) & FK (USERS) & No & The \texttt{TRAINER} conducting the training session. \\
+\texttt{MEMBER\_ID} & NUMBER(10) & FK (USERS) & No & The \texttt{MEMBER} receiving the training session. \\
+\texttt{START\_TIME} & TIMESTAMP & - & No & Scheduled start date and time. \\
+\texttt{END\_TIME} & TIMESTAMP & - & No & Scheduled conclusion time. \\
+\texttt{STATUS} & VARCHAR2(20) & - & No & \texttt{SCHEDULED}, \texttt{FINISHED}, \texttt{CANCELLED}. \\
+\texttt{FEEDBACK} & CLOB & - & Yes & Detailed trainer remarks on member progress. \\
+\hline
 \end{longtable}
 }
 
