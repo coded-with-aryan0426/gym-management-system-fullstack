@@ -3740,20 +3740,21 @@ Supervisor Signature & Student Signature \\
 - Assessment: Transitioned from UI to data-driven architecture with strong database foundation and scalable backend structure.}
 
 % Embed the first page of the research paper, injecting the subsection title directly onto it.
+% Offset moves content: positive X = right, negative X = left
+% Main report has left=1.5in, right=1.0in (0.5in difference)
+% So we shift research paper right by 12mm to match asymmetric layout
 \includepdf[
   pages=1,
   pagecommand={\thispagestyle{fancy}\subsection{E.5 Research Paper}},
   scale=1.0,
-  trim=11mm 0 0 0,
-  clip
+  offset=12mm 0
 ]{research_paper_no_hdr.pdf}
 
-% Embed the remaining pages normally.
+% Embed the remaining pages with same right offset.
 \includepdf[
   pages=2-,
   pagecommand={\thispagestyle{fancy}},
-  trim=11mm 0 0 0,
-  clip
+  offset=12mm 0
 ]{research_paper_no_hdr.pdf}
 
 
