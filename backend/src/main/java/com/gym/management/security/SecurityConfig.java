@@ -46,6 +46,9 @@ public class SecurityConfig {
     @Autowired
     private SuperAdminAuthFilter superAdminAuthFilter;
 
+    @Autowired
+    private com.gym.management.filter.TenantIsolationFilter tenantIsolationFilter;
+
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -166,6 +169,9 @@ public class SecurityConfig {
 
         // Rate limiting filter runs first
         http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // Tenant isolation filter runs BEFORE everything - sets tenant context for all requests
+        http.addFilterBefore(tenantIsolationFilter, RateLimitFilter.class);
 
         // Super admin passphrase-token auth for /api/superadmin/**
         http.addFilterAfter(superAdminAuthFilter, UsernamePasswordAuthenticationFilter.class);

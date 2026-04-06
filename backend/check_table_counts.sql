@@ -1,0 +1,18 @@
+SET SERVEROUTPUT ON FEEDBACK OFF
+DECLARE
+    v_count NUMBER;
+BEGIN
+    FOR rec IN (
+        SELECT table_name FROM user_tables WHERE table_name IN (
+            'GROUP_CLASSES','MEMBERS','MEMBER_MEMBERSHIPS','PT_SESSIONS','TRANSACTIONS',
+            'EQUIPMENT','AUDIT_LOGS','NOTIFICATIONS','USERS','GYMS','CLASS_BOOKINGS',
+            'INVOICES','PAYMENT_TRANSACTIONS','MEMBERSHIP_PLANS','MEMBERSHIP_PACKAGES',
+            'FEATURE_FLAGS','USER_SESSIONS','WORKOUT_LOGS','USER_ROLE_MAP','ROLES'
+        )
+    ) LOOP
+        EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ' || rec.table_name INTO v_count;
+        DBMS_OUTPUT.PUT_LINE(rec.table_name || ': ' || v_count || ' rows');
+    END LOOP;
+END;
+/
+EXIT;

@@ -1,0 +1,1172 @@
+BEGIN
+*
+ERROR at line 1:
+ORA-04098: trigger 'SYS.DELETE_ENTRIES' is invalid and failed re-validation
+ORA-06512: at line 3
+ORA-06512: at line 3
+
+https://docs.oracle.com/error-help/db/ora-04098/
+
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-04098/
+https://docs.oracle.com/error-help/db/ora-06512/
+BEGIN
+*
+ERROR at line 1:
+ORA-04098: trigger 'SYS.DELETE_ENTRIES' is invalid and failed re-validation
+ORA-06512: at line 3
+ORA-06512: at line 3
+
+https://docs.oracle.com/error-help/db/ora-04098/
+
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-04098/
+https://docs.oracle.com/error-help/db/ora-06512/
+BEGIN
+*
+ERROR at line 1:
+ORA-04098: trigger 'SYS.DELETE_ENTRIES' is invalid and failed re-validation
+ORA-06512: at line 3
+ORA-06512: at line 3
+
+https://docs.oracle.com/error-help/db/ora-04098/
+
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-04098/
+https://docs.oracle.com/error-help/db/ora-06512/
+BEGIN
+*
+ERROR at line 1:
+ORA-04098: trigger 'SYS.DELETE_ENTRIES' is invalid and failed re-validation
+ORA-06512: at line 3
+ORA-06512: at line 3
+
+https://docs.oracle.com/error-help/db/ora-04098/
+
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-04098/
+https://docs.oracle.com/error-help/db/ora-06512/
+BEGIN
+*
+ERROR at line 1:
+ORA-04098: trigger 'SYS.DELETE_ENTRIES' is invalid and failed re-validation
+ORA-06512: at line 3
+ORA-06512: at line 3
+
+https://docs.oracle.com/error-help/db/ora-04098/
+
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-04098/
+https://docs.oracle.com/error-help/db/ora-06512/
+
+Commit complete.
+
+
+Error starting at line : 51 in command -
+CREATE SEQUENCE gym_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 52 in command -
+CREATE SEQUENCE member_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 53 in command -
+CREATE SEQUENCE membership_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 54 in command -
+CREATE SEQUENCE staff_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 55 in command -
+CREATE SEQUENCE checkin_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 56 in command -
+CREATE SEQUENCE equipment_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 57 in command -
+CREATE SEQUENCE payment_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 58 in command -
+CREATE SEQUENCE invoice_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 59 in command -
+CREATE SEQUENCE transaction_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 60 in command -
+CREATE SEQUENCE audit_log_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 61 in command -
+CREATE SEQUENCE notification_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 62 in command -
+CREATE SEQUENCE class_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 63 in command -
+CREATE SEQUENCE trainer_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 64 in command -
+CREATE SEQUENCE schedule_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 65 in command -
+CREATE SEQUENCE attendance_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 66 in command -
+CREATE SEQUENCE onekey_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 67 in command -
+CREATE SEQUENCE role_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 68 in command -
+CREATE SEQUENCE assignment_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 69 in command -
+CREATE SEQUENCE branch_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 70 in command -
+CREATE SEQUENCE doc_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 71 in command -
+CREATE SEQUENCE health_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 72 in command -
+CREATE SEQUENCE tier_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 73 in command -
+CREATE SEQUENCE cat_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 74 in command -
+CREATE SEQUENCE maint_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 75 in command -
+CREATE SEQUENCE staff_att_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 76 in command -
+CREATE SEQUENCE payroll_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 77 in command -
+CREATE SEQUENCE mm_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 78 in command -
+CREATE SEQUENCE fin_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 79 in command -
+CREATE SEQUENCE booking_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 80 in command -
+CREATE SEQUENCE pt_assign_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 81 in command -
+CREATE SEQUENCE pt_session_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Table TENANTS created.
+
+
+Table GYM_PROFILES created.
+
+
+Table USERS created.
+
+
+Index IDX_USERS_GYM created.
+
+
+Table USER_ROLES created.
+
+
+Table USER_ROLE_ASSIGNMENTS created.
+
+
+Table GYM_BRANCHES created.
+
+
+Index IDX_BRANCHES_GYM created.
+
+
+Table MEMBERS created.
+
+
+Index IDX_MEMBERS_GYM created.
+
+
+Index IDX_MEMBERS_PHONE created.
+
+
+Table MEMBER_DOCUMENTS created.
+
+
+Table MEMBER_HEALTH_METRICS created.
+
+
+Table MEMBERSHIP_PLANS created.
+
+
+Index IDX_PLANS_GYM created.
+
+
+Table PLAN_PRICING_TIERS created.
+
+
+Table CHECKIN_RECORDS created.
+
+
+Index IDX_CHECKIN_GYM created.
+
+
+Index IDX_CHECKIN_MEMBER created.
+
+
+Error starting at line : 264 in command -
+CREATE TABLE daily_attendance (
+    attendance_id NUMBER DEFAULT attendance_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    attendance_date DATE NOT NULL,
+    total_checkins NUMBER DEFAULT 0,
+    UNIQUE (gym_id, attendance_date)
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 272 in command -
+CREATE TABLE equipment_categories (
+    category_id NUMBER DEFAULT cat_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER,
+    category_name VARCHAR2(100) NOT NULL,
+    category_code VARCHAR2(50),
+    is_active CHAR(1) DEFAULT 'Y',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 281 in command -
+CREATE TABLE equipment (
+    equipment_id NUMBER DEFAULT equipment_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    equipment_code VARCHAR2(50),
+    equipment_name VARCHAR2(200) NOT NULL,
+    category_id NUMBER,
+    brand_name VARCHAR2(100),
+    serial_number VARCHAR2(100),
+    purchase_date DATE,
+    purchase_amount NUMBER(12, 2),
+    location VARCHAR2(200),
+    status VARCHAR2(50) DEFAULT 'ACTIVE',
+    condition_status VARCHAR2(50) DEFAULT 'GOOD',
+    is_active CHAR(1) DEFAULT 'Y',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 298 in command -
+CREATE INDEX idx_equipment_gym ON equipment(gym_id)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 300 in command -
+CREATE TABLE equipment_maintenance (
+    maintenance_id NUMBER DEFAULT maint_seq.NEXTVAL PRIMARY KEY,
+    equipment_id NUMBER NOT NULL,
+    gym_id NUMBER NOT NULL,
+    maintenance_type VARCHAR2(50),
+    description CLOB,
+    maintenance_date DATE NOT NULL,
+    cost NUMBER(12, 2) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 311 in command -
+CREATE TABLE staff (
+    staff_id NUMBER DEFAULT staff_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    user_id NUMBER,
+    staff_code VARCHAR2(50),
+    first_name VARCHAR2(100) NOT NULL,
+    last_name VARCHAR2(100),
+    email VARCHAR2(200),
+    phone VARCHAR2(20) NOT NULL,
+    designation VARCHAR2(100),
+    department VARCHAR2(100),
+    role VARCHAR2(100),
+    joining_date DATE,
+    employment_type VARCHAR2(50),
+    salary_amount NUMBER(12, 2),
+    is_active CHAR(1) DEFAULT 'Y',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 330 in command -
+CREATE INDEX idx_staff_gym ON staff(gym_id)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Table STAFF_ATTENDANCE created.
+
+
+Table STAFF_PAYROLL created.
+
+
+Table MEMBER_MEMBERSHIPS created.
+
+
+Index IDX_MM_GYM created.
+
+
+Index IDX_MM_MEMBER created.
+
+
+Error starting at line : 377 in command -
+CREATE TABLE payment_transactions (
+    transaction_id NUMBER DEFAULT transaction_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    member_id NUMBER,
+    membership_id NUMBER,
+    transaction_code VARCHAR2(50) NOT NULL,
+    transaction_type VARCHAR2(50) NOT NULL,
+    payment_mode VARCHAR2(50) NOT NULL,
+    transaction_date TIMESTAMP NOT NULL,
+    amount NUMBER(12, 2) NOT NULL,
+    total_amount NUMBER(12, 2) NOT NULL,
+    amount_received NUMBER(12, 2) NOT NULL,
+    transaction_status VARCHAR2(50) DEFAULT 'SUCCESS',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_transaction_code UNIQUE (gym_id, transaction_code)
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 394 in command -
+CREATE INDEX idx_txn_gym ON payment_transactions(gym_id)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 396 in command -
+CREATE TABLE invoices (
+    invoice_id NUMBER DEFAULT invoice_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    member_id NUMBER,
+    invoice_number VARCHAR2(50) NOT NULL,
+    invoice_date DATE NOT NULL,
+    total_amount NUMBER(12, 2) NOT NULL,
+    amount_paid NUMBER(12, 2) DEFAULT 0,
+    amount_due NUMBER(12, 2) DEFAULT 0,
+    payment_status VARCHAR2(50) DEFAULT 'PENDING',
+    status VARCHAR2(50) DEFAULT 'ISSUE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 410 in command -
+CREATE INDEX idx_inv_gym ON invoices(gym_id)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 412 in command -
+CREATE TABLE group_classes (
+    class_id NUMBER DEFAULT class_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    class_name VARCHAR2(200) NOT NULL,
+    class_code VARCHAR2(50),
+    description CLOB,
+    category VARCHAR2(100),
+    difficulty_level VARCHAR2(20),
+    duration_minutes NUMBER DEFAULT 60,
+    max_participants NUMBER DEFAULT 20,
+    trainer_id NUMBER,
+    room_name VARCHAR2(100),
+    is_active CHAR(1) DEFAULT 'Y',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 428 in command -
+CREATE INDEX idx_classes_gym ON group_classes(gym_id)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 430 in command -
+CREATE TABLE class_schedules (
+    schedule_id NUMBER DEFAULT schedule_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    class_id NUMBER NOT NULL,
+    trainer_id NUMBER,
+    day_of_week NUMBER,
+    start_time VARCHAR2(10) NOT NULL,
+    end_time VARCHAR2(10) NOT NULL,
+    room_name VARCHAR2(100),
+    is_active CHAR(1) DEFAULT 'Y',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 443 in command -
+CREATE TABLE class_bookings (
+    booking_id NUMBER DEFAULT booking_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    schedule_id NUMBER NOT NULL,
+    class_id NUMBER NOT NULL,
+    member_id NUMBER NOT NULL,
+    booking_date DATE NOT NULL,
+    status VARCHAR2(50) DEFAULT 'CONFIRMED',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 454 in command -
+CREATE TABLE pt_assignments (
+    assignment_id NUMBER DEFAULT pt_assign_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    member_id NUMBER NOT NULL,
+    trainer_id NUMBER NOT NULL,
+    session_count NUMBER NOT NULL,
+    sessions_remaining NUMBER NOT NULL,
+    session_price NUMBER(12, 2) NOT NULL,
+    total_amount NUMBER(12, 2) NOT NULL,
+    amount_paid NUMBER(12, 2) DEFAULT 0,
+    status VARCHAR2(50) DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 468 in command -
+CREATE TABLE pt_sessions (
+    session_id NUMBER DEFAULT pt_session_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    assignment_id NUMBER NOT NULL,
+    member_id NUMBER NOT NULL,
+    trainer_id NUMBER NOT NULL,
+    session_date DATE NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP,
+    duration_minutes NUMBER,
+    session_status VARCHAR2(50) DEFAULT 'SCHEDULED',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 482 in command -
+CREATE TABLE financial_transactions (
+    transaction_id NUMBER DEFAULT fin_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    transaction_type VARCHAR2(20) NOT NULL,
+    category VARCHAR2(100) NOT NULL,
+    amount NUMBER(12, 2) NOT NULL,
+    transaction_date DATE NOT NULL,
+    description VARCHAR2(500),
+    payment_method VARCHAR2(50),
+    status VARCHAR2(50) DEFAULT 'COMPLETED',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 495 in command -
+CREATE INDEX idx_fin_gym ON financial_transactions(gym_id)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 497 in command -
+CREATE TABLE audit_logs (
+    audit_id NUMBER DEFAULT audit_log_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    user_id NUMBER,
+    username VARCHAR2(100),
+    action VARCHAR2(100) NOT NULL,
+    entity_type VARCHAR2(100) NOT NULL,
+    entity_id VARCHAR2(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Error starting at line : 508 in command -
+CREATE TABLE notifications (
+    notification_id NUMBER DEFAULT notification_seq.NEXTVAL PRIMARY KEY,
+    gym_id NUMBER NOT NULL,
+    user_id NUMBER NOT NULL,
+    notification_type VARCHAR2(50) NOT NULL,
+    title VARCHAR2(200) NOT NULL,
+    message CLOB NOT NULL,
+    status VARCHAR2(50) DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+Error report -
+ORA-00955: name is already used by an existing object
+
+https://docs.oracle.com/error-help/db/ora-00955/00955. 00000 -  "name is already used by an existing object"
+*Cause:    An attempt was made to create a database object (such
+           as a table, view, cluster, index, or synonym) that already
+           existed. A user's database objects must have distinct names.
+*Action:   Enter a unique name for the database object or modify
+           or drop the existing object so it can be reused.
+
+Table USERS altered.
+
+
+Table USER_ROLE_ASSIGNMENTS altered.
+
+
+Table GYM_BRANCHES altered.
+
+
+Table MEMBERS altered.
+
+
+Table MEMBER_DOCUMENTS altered.
+
+
+Table MEMBER_HEALTH_METRICS altered.
+
+
+Table MEMBERSHIP_PLANS altered.
+
+
+Table PLAN_PRICING_TIERS altered.
+
+
+Table CHECKIN_RECORDS altered.
+
+
+Table DAILY_ATTENDANCE altered.
+
+
+Error starting at line : 533 in command -
+ALTER TABLE equipment ADD CONSTRAINT fk_equip_gym FOREIGN KEY (gym_id) REFERENCES gym_profiles(gym_id)
+Error report -
+ORA-02298: cannot validate (SYSTEM.FK_EQUIP_GYM) - parent keys not found
+
+https://docs.oracle.com/error-help/db/ora-02298/02298. 00000 - "cannot validate (%s.%s) - parent keys not found"
+*Cause:    an alter table validating constraint failed because the table has
+           child records.
+*Action:   Obvious
+
+Table EQUIPMENT_MAINTENANCE altered.
+
+
+Error starting at line : 535 in command -
+ALTER TABLE staff ADD CONSTRAINT fk_staff_gym FOREIGN KEY (gym_id) REFERENCES gym_profiles(gym_id)
+Error report -
+ORA-02298: cannot validate (SYSTEM.FK_STAFF_GYM) - parent keys not found
+
+https://docs.oracle.com/error-help/db/ora-02298/02298. 00000 - "cannot validate (%s.%s) - parent keys not found"
+*Cause:    an alter table validating constraint failed because the table has
+           child records.
+*Action:   Obvious
+
+Table STAFF_ATTENDANCE altered.
+
+
+Table STAFF_PAYROLL altered.
+
+
+Table MEMBER_MEMBERSHIPS altered.
+
+
+Table PAYMENT_TRANSACTIONS altered.
+
+
+Table INVOICES altered.
+
+
+Error starting at line : 541 in command -
+ALTER TABLE group_classes ADD CONSTRAINT fk_classes_gym FOREIGN KEY (gym_id) REFERENCES gym_profiles(gym_id)
+Error report -
+ORA-02298: cannot validate (SYSTEM.FK_CLASSES_GYM) - parent keys not found
+
+https://docs.oracle.com/error-help/db/ora-02298/02298. 00000 - "cannot validate (%s.%s) - parent keys not found"
+*Cause:    an alter table validating constraint failed because the table has
+           child records.
+*Action:   Obvious
+
+Error starting at line : 542 in command -
+ALTER TABLE class_schedules ADD CONSTRAINT fk_sched_gym FOREIGN KEY (gym_id) REFERENCES gym_profiles(gym_id)
+Error report -
+ORA-02298: cannot validate (SYSTEM.FK_SCHED_GYM) - parent keys not found
+
+https://docs.oracle.com/error-help/db/ora-02298/02298. 00000 - "cannot validate (%s.%s) - parent keys not found"
+*Cause:    an alter table validating constraint failed because the table has
+           child records.
+*Action:   Obvious
+
+Table CLASS_BOOKINGS altered.
+
+
+Table PT_ASSIGNMENTS altered.
+
+
+Table PT_SESSIONS altered.
+
+
+Error starting at line : 546 in command -
+ALTER TABLE financial_transactions ADD CONSTRAINT fk_fin_gym FOREIGN KEY (gym_id) REFERENCES gym_profiles(gym_id)
+Error report -
+ORA-02298: cannot validate (SYSTEM.FK_FIN_GYM) - parent keys not found
+
+https://docs.oracle.com/error-help/db/ora-02298/02298. 00000 - "cannot validate (%s.%s) - parent keys not found"
+*Cause:    an alter table validating constraint failed because the table has
+           child records.
+*Action:   Obvious
+
+Error starting at line : 547 in command -
+ALTER TABLE audit_logs ADD CONSTRAINT fk_audit_gym FOREIGN KEY (gym_id) REFERENCES gym_profiles(gym_id)
+Error report -
+ORA-02298: cannot validate (SYSTEM.FK_AUDIT_GYM) - parent keys not found
+
+https://docs.oracle.com/error-help/db/ora-02298/02298. 00000 - "cannot validate (%s.%s) - parent keys not found"
+*Cause:    an alter table validating constraint failed because the table has
+           child records.
+*Action:   Obvious
+
+Table NOTIFICATIONS altered.
+
+
+Trigger TRG_MEMBER_CODE compiled
+
+
+Trigger TRG_MEMBERSHIP_CODE compiled
+
+
+Trigger TRG_TRANSACTION_CODE compiled
+
+
+Commit complete.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+Error starting at line : 642 in command -
+INSERT INTO equipment (equipment_id, gym_id, equipment_code, equipment_name, category_id, brand_name, serial_number, purchase_date, purchase_amount, location, status, condition_status, is_active)
+VALUES (equipment_seq.NEXTVAL, 1, 'EQ001', 'Treadmill Pro 5000', 1, 'Life Fitness', 'LF20240001', TO_DATE('2024-01-15', 'YYYY-MM-DD'), 250000, 'Cardio Zone - Bandra', 'ACTIVE', 'EXCELLENT', 'Y')
+Error report -
+ORA-00001: unique constraint (SYSTEM.UK_EQUIPMENT_CODE) violated on table SYSTEM.EQUIPMENT columns (GYM_ID, EQUIPMENT_CODE)
+ORA-03301: (ORA-00001 details) row with column values (GYM_ID:1, EQUIPMENT_CODE:'EQ001') already exists
+
+https://docs.oracle.com/error-help/db/ora-00001/
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-00001/
+https://docs.oracle.com/error-help/db/ora-03301/
+
+Error starting at line : 645 in command -
+INSERT INTO equipment (equipment_id, gym_id, equipment_code, equipment_name, category_id, brand_name, serial_number, purchase_date, purchase_amount, location, status, condition_status, is_active)
+VALUES (equipment_seq.NEXTVAL, 1, 'EQ002', 'Elliptical Cross Trainer', 1, 'Precor', 'PC20240002', TO_DATE('2024-02-20', 'YYYY-MM-DD'), 180000, 'Cardio Zone - Bandra', 'ACTIVE', 'GOOD', 'Y')
+Error report -
+ORA-00001: unique constraint (SYSTEM.UK_EQUIPMENT_CODE) violated on table SYSTEM.EQUIPMENT columns (GYM_ID, EQUIPMENT_CODE)
+ORA-03301: (ORA-00001 details) row with column values (GYM_ID:1, EQUIPMENT_CODE:'EQ002') already exists
+
+https://docs.oracle.com/error-help/db/ora-00001/
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-00001/
+https://docs.oracle.com/error-help/db/ora-03301/
+
+Error starting at line : 648 in command -
+INSERT INTO equipment (equipment_id, gym_id, equipment_code, equipment_name, category_id, brand_name, serial_number, purchase_date, purchase_amount, location, status, condition_status, is_active)
+VALUES (equipment_seq.NEXTVAL, 1, 'EQ003', 'Dumbbell Set 5-50kg', 3, 'York', 'YK2024015', TO_DATE('2024-01-20', 'YYYY-MM-DD'), 85000, 'Free Weights Area - Powai', 'ACTIVE', 'EXCELLENT', 'Y')
+Error report -
+ORA-00001: unique constraint (SYSTEM.UK_EQUIPMENT_CODE) violated on table SYSTEM.EQUIPMENT columns (GYM_ID, EQUIPMENT_CODE)
+ORA-03301: (ORA-00001 details) row with column values (GYM_ID:1, EQUIPMENT_CODE:'EQ003') already exists
+
+https://docs.oracle.com/error-help/db/ora-00001/
+
+More Details :
+https://docs.oracle.com/error-help/db/ora-00001/
+https://docs.oracle.com/error-help/db/ora-03301/
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+1 row inserted.
+
+
+Commit complete.
+

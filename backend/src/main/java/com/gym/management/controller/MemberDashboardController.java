@@ -291,30 +291,30 @@ public class MemberDashboardController {
 
             // 8. Mocks for Radar and Weight (unless data exists)
             builder.fitnessMetrics(Arrays.asList(
-                    new MemberDashboardStatsDTO.FitnessMetricDTO("Strength", 85),
-                    new MemberDashboardStatsDTO.FitnessMetricDTO("Endurance", 72),
-                    new MemberDashboardStatsDTO.FitnessMetricDTO("Flexibility", 68),
-                    new MemberDashboardStatsDTO.FitnessMetricDTO("Balance", 75),
-                    new MemberDashboardStatsDTO.FitnessMetricDTO("Speed", 70)
+                    MemberDashboardStatsDTO.FitnessMetricDTO.builder().metricName("Strength").currentValue("85").change("+0").build(),
+                    MemberDashboardStatsDTO.FitnessMetricDTO.builder().metricName("Endurance").currentValue("72").change("+0").build(),
+                    MemberDashboardStatsDTO.FitnessMetricDTO.builder().metricName("Flexibility").currentValue("68").change("+0").build(),
+                    MemberDashboardStatsDTO.FitnessMetricDTO.builder().metricName("Balance").currentValue("75").change("+0").build(),
+                    MemberDashboardStatsDTO.FitnessMetricDTO.builder().metricName("Speed").currentValue("70").change("+0").build()
             ));
 
             if (member.getWeight() != null) {
                 double w = member.getWeight().doubleValue();
                 builder.weightProgress(Arrays.asList(
-                        new MemberDashboardStatsDTO.WeightProgressDTO("Week 1", w + 2, w),
-                        new MemberDashboardStatsDTO.WeightProgressDTO("Week 2", w + 1.5, w),
-                        new MemberDashboardStatsDTO.WeightProgressDTO("Week 3", w + 0.8, w),
-                        new MemberDashboardStatsDTO.WeightProgressDTO("Week 4", w, w)
+                        MemberDashboardStatsDTO.WeightProgressDTO.builder().week("Week 1").weight(w + 2).change(w).build(),
+                        MemberDashboardStatsDTO.WeightProgressDTO.builder().week("Week 2").weight(w + 1.5).change(w).build(),
+                        MemberDashboardStatsDTO.WeightProgressDTO.builder().week("Week 3").weight(w + 0.8).change(w).build(),
+                        MemberDashboardStatsDTO.WeightProgressDTO.builder().week("Week 4").weight(w).change(w).build()
                 ));
             } else {
                 builder.weightProgress(Collections.emptyList());
             }
 
             builder.achievements(Arrays.asList(
-                    new MemberDashboardStatsDTO.AchievementDTO("Trophy", "7-Day Streak", "#F59E0B"),
-                    new MemberDashboardStatsDTO.AchievementDTO("Target", "50 Workouts", "#10B981"),
-                    new MemberDashboardStatsDTO.AchievementDTO("Award", "Perfect Week", "#8B5CF6"),
-                    new MemberDashboardStatsDTO.AchievementDTO("Star", "Early Bird", "#06B6D4")
+                    MemberDashboardStatsDTO.AchievementDTO.builder().icon("Trophy").title("7-Day Streak").color("#F59E0B").build(),
+                    MemberDashboardStatsDTO.AchievementDTO.builder().icon("Target").title("50 Workouts").color("#10B981").build(),
+                    MemberDashboardStatsDTO.AchievementDTO.builder().icon("Award").title("Perfect Week").color("#8B5CF6").build(),
+                    MemberDashboardStatsDTO.AchievementDTO.builder().icon("Star").title("Early Bird").color("#06B6D4").build()
             ));
 
             return ResponseEntity.ok(builder.build());

@@ -1,41 +1,41 @@
 package com.gym.management.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
+@Data
 @Entity
 @Table(name = "member_points")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class MemberPoints {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "points_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private User member;
+    @Column(name = "member_id", nullable = false)
+    private Long memberId;
 
-    @Column(nullable = false)
+    @Column(name = "member_user_id")
+    private Long memberUserId;
+
+    @Column(name = "gym_id", nullable = false)
+    private Long gymId;
+
+    @Column(name = "points", nullable = false)
     private Integer points;
 
-    @Column(nullable = false)
-    private String reason;
+    @Column(name = "points_type")
+    private String pointsType;
 
-    @Column(name = "earned_at")
-    private LocalDateTime earnedAt;
+    @Column(name = "description")
+    private String description;
 
-    @PrePersist
-    protected void onCreate() {
-        if (earnedAt == null) {
-            earnedAt = LocalDateTime.now();
-        }
-    }
+    @Column(name = "transaction_date")
+    private LocalDateTime transactionDate;
+
+    @Column(name = "reference_id")
+    private String referenceId;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }

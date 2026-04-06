@@ -8,6 +8,7 @@ import {
   CreditCard, Zap, Eye, Wallet, UserCheck, RefreshCw,
   CircleDot, AlertTriangle, Target, ShieldAlert, Layers,
   BarChart3, Clock, Flame, Star, Award, Wrench, CheckCircle, XCircle, Settings,
+  Crown, AlertOctagon,
 } from "lucide-react"
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -16,6 +17,7 @@ import {
 } from "recharts"
 import api from "../../services/api"
 import { equipmentApi } from "../../services/equipmentApi"
+import { subscriptionApi } from "../../services/subscriptionApi"
 import { useCurrency } from "../../contexts/CurrencyContext"
 import { 
   SkeletonKPIGrid, SkeletonChart, SkeletonCard, SkeletonTable,
@@ -64,8 +66,35 @@ const Dashboard: React.FC = () => {
   const [error, setError]               = useState<string | null>(null)
   const [chartPeriod, setChartPeriod]   = useState<'day'|'week'|'month'|'6month'|'year'>('month')
   const [chartLoading, setChartLoading] = useState(false)
+  const [subscriptionStatus, setSubscriptionStatus] = useState<{ isActive: boolean; daysLeft: number | null; planName: string | null; isInGracePeriod: boolean } | null>(null)
   const navigate  = useNavigate()
   const { formatPrice } = useCurrency()
+
+  const checkSubscriptionStatus = useCallback(async () => {
+    const userId = localStorage.getItem('userId')
+    if (!userId) return
+    try {
+      const response = await subscriptionApi.getStatus(userId)
+      const sub = response.data
+      if (sub) {
+        const now = new Date()
+        const endDate = sub.currentPeriodEnd ? new Date(sub.currentPeriodEnd) : null
+        const daysLeft = endDate ? Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : null
+        setSubscriptionStatus({
+          isActive: sub.status?.toUpperCase() === 'ACTIVE',
+          daysLeft,
+          planName: sub.planName || null,
+          isInGracePeriod: sub.isInGracePeriod || false,
+        })
+      }
+    } catch (err) {
+      console.warn('[Dashboard] Could not fetch subscription status:', err)
+    }
+  }, [])
+
+  useEffect(() => {
+    checkSubscriptionStatus()
+  }, [checkSubscriptionStatus])
 
   const loadDashboardData = useCallback(async () => {
     try {
@@ -473,6 +502,25 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </header>
+
+      {subscriptionStatus && !subscriptionStatus.isActive && (
+        <div className={`dash__sub-alert ${subscriptionStatus.isInGracePeriod ? 'dash__sub-alert--grace' : 'dash__sub-alert--expired'}`}>
+          <div className="dash__sub-alert-icon">
+            {subscriptionStatus.isInGracePeriod ? <AlertOctagon size={18} /> : <AlertOctagon size={18} />}
+          </div>
+          <div className="dash__sub-alert-content">
+            <strong>{subscriptionStatus.isInGracePeriod ? 'Grace Period Active' : 'Subscription Expired'}</strong>
+            <span>
+              {subscriptionStatus.isInGracePeriod
+                ? `Your subscription is in grace period. ${subscriptionStatus.daysLeft} days remaining to renew.`
+                : 'Your SaaS subscription has expired. Please renew to continue accessing premium features.'}
+            </span>
+          </div>
+          <button className="dash__sub-alert-btn" onClick={() => navigate('/settings')}>
+            {subscriptionStatus.isInGracePeriod ? 'Renew Now' : 'Reactivate'}
+          </button>
+        </div>
+      )}
 
       {/* ══ MAIN GRID ══ */}
       <div className="dash__grid">

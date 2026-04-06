@@ -1,0 +1,17 @@
+{
+  "name": "@gym-app/subscription-ui",
+  "version": "1.0.0",
+  "description": "Subscription UI components for Gym Management App",
+  "main": "src/api/subscriptionApi.ts",
+  "types": "src/api/subscriptionApi.ts",
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0"
+  }
+}

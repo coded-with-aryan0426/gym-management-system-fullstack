@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "gym_classes")
+@Table(name = "group_classes")
 @Data
 @NoArgsConstructor
 public class GymClass {
@@ -19,7 +19,7 @@ public class GymClass {
     @Column(name = "class_name", nullable = false)
     private String className;
 
-    @Column(name = "class_type", nullable = false)
+    @Column(name = "CATEGORY", nullable = false)
     private String classType;
 
     @Column(name = "description", columnDefinition = "CLOB")
@@ -35,13 +35,13 @@ public class GymClass {
     @Column(name = "duration_minutes", nullable = false)
     private Integer durationMinutes;
 
-    @Column(name = "max_capacity", nullable = false)
+    @Column(name = "MAX_PARTICIPANTS", nullable = false)
     private Integer maxCapacity;
 
-    @Column(name = "current_bookings")
+    @Column(name = "CURRENT_PARTICIPANTS")
     private Integer currentBookings = 0;
 
-    @Column(name = "difficulty")
+    @Column(name = "DIFFICULTY_LEVEL")
     private String difficulty;
 
     @Column(name = "location")

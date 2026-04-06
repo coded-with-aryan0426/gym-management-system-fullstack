@@ -13,6 +13,7 @@ import {
     FileText,
     Palette,
     Building2,
+    Crown,
 } from "lucide-react"
 import "./Settings.css"
 
@@ -26,6 +27,7 @@ import NotificationsSection from "./sections/NotificationsSection"
 import AuditLogSection from "./sections/AuditLogSection"
 import ThemeSection from "./sections/ThemeSection"
 import GymProfileSection from "./sections/GymProfileSection"
+import SaaSSubscription from "./SaaSSubscription"
 
 const settingsCategories = [
     { id: 'profile', label: 'Owner Profile', icon: User, desc: 'Personal & Gym details', color: '#3b82f6' },
@@ -37,6 +39,7 @@ const settingsCategories = [
     { id: 'membership', label: 'Membership Policies', icon: ClipboardList, desc: 'Freezes & Cancellations', color: '#06b6d4' },
     { id: 'userrules', label: 'User Rules', icon: Users, desc: 'Staff, Trainer & Member policies', color: '#8b5cf6' },
     { id: 'notifications', label: 'Notifications', icon: Bell, desc: 'Alerts & Reminders', color: '#f97316' },
+    { id: 'subscription', label: 'Subscription', icon: Crown, desc: 'SaaS License & Plans', color: '#ec4899' },
     { id: 'audit', label: 'Audit Logs', icon: FileText, desc: 'System activity history', color: '#14b8a6' },
 ]
 
@@ -62,6 +65,7 @@ const Settings: React.FC = () => {
             case 'membership': return <MembershipPoliciesSection />
             case 'userrules': return <UserRulesSection />
             case 'notifications': return <NotificationsSection />
+            case 'subscription': return <SaaSSubscription />
             case 'audit': return <AuditLogSection />
             default: return <OwnerProfileSection />
         }

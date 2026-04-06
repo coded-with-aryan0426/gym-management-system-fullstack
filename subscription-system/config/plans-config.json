@@ -1,0 +1,264 @@
+{
+  "currency": {
+    "default": "INR",
+    "symbol": "₹",
+    "supported": ["INR", "USD", "EUR"]
+  },
+  "plans": [
+    {
+      "id": "starter",
+      "name": "Starter",
+      "displayName": "Starter",
+      "description": "Perfect for solo trainers getting started",
+      "gymTypes": ["solo"],
+      "tierLevel": 1,
+      "prices": {
+        "monthly": 999,
+        "quarterly": 2699,
+        "yearly": 9590
+      },
+      "pricesUSD": {
+        "monthly": 12,
+        "quarterly": 32,
+        "yearly": 115
+      },
+      "trialDays": 7,
+      "gracePeriodDays": 3,
+      "maxDevices": 1,
+      "maxMembers": 30,
+      "maxStaff": 1,
+      "maxTrainers": 1,
+      "maxClasses": 10,
+      "features": {
+        "memberManagement": true,
+        "qrCheckin": true,
+        "biometricCheckin": false,
+        "brandedMobileApp": false,
+        "trainerProfiles": 1,
+        "ptSessionBooking": false,
+        "paymentCollection": false,
+        "multiGateway": false,
+        "staffPayroll": false,
+        "inventoryManagement": false,
+        "analytics": false,
+        "apiAccess": false,
+        "whiteLabel": false,
+        "multiLocation": false,
+        "dedicatedSupport": false,
+        "dietManagement": false,
+        "workoutBuilder": false,
+        "exerciseLibrary": false,
+        "fitnessAssessment": false
+      },
+      "isActive": true,
+      "isFeatured": false,
+      "sortOrder": 1
+    },
+    {
+      "id": "professional",
+      "name": "Professional",
+      "displayName": "Professional",
+      "description": "Ideal for growing studios and small gyms",
+      "gymTypes": ["solo", "small"],
+      "tierLevel": 2,
+      "prices": {
+        "monthly": 2999,
+        "quarterly": 8099,
+        "yearly": 28790
+      },
+      "pricesUSD": {
+        "monthly": 36,
+        "quarterly": 97,
+        "yearly": 345
+      },
+      "trialDays": 14,
+      "gracePeriodDays": 5,
+      "maxDevices": 3,
+      "maxMembers": 100,
+      "maxStaff": 3,
+      "maxTrainers": 5,
+      "maxClasses": -1,
+      "features": {
+        "memberManagement": true,
+        "qrCheckin": true,
+        "biometricCheckin": true,
+        "brandedMobileApp": true,
+        "trainerProfiles": 5,
+        "ptSessionBooking": true,
+        "paymentCollection": true,
+        "multiGateway": false,
+        "staffPayroll": false,
+        "inventoryManagement": false,
+        "analytics": true,
+        "apiAccess": false,
+        "whiteLabel": false,
+        "multiLocation": false,
+        "dedicatedSupport": true,
+        "dietManagement": true,
+        "workoutBuilder": true,
+        "exerciseLibrary": true,
+        "fitnessAssessment": true
+      },
+      "isActive": true,
+      "isFeatured": true,
+      "sortOrder": 2
+    },
+    {
+      "id": "business",
+      "name": "Business",
+      "displayName": "Business",
+      "description": "For established medium-sized gyms",
+      "gymTypes": ["small", "medium"],
+      "tierLevel": 3,
+      "prices": {
+        "monthly": 7999,
+        "quarterly": 21599,
+        "yearly": 76790
+      },
+      "pricesUSD": {
+        "monthly": 96,
+        "quarterly": 259,
+        "yearly": 921
+      },
+      "trialDays": 14,
+      "gracePeriodDays": 7,
+      "maxDevices": 5,
+      "maxMembers": 500,
+      "maxStaff": 10,
+      "maxTrainers": 15,
+      "maxClasses": -1,
+      "features": {
+        "memberManagement": true,
+        "qrCheckin": true,
+        "biometricCheckin": true,
+        "brandedMobileApp": true,
+        "trainerProfiles": 15,
+        "ptSessionBooking": true,
+        "paymentCollection": true,
+        "multiGateway": true,
+        "staffPayroll": true,
+        "inventoryManagement": true,
+        "analytics": true,
+        "apiAccess": true,
+        "whiteLabel": false,
+        "multiLocation": false,
+        "dedicatedSupport": true,
+        "dietManagement": true,
+        "workoutBuilder": true,
+        "exerciseLibrary": true,
+        "fitnessAssessment": true
+      },
+      "isActive": true,
+      "isFeatured": false,
+      "sortOrder": 3
+    },
+    {
+      "id": "enterprise",
+      "name": "Enterprise",
+      "displayName": "Enterprise",
+      "description": "Complete solution for large gyms & chains",
+      "gymTypes": ["medium", "large", "enterprise"],
+      "tierLevel": 4,
+      "prices": {
+        "monthly": 19999,
+        "quarterly": 53999,
+        "yearly": 191990
+      },
+      "pricesUSD": {
+        "monthly": 240,
+        "quarterly": 648,
+        "yearly": 2304
+      },
+      "trialDays": 30,
+      "gracePeriodDays": 14,
+      "maxDevices": -1,
+      "maxMembers": -1,
+      "maxStaff": -1,
+      "maxTrainers": -1,
+      "maxClasses": -1,
+      "features": {
+        "memberManagement": true,
+        "qrCheckin": true,
+        "biometricCheckin": true,
+        "brandedMobileApp": true,
+        "trainerProfiles": -1,
+        "ptSessionBooking": true,
+        "paymentCollection": true,
+        "multiGateway": true,
+        "staffPayroll": true,
+        "inventoryManagement": true,
+        "analytics": true,
+        "apiAccess": true,
+        "whiteLabel": true,
+        "multiLocation": true,
+        "dedicatedSupport": true,
+        "dietManagement": true,
+        "workoutBuilder": true,
+        "exerciseLibrary": true,
+        "fitnessAssessment": true
+      },
+      "isActive": true,
+      "isFeatured": false,
+      "sortOrder": 4
+    }
+  ],
+  "billing": {
+    "defaultCycle": "yearly",
+    "allowMonthly": true,
+    "allowQuarterly": true,
+    "allowYearly": true,
+    "taxPercent": 0,
+    "discounts": {
+      "yearly": 20,
+      "quarterly": 10
+    }
+  },
+  "trial": {
+    "enabled": true,
+    "requireCreditCard": false,
+    "maxTrialsPerUser": 1,
+    "autoConvert": true,
+    "conversionGracePeriodDays": 3
+  },
+  "gracePeriod": {
+    "enabled": true,
+    "defaultDays": 3,
+    "notifyDaysBefore": [7, 3, 1],
+    "notifyDuringGrace": true
+  },
+  "notifications": {
+    "email": {
+      "enabled": true,
+      "trialStarting": true,
+      "trialExpiring": true,
+      "subscriptionActivated": true,
+      "subscriptionRenewing": true,
+      "subscriptionExpiring": true,
+      "paymentFailed": true,
+      "gracePeriodStarted": true
+    }
+  },
+  "rateLimiting": {
+    "enabled": true,
+    "trialRequestsPerHour": 100,
+    "paidRequestsPerHour": 1000
+  },
+  "paymentGateways": {
+    "stripe": {
+      "enabled": false,
+      "testMode": true,
+      "webhookSecret": ""
+    },
+    "razorpay": {
+      "enabled": true,
+      "testMode": true,
+      "keyId": "",
+      "keySecret": ""
+    },
+    "paypal": {
+      "enabled": false,
+      "testMode": true,
+      "clientId": ""
+    }
+  }
+}

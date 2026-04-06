@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Box, Typography, Grid, Container, Link, IconButton } from '@mui/material';
-import { Facebook, Twitter, Instagram, Linkedin, Youtube, Star, Shield, Zap } from 'lucide-react';
+import { Globe, ExternalLink, Star, Shield, Zap } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -102,7 +102,7 @@ export default function Footer() {
 
               {/* Social Icons */}
               <Box sx={{ display: 'flex', gap: 2 }}>
-                {[Facebook, Twitter, Instagram, Linkedin].map((Icon, idx) => (
+                {[Globe, ExternalLink, Globe, ExternalLink].map((Icon, idx) => (
                   <IconButton
                     key={idx}
                     size="small"
