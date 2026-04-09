@@ -492,8 +492,7 @@ export default function AuthModal() {
                 style={{
                     position: 'fixed',
                     inset: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                    backdropFilter: 'blur(4px)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
                     zIndex: 9998,
                     animation: 'fadeIn 0.2s ease',
                 }}
