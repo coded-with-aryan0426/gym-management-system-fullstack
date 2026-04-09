@@ -10,7 +10,7 @@ interface LogoProps {
 
 export const Logo = ({ size = 32, showText = true, className = "" }: LogoProps) => {
     const { resolvedTheme } = useTheme();
-    const logoSrc = showText ? '/images/Logo.png' : '/images/Top logo.png';
+    const logoSrc = showText ? '/images/logo.png' : '/images/Top logo.png';
 
     return (
         <Box 

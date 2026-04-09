@@ -67,24 +67,26 @@ cd frontend && npm run dev
 cloudflared tunnel --url http://localhost:5173
 
 ```
+👑 Owner
 
+Email/Username: owner@fitpro.com
+Password: owner@123
 
-Use THIS URL to access your app publicly.
+👑 Admin
 
----
+Email/Username: admin@fitpro.com
+Password: admin123
 
-That's it! Any random Cloudflare tunnel URL will work automatically.
+🏋️ Trainers
 
-## 🔑 Access Credentials
+john.smith@fitpro.com - Password: password123
+sarah.jones@fitpro.com - Password: password123
 
-| Role | Username | Password | Email |
-| :--- | :--- | :--- | :--- |
-| 👑 **Admin** | `admin` | `Aryan@194` | `AryanFit3@gmail.com` |
-| 🔑 **Owner** | `owner` | `pass2233` | `owner@fitpro.com` |
-| 🏋️ **Trainer** | `john.smith` | `password12` | `john.smith@fitpro.com` |
-| 🏋️ **Trainer** | `sarah.jones` | `Sarah@fit123` | `sarah.jones@fitpro.com` |
-| 🧑 **Member** | `member1` | `password123` | `member1@email.com` |
-| 🧑 **Member** | `jane.doe` | `password123` | `jane.doe@email.com` |
+🧑 Members
+
+member1@email.com - Password: password123
+jane.doe@email.com - Password: password123
+
 
 ## 📂 Project Organization Map
 
@@ -104,8 +106,6 @@ We have reorganized the project for better discoverability.
 ```
 
 (docker exec -i oracle-db sqlplus -s system/Oracle123@FREE <<'EOSQL'
-
-
 
 Builder with MCP
 
