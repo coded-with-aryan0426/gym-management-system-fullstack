@@ -11,15 +11,19 @@ interface CashFlowWaterfallProps {
 }
 
 const CashFlowWaterfall: React.FC<CashFlowWaterfallProps> = ({ transactions, totalRevenue, totalExpenses }) => {
-    // Group transactions by category and build waterfall data
+    const normalizeKey = (s: string | undefined) => s?.trim().toLowerCase().replace(/\s+/g, ' ') || 'uncategorized';
+
     const incomeByCategory: Record<string, number> = {};
     const expenseByCategory: Record<string, number> = {};
 
     transactions.forEach(t => {
+        const cat = t.category || 'uncategorized';
         if (t.type === 'INCOME') {
-            incomeByCategory[t.category] = (incomeByCategory[t.category] || 0) + t.amount;
+            const key = normalizeKey(cat);
+            incomeByCategory[key] = (incomeByCategory[key] || 0) + t.amount;
         } else {
-            expenseByCategory[t.category] = (expenseByCategory[t.category] || 0) + t.amount;
+            const key = normalizeKey(cat);
+            expenseByCategory[key] = (expenseByCategory[key] || 0) + t.amount;
         }
     });
 
@@ -88,6 +92,7 @@ const CashFlowWaterfall: React.FC<CashFlowWaterfallProps> = ({ transactions, tot
     // Cash flow story
     const topIncome = Object.entries(incomeByCategory).sort((a, b) => b[1] - a[1])[0];
     const topExpense = Object.entries(expenseByCategory).sort((a, b) => b[1] - a[1])[0];
+    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
     return (
         <div className="cashflow-waterfall">
@@ -102,23 +107,23 @@ const CashFlowWaterfall: React.FC<CashFlowWaterfallProps> = ({ transactions, tot
 
             <div className="waterfall-chart-container">
                 <ResponsiveContainer width="100%" height={220}>
-                    <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <BarChart data={chartData} margin={{ top: 10, right: 10, left: 45, bottom: 5 }}>
                         <XAxis
                             dataKey="name"
                             axisLine={false}
                             tickLine={false}
                             tick={{ fill: '#71717a', fontSize: 10 }}
                             interval={0}
-                            angle={-20}
+                            angle={-35}
                             textAnchor="end"
-                            height={50}
+                            height={55}
                         />
                         <YAxis
                             axisLine={false}
                             tickLine={false}
                             tick={{ fill: '#71717a', fontSize: 10 }}
                             tickFormatter={fmt}
-                            width={50}
+                            width={40}
                         />
                         <Tooltip content={<CustomTooltip />} />
                         <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
@@ -142,13 +147,13 @@ const CashFlowWaterfall: React.FC<CashFlowWaterfallProps> = ({ transactions, tot
                     <div className="flow-item income">
                         <span className="flow-label">Money In</span>
                         <span className="flow-value">{formatCurrency(totalRevenue)}</span>
-                        {topIncome && <span className="flow-detail">Top: {topIncome[0]}</span>}
+                        {topIncome && <span className="flow-detail">Top: {capitalize(topIncome[0])}</span>}
                     </div>
                     <div className="flow-arrow">→</div>
                     <div className="flow-item expense">
                         <span className="flow-label">Money Out</span>
                         <span className="flow-value">{formatCurrency(totalExpenses)}</span>
-                        {topExpense && <span className="flow-detail">Top: {topExpense[0]}</span>}
+                        {topExpense && <span className="flow-detail">Top: {capitalize(topExpense[0])}</span>}
                     </div>
                     <div className="flow-arrow">=</div>
                     <div className={`flow-item ${netProfit >= 0 ? 'profit' : 'loss'}`}>

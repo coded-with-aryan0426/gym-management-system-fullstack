@@ -405,3 +405,30 @@
 .meta-separator {
     color: var(--border-primary);
 }
+
+/* Brush / Zoom component — fix dark text on dark background */
+.recharts-brush-slide {
+    fill: var(--bg-secondary);
+    fill-opacity: 0.6;
+}
+
+.recharts-brush-traveller {
+    fill: var(--color-emerald);
+    stroke: var(--color-emerald);
+}
+
+.recharts-brush-texts text,
+.recharts-brush text {
+    fill: var(--text-secondary) !important;
+    font-size: 9px !important;
+}
+
+.recharts-layer.recharts-brush rect[class*="slide"] {
+    fill: var(--bg-secondary);
+    fill-opacity: 0.5;
+}
+
+.recharts-brush rect[class*="background"] {
+    fill: var(--bg-tertiary);
+    fill-opacity: 0.3;
+}

@@ -41,7 +41,19 @@ import {
   CalendarCheck,
   ClipboardCheck,
   ClipboardList,
-  BarChart3
+  BarChart3,
+  Building2,
+  CalendarRange,
+  Landmark,
+  PieChart,
+  Target,
+  NotepadText,
+  Home,
+  Award,
+  Flame,
+  Handshake,
+  TrendingUp,
+  LineChart
 } from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext"
 import { useTheme } from "../../contexts/ThemeContext"
@@ -65,29 +77,37 @@ export interface NavItem {
 }
 
 const iconMap: Record<string, any> = {
-  dashboard: LayoutDashboard,
+  // Owner/Admin
+  dashboard: Building2,
   members: Users,
   trainers: UserCheck,
   staff: UserCog,
   equipment: Dumbbell,
-  classes: BookOpen,
-  financials: CreditCard,
-  attendance: CheckSquare,
+  classes: CalendarRange,
+  financials: Landmark,
+  attendance: ClipboardCheck,
   tasks: CheckSquare,
-  profile: User,
-  "my-membership": Crown,
-  "my-progress": Activity,
-  "my-attendance": CalendarCheck,
-  "available-classes": Dumbbell,
-  "my-trainer": UserCheck,
-  "my-bookings": CalendarDays,
-  notifications: MessageSquare,
+  reports: PieChart,
+
+  // Trainer
+  "trainer-dashboard": Target,
   "my-members": Users,
   "member-attendance": ClipboardCheck,
-  "my-classes": Dumbbell,
-  "my-schedule": CalendarDays,
-  "progress-notes": ClipboardList,
-  reports: BarChart3
+  "my-classes": CalendarRange,
+  "my-schedule": Clock,
+  "progress-notes": NotepadText,
+
+  // Member
+  "member-dashboard": Home,
+  "my-membership": Award,
+  "my-progress": Flame,
+  "my-attendance": CalendarCheck,
+  "available-classes": Dumbbell,
+  "my-trainer": Handshake,
+  "my-bookings": CalendarDays,
+
+  notifications: MessageSquare,
+  profile: User,
 };
 
 const defaultNavItems: NavItem[] = [

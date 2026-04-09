@@ -1,7 +1,9 @@
 package com.gym.management.service;
 
 import com.gym.management.model.Transaction;
+import com.gym.management.model.User;
 import com.gym.management.repository.TransactionRepository;
+import com.gym.management.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 public class FinanceService {
 
     private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
 
     private LocalDateTime[] getDateRange(String period) {
         LocalDateTime endDate = LocalDateTime.now();
@@ -54,12 +57,16 @@ public class FinanceService {
     }
 
     @Transactional
-    public Transaction createTransaction(Transaction transaction) {
+    public Transaction createTransaction(Transaction transaction, Long currentUserId) {
         if (transaction.getDateTime() == null) {
             transaction.setDateTime(LocalDateTime.now());
         }
         if (transaction.getStatus() == null) {
             transaction.setStatus("Completed");
+        }
+        if (currentUserId != null) {
+            userRepository.findById(currentUserId)
+                .ifPresent((User user) -> transaction.setUser(user));
         }
         return transactionRepository.save(transaction);
     }

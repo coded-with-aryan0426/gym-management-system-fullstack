@@ -35,9 +35,18 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ transactions, onAct
 
         result = [...result].sort((a, b) => {
             let cmp = 0;
-            if (sortKey === 'date') cmp = new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime();
-            else if (sortKey === 'amount') cmp = Math.abs(a.amount) - Math.abs(b.amount);
-            else if (sortKey === 'description') cmp = a.description.localeCompare(b.description);
+            if (sortKey === 'date') {
+                const safeDate = (d: string | undefined) => {
+                    if (!d) return 0;
+                    const parsed = new Date(d).getTime();
+                    return isNaN(parsed) ? 0 : parsed;
+                };
+                cmp = safeDate(a.date) - safeDate(b.date);
+            } else if (sortKey === 'amount') {
+                cmp = Math.abs(a.amount) - Math.abs(b.amount);
+            } else if (sortKey === 'description') {
+                cmp = a.description.localeCompare(b.description);
+            }
             return sortDir === 'asc' ? cmp : -cmp;
         });
 

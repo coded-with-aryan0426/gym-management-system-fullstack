@@ -17,7 +17,7 @@ const MemberLayout: React.FC<MemberLayoutProps> = ({ children }) => {
     }, []);
 
     const navItems: NavItem[] = [
-        { path: '/member', label: 'Dashboard', key: 'dashboard', color: '#EF4444', end: true },
+        { path: '/member', label: 'Dashboard', key: 'member-dashboard', color: '#EF4444', end: true },
         { path: '/member/profile', label: 'My Profile', key: 'profile', color: '#3B82F6' },
         { path: '/member/membership', label: 'My Membership', key: 'my-membership', color: '#8B5CF6' },
         { path: '/member/progress', label: 'My Progress', key: 'my-progress', color: '#10B981' },

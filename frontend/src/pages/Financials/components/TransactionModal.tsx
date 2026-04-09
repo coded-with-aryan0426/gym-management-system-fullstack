@@ -52,8 +52,6 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, on
         e.preventDefault();
         if (validateForm()) {
             onSubmit(formData);
-            // Don't close immediately if we add logic for "Save & Add Another" later
-            onClose();
         }
     };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, ReferenceLine, Brush } from 'recharts';
 import { formatCurrency } from '../../../utils/formatters';
 import './FinancialChart.css';
 
@@ -145,9 +145,11 @@ const FinancialChart: React.FC<FinancialChartProps> = ({ data, period }) => {
                             domain={['auto', 'auto']}
                         />
                         <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} />
+                        <ReferenceLine y={avgRevenue} label={{ value: `Avg ${formatCurrency(avgRevenue)}`, position: 'right', fill: '#10B981', fontSize: 9 }} stroke="#10B981" strokeDasharray="3 3" strokeOpacity={0.6} />
                         <Area type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={2.5} fill="url(#revenueGrad)" dot={false} activeDot={{ r: 6, fill: '#10B981' }} />
                         <Area type="monotone" dataKey="expenses" stroke="#EF4444" strokeWidth={2.5} fill="url(#expenseGrad)" dot={false} activeDot={{ r: 6, fill: '#EF4444' }} />
                         <Area type="monotone" dataKey="profit" stroke="#14B8A6" strokeWidth={2} fill="url(#profitGrad)" dot={false} activeDot={{ r: 5, fill: '#14B8A6' }} strokeDasharray="4 2" />
+                        <Brush dataKey="name" height={20} stroke="rgba(255,255,255,0.1)" fill="rgba(255,255,255,0.02)" startIndex={Math.max(0, data.length - 14)} endIndex={data.length - 1} />
                         <Legend
                             verticalAlign="top"
                             height={32}

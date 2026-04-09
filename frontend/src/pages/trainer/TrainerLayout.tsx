@@ -16,7 +16,7 @@ const TrainerLayout: React.FC<TrainerLayoutProps> = ({ children }) => {
     }, []);
 
     const navItems: NavItem[] = [
-        { path: '/trainer', label: 'Dashboard', key: 'dashboard', color: '#EF4444', end: true },
+        { path: '/trainer', label: 'Dashboard', key: 'trainer-dashboard', color: '#EF4444', end: true },
         { path: '/trainer/profile', label: 'My Profile', key: 'profile', color: '#3B82F6' },
         { path: '/trainer/members', label: 'My Members', key: 'my-members', color: '#8B5CF6' },
         { path: '/trainer/member-attendance', label: 'Member Attendance', key: 'member-attendance', color: '#10B981' },

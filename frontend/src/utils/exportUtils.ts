@@ -113,6 +113,7 @@ export const exportFinancialPDF = (data: PDFExportData) => {
     const H  = doc.internal.pageSize.getHeight();  // 297
     const M  = 14;
     const CW = W - M * 2;   // content width = 182
+    const RESERVE = 25;      // mm — ensures autoTable has room for header + first rows
     let y    = 0;
 
     const gymName     = data.gymName || 'GymDesk Pro';
@@ -245,7 +246,10 @@ export const exportFinancialPDF = (data: PDFExportData) => {
             const endA   = angle + slice - gapAngle / 2;
 
             // Triangulate the annular sector using N steps
-            const STEPS = Math.max(Math.ceil((endA - startA) / (Math.PI / 30)), 2);
+            const STEPS = Math.min(
+                Math.max(Math.ceil((endA - startA) / (Math.PI / 30)), 2),
+                8
+            );
             const da = (endA - startA) / STEPS;
 
             doc.setFillColor(...color);
@@ -370,11 +374,13 @@ export const exportFinancialPDF = (data: PDFExportData) => {
             doc.roundedRect(b2x, startY + chartH - h2, barW, h2, 0.6, 0.6, 'F');
 
             // X label — only draw if enough room (avoid crowding)
-            if (groupW > 5 || i % Math.ceil(n / 12) === 0) {
+            const showEvery = Math.ceil(n / 12);
+            if (i % showEvery === 0) {
                 doc.setFontSize(4.2);
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(...C.slate500);
-                const shortLabel = label.length > 5 ? label.slice(0, 4) + '.' : label;
+                const maxLabelW = groupW - 2;
+                const shortLabel = doc.splitTextToSize(label, maxLabelW)[0] || label.slice(0, 4);
                 doc.text(shortLabel, cx, startY + chartH + 4, { align: 'center' });
             }
         });
@@ -593,6 +599,7 @@ export const exportFinancialPDF = (data: PDFExportData) => {
         body: plRows,
         margin: { left: M, right: M },
         theme: 'plain',
+        pageBreak: 'avoid',
         styles: { fontSize: 7.5, cellPadding: { top: 2.8, bottom: 2.8, left: 4, right: 4 }, textColor: C.navyLight },
         headStyles: { fillColor: C.navyMid, textColor: C.white, fontStyle: 'bold', fontSize: 7 },
         columnStyles: {
@@ -847,6 +854,7 @@ export const exportFinancialPDF = (data: PDFExportData) => {
             body: catRows,
             margin: { left: M, right: M },
             theme: 'plain',
+            pageBreak: 'avoid',
             styles: { fontSize: 7.5, cellPadding: 2.8, textColor: C.navyLight },
             headStyles: { fillColor: C.navyMid, textColor: C.white, fontStyle: 'bold', fontSize: 7 },
             columnStyles: {

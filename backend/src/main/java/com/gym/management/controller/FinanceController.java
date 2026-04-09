@@ -112,7 +112,8 @@ public class FinanceController {
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")
     public ResponseEntity<?> createTransaction(@RequestBody Transaction transaction) {
         try {
-            return ResponseEntity.ok(financeService.createTransaction(transaction));
+            Long currentUserId = dataScopeValidator.getCurrentUserId();
+            return ResponseEntity.ok(financeService.createTransaction(transaction, currentUserId));
         } catch (Exception e) {
             log.error("Failed to create transaction", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

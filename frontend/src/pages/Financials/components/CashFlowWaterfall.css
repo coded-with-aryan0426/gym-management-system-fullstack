@@ -44,8 +44,8 @@
 
 .waterfall-chart-container {
     flex: 1;
-    padding: 8px 8px 0;
-    min-height: 220px;
+    padding: 8px 4px 0;
+    min-height: 240px;
 }
 
 .waterfall-tooltip {

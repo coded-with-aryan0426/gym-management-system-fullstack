@@ -269,15 +269,19 @@ const Financials: React.FC = () => {
 
     const handleAddTransaction = async (data: any) => {
         try {
-            await financeApi.createTransaction({
+            const payload: any = {
                 type: data.type === 'Expense' ? 'EXPENSE' : 'INCOME',
-                category: data.category,
                 amount: Number(data.amount),
-                description: data.description,
-                status: data.status || 'Completed',
-                referenceNumber: `REF-${Date.now()}`,
-                dateTime: `${data.date}T${new Date().toTimeString().split(' ')[0]}`
-            } as any);
+                description: data.description || '',
+                status: 'Completed',
+                dateTime: `${data.date}T${new Date().toTimeString().split(' ')[0]}`,
+            };
+            if (data.type === 'Expense') {
+                payload.category = data.category;
+            } else {
+                payload.category = data.category;
+            }
+            await financeApi.createTransaction(payload);
             showToast('Transaction added', 'success');
             setIsModalOpen(false);
             loadData();
@@ -298,6 +302,23 @@ const Financials: React.FC = () => {
     };
 
     const handleExportPDF = () => {
+        const warnings: string[] = [];
+        if (!kpiStats || kpiStats.totalRevenue === 0) {
+            warnings.push('Revenue data is missing or zero');
+        }
+        if (!transactions?.length) {
+            warnings.push('No transactions found');
+        }
+        if (!dailyTrend?.length) {
+            warnings.push('No daily trend data');
+        }
+        if (warnings.length > 0) {
+            console.warn('[PDF Export] Data warnings:', warnings);
+        }
+        if (kpiStats.totalRevenue === 0 && transactions.length === 0) {
+            showToast('No data available for PDF export', 'error');
+            return;
+        }
         exportFinancialPDF({
             stats: kpiStats, transactions,
             revenueBreakdown: breakdownData.revenue,
@@ -543,39 +564,16 @@ const Financials: React.FC = () => {
                 {/* ══ OVERVIEW ══ */}
                 {activeTab === 'overview' && (
                     <div className="fin-grid">
-                        {/* Row 1: KPI strip removed as per new header design */}
-
-                        {/* Row 2: Main chart (left 2/3) + right panel: Health Score + Quick Insights stacked (1/3) */}
-                        <div className="fin-row fin-row--chart">
-                            <div className="fin-card fin-card--chart">
-                                <FinancialChart
-                                    data={chartData}
-                                    period={chartPeriod}
-                                    onPeriodChange={setChartPeriod}
-                                />
-                            </div>
-                            <div className="fin-right-panel">
-                                <div className="fin-card fin-card--health">
-                                    <FinancialHealthScore
-                                        totalRevenue={kpiStats.totalRevenue}
-                                        totalExpenses={kpiStats.totalExpenses}
-                                        netProfit={kpiStats.netProfit}
-                                        profitMargin={kpiStats.profitMargin}
-                                        pendingPayments={kpiStats.pendingPayments}
-                                        revenueChange={kpiStats.revenueChange}
-                                    />
-                                </div>
-                                <div className="fin-card fin-card--insights">
-                                    <QuickInsights
-                                        stats={kpiStats}
-                                        transactions={transactions}
-                                        chartData={chartData}
-                                    />
-                                </div>
-                            </div>
+                        {/* Row 1: Main chart - full width */}
+                        <div className="fin-card fin-card--chart">
+                            <FinancialChart
+                                data={chartData}
+                                period={chartPeriod}
+                                onPeriodChange={setChartPeriod}
+                            />
                         </div>
 
-                        {/* Row 3: Revenue breakdown (1/2) + Expense breakdown (1/2) */}
+                        {/* Row 2: Revenue breakdown (1/2) + Expense breakdown (1/2) */}
                         <div className="fin-row fin-row--half">
                             <div className="fin-card fin-card--breakdown">
                                 <div className="fin-card__hd">
@@ -593,7 +591,7 @@ const Financials: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Row 4: Cash Flow (1/2) + Pending (1/2) */}
+                        {/* Row 3: Cash Flow (1/2) + Pending (1/2) */}
                         <div className="fin-row fin-row--half">
                             <div className="fin-card">
                                 <CashFlowWaterfall
@@ -611,7 +609,7 @@ const Financials: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Row 5: Category Stats full width */}
+                        {/* Row 4: Category Stats full width */}
                         <div className="fin-card">
                             <CategoryStats
                                 incomeStats={incomeCatStats}
@@ -621,7 +619,7 @@ const Financials: React.FC = () => {
                             />
                         </div>
 
-                        {/* Row 6: Recent Transactions */}
+                        {/* Row 5: Recent Transactions */}
                         <div className="fin-card fin-card--table">
                             <div className="fin-card__hd">
                                 <span className="fin-card__title">Recent Transactions</span>
@@ -659,7 +657,7 @@ const Financials: React.FC = () => {
                 {/* ══ REPORTS ══ */}
                 {activeTab === 'reports' && (
                     <div className="fin-grid">
-                        {/* P&L + Health */}
+                        {/* P&L + Health Score */}
                         <div className="fin-row fin-row--half">
                             <div className="fin-card fin-card--pl">
                                 <ProfitLossCard
@@ -683,37 +681,19 @@ const Financials: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Cash Flow full width */}
-                        <div className="fin-card">
-                            <CashFlowWaterfall
-                                transactions={transactions}
-                                totalRevenue={kpiStats.totalRevenue}
-                                totalExpenses={kpiStats.totalExpenses}
-                            />
-                        </div>
-
-                        {/* Daily Comparison full width */}
+                        {/* Monthly Comparison full width */}
                         <div className="fin-card">
                             <MonthlyComparison chartData={chartData} period={chartPeriod} />
                         </div>
 
-                        {/* Category + Insights */}
-                        <div className="fin-row fin-row--half">
-                            <div className="fin-card">
-                                <CategoryStats
-                                    incomeStats={incomeCatStats}
-                                    expenseStats={expenseCatStats}
-                                    totalRevenue={kpiStats.totalRevenue}
-                                    totalExpenses={kpiStats.totalExpenses}
-                                />
-                            </div>
-                            <div className="fin-card">
-                                <QuickInsights
-                                    stats={kpiStats}
-                                    transactions={transactions}
-                                    chartData={chartData}
-                                />
-                            </div>
+                        {/* Category Stats full width */}
+                        <div className="fin-card">
+                            <CategoryStats
+                                incomeStats={incomeCatStats}
+                                expenseStats={expenseCatStats}
+                                totalRevenue={kpiStats.totalRevenue}
+                                totalExpenses={kpiStats.totalExpenses}
+                            />
                         </div>
 
                         {/* Pending Collections */}
