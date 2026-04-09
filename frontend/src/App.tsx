@@ -122,6 +122,9 @@ function ScrollToTopOnPublicRoutes() {
     if (PUBLIC_LANDING_ROUTES.has(pathname)) {
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
+    // Safety net: always reset body overflow on route change
+    // This prevents AuthModal's overflow:hidden from leaking between pages
+    document.body.style.overflow = '';
   }, [pathname]);
 
   return null;

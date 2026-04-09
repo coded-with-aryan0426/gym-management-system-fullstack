@@ -141,12 +141,16 @@ export default function AuthModal() {
             document.addEventListener('keydown', handleEscape);
             document.addEventListener('mousedown', handleClickOutside);
             document.body.style.overflow = 'hidden';
+        } else {
+            // Always ensure body overflow is restored when modal is closed
+            document.body.style.overflow = '';
         }
 
         return () => {
             document.removeEventListener('keydown', handleEscape);
             document.removeEventListener('mousedown', handleClickOutside);
-            document.body.style.overflow = 'unset';
+            // Always restore on cleanup to prevent stale overflow locks
+            document.body.style.overflow = '';
         };
     }, [isOpen, closeAuthModal]);
 
