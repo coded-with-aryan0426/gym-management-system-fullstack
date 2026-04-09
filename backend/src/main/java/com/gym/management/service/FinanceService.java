@@ -27,7 +27,7 @@ public class FinanceService {
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = switch (period) {
             case "day" -> LocalDate.now().atStartOfDay();
-            case "week" -> LocalDate.now().minusWeeks(1).atStartOfDay();
+            case "week" -> LocalDate.now().minusDays(6).atStartOfDay();
             case "month" -> LocalDate.now().minusMonths(1).atStartOfDay();
             case "6month" -> LocalDate.now().minusMonths(6).atStartOfDay();
             case "year" -> LocalDate.now().minusYears(1).atStartOfDay();

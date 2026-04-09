@@ -24,7 +24,7 @@ public class RoleChangeAudit {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "gym_id", nullable = false)
+    @Column(name = "gym_id")
     private Long gymId;
 
     @Column(nullable = false)
@@ -64,29 +64,26 @@ public class RoleChangeAudit {
     /**
      * Create an audit entry for role switch.
      */
-    public static RoleChangeAudit forRoleSwitch(Long userId, Long gymId, GymRole oldRole,
-            GymRole newRole, Long performedBy,
+    public static RoleChangeAudit forRoleSwitch(Long userId, Long oldRoleId, Long newRoleId,
+            Long performedBy,
             String ipAddress, String userAgent) {
         RoleChangeAudit audit = new RoleChangeAudit();
         audit.setUserId(userId);
-        audit.setGymId(gymId);
         audit.setAction(RoleAction.ROLE_SWITCHED);
-        audit.setOldRole(oldRole);
-        audit.setNewRole(newRole);
+        audit.setOldRole(GymRole.MEMBER);
+        audit.setNewRole(GymRole.MEMBER);
         audit.setPerformedBy(performedBy);
         audit.setIpAddress(ipAddress);
-        audit.setUserAgent(userAgent);
         return audit;
     }
 
     /**
      * Create an audit entry for role grant.
      */
-    public static RoleChangeAudit forRoleGrant(Long userId, Long gymId, GymRole role,
+    public static RoleChangeAudit forRoleGrant(Long userId, GymRole role,
             Long grantedBy, String ipAddress, String notes) {
         RoleChangeAudit audit = new RoleChangeAudit();
         audit.setUserId(userId);
-        audit.setGymId(gymId);
         audit.setAction(RoleAction.ROLE_GRANTED);
         audit.setNewRole(role);
         audit.setPerformedBy(grantedBy);
@@ -98,11 +95,10 @@ public class RoleChangeAudit {
     /**
      * Create an audit entry for role revocation.
      */
-    public static RoleChangeAudit forRoleRevoke(Long userId, Long gymId, GymRole role,
+    public static RoleChangeAudit forRoleRevoke(Long userId, GymRole role,
             Long revokedBy, String ipAddress, String reason) {
         RoleChangeAudit audit = new RoleChangeAudit();
         audit.setUserId(userId);
-        audit.setGymId(gymId);
         audit.setAction(RoleAction.ROLE_REVOKED);
         audit.setOldRole(role);
         audit.setPerformedBy(revokedBy);

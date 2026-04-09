@@ -80,7 +80,6 @@ public class RazorpayWebhookHandler {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void processEvent(String eventType, Map<String, Object> event) {
         switch (eventType) {
             case "payment.captured" -> handlePaymentCaptured(event);
@@ -140,7 +139,6 @@ public class RazorpayWebhookHandler {
         Map<String, Object> paymentEntity = (Map<String, Object>) ((Map<String, Object>) payload.get("payment")).get("entity");
 
         String razorpayPaymentId = (String) paymentEntity.get("id");
-        String razorpayOrderId = (String) paymentEntity.get("order_id");
         String reason = (String) paymentEntity.get("error_description");
 
         Optional<SubscriptionPayment> existingPayment = paymentRepository.findByGatewayPaymentIdAndGateway(

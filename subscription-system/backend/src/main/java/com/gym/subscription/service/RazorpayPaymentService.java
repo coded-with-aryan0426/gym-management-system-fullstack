@@ -47,12 +47,11 @@ public class RazorpayPaymentService {
     @Value("${app.base.url:http://localhost:8080}")
     private String appBaseUrl;
 
-    private static final String RAZORPAY_API = "https://api.razorpay.com/v1";
     private static final String RAZORPAY_CHECKOUT_JS = "https://checkout.razorpay.com/v1/checkout.js";
 
     @Transactional
     public CheckoutResponse createCheckout(String userId, CheckoutRequest request) {
-        User user = userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         PlansConfigLoader.PlanConfig plan = configLoader.getPlanById(request.getPlanId());
@@ -271,7 +270,9 @@ public class RazorpayPaymentService {
             } else if (value instanceof Boolean) {
                 sb.append(value);
             } else {
-                sb.append(toJson((Map<String, Object>) value));
+                @SuppressWarnings("unchecked")
+                Map<String, Object> mapValue = (Map<String, Object>) value;
+                sb.append(toJson(mapValue));
             }
         }
         sb.append("}");

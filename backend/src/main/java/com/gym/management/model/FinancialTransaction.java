@@ -26,7 +26,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "financial_transactions", indexes = {
-    @Index(name = "idx_financial_gym_date", columnList = "gym_id, transaction_date"),
     @Index(name = "idx_financial_type", columnList = "type, category"),
     @Index(name = "idx_financial_member", columnList = "member_id")
 })
@@ -36,7 +35,7 @@ public class FinancialTransaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "gym_id", nullable = false)
+    @Column(name = "gym_id")
     private Long gymId;
 
     @Column(name = "type", nullable = false, length = 20)

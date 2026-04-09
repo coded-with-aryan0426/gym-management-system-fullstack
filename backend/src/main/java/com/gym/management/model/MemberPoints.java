@@ -18,7 +18,7 @@ public class MemberPoints {
     @Column(name = "member_user_id")
     private Long memberUserId;
 
-    @Column(name = "gym_id", nullable = false)
+    @Column(name = "gym_id")
     private Long gymId;
 
     @Column(name = "points", nullable = false)

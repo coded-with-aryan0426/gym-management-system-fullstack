@@ -5,8 +5,6 @@ import com.gym.management.model.Gym;
 import com.gym.management.model.GymRole;
 import com.gym.management.model.RoleStatus;
 import com.gym.management.model.SessionStatus;
-
-import com.gym.management.model.UserGymRole;
 import com.gym.management.repository.AlertRepository;
 import com.gym.management.repository.AuditLogRepository;
 import com.gym.management.repository.CheckInRepository;
@@ -27,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class SuperAdminDashboardService {
@@ -69,7 +66,8 @@ public class SuperAdminDashboardService {
 
         long totalUsers = userRepository.count();
         long previousMonthUsers = Math.max(totalUsers - 10, 0);
-        long totalGyms = gymRepository.count();
+        Gym gym = gymRepository.findAll().stream().findFirst().orElse(null);
+        long totalGyms = gym != null ? 1 : 0;
 
         BigDecimal monthRevenue = transactionRepository.getRevenueForDateRange(monthStart, now);
         BigDecimal previousMonthRevenue = transactionRepository.getRevenueForDateRange(previousMonthStart, monthStart.minusNanos(1));
@@ -81,13 +79,13 @@ public class SuperAdminDashboardService {
 
         Map<String, Object> kpis = new HashMap<>();
         kpis.put("totalUsers", metric(totalUsers, percentChange(totalUsers, previousMonthUsers)));
-        kpis.put("totalGyms", metric(totalGyms, percentChange(totalGyms, Math.max(totalGyms - 1, 0))));
+        kpis.put("totalGyms", metric(totalGyms, 0));
         kpis.put("mrr", metric(monthRevenue, percentChange(monthRevenue, previousMonthRevenue)));
         kpis.put("systemHealth", metric(
                 new BigDecimal("99.50").add(unreadAlerts == 0 ? new BigDecimal("0.30") : BigDecimal.ZERO),
                 unreadAlerts == 0 ? 0.2 : -0.6));
 
-        List<Map<String, Object>> topGyms = buildTopGyms(monthStart, now);
+        List<Map<String, Object>> topGyms = buildTopGyms(monthStart, now, gym);
         List<Map<String, Object>> alerts = buildAlerts();
         List<Map<String, Object>> serviceStatus = buildServiceStatus(unreadAlerts, activeCheckIns, scheduledSessions);
         List<Map<String, Object>> responseTrend = buildResponseTrend(now);
@@ -108,36 +106,20 @@ public class SuperAdminDashboardService {
         return payload;
     }
 
-    private List<Map<String, Object>> buildTopGyms(LocalDateTime start, LocalDateTime end) {
-        Map<Long, Gym> gymsById = gymRepository.findAll().stream()
-                .collect(Collectors.toMap(Gym::getGymId, g -> g, (a, b) -> a));
-
-        Map<Long, Long> memberCountByGym = new HashMap<>();
-        List<UserGymRole> memberRoles = userGymRoleRepository.findAll().stream()
-                .filter(ugr -> ugr.getStatus() == RoleStatus.ACTIVE && ugr.getRole() == GymRole.MEMBER)
-                .toList();
-        for (UserGymRole role : memberRoles) {
-            if (role.getGym() != null && role.getGym().getGymId() != null) {
-                memberCountByGym.merge(role.getGym().getGymId(), 1L, Long::sum);
-            }
-        }
-
-        List<Object[]> rows = transactionRepository.findTopGymsByRevenue(start, end);
+    private List<Map<String, Object>> buildTopGyms(LocalDateTime start, LocalDateTime end, Gym gym) {
         List<Map<String, Object>> result = new ArrayList<>();
-        for (Object[] row : rows.stream().limit(5).toList()) {
-            Long gymId = (Long) row[0];
-            BigDecimal revenue = (BigDecimal) row[1];
-            Gym gym = gymsById.get(gymId);
-            String name = gym != null ? gym.getName() : "Gym #" + gymId;
-            String city = gym != null && gym.getCity() != null ? gym.getCity() : "—";
-            long members = memberCountByGym.getOrDefault(gymId, 0L);
-
+        if (gym != null) {
+            List<Object[]> rows = transactionRepository.findTopGymsByRevenue(start, end);
+            BigDecimal revenue = rows.isEmpty() ? BigDecimal.ZERO : (BigDecimal) rows.get(0)[1];
+            long memberCount = userGymRoleRepository.findAll().stream()
+                    .filter(ugr -> ugr.getStatus() == RoleStatus.ACTIVE && ugr.getRole() == GymRole.MEMBER)
+                    .count();
             result.add(Map.of(
-                    "gymId", gymId,
-                    "name", name,
-                    "city", city,
-                    "members", members,
-                    "revenue", revenue == null ? BigDecimal.ZERO : revenue));
+                    "gymId", gym.getGymId(),
+                    "name", gym.getName() != null ? gym.getName() : "My Gym",
+                    "city", gym.getCity() != null ? gym.getCity() : "—",
+                    "members", memberCount,
+                    "revenue", revenue));
         }
         return result;
     }

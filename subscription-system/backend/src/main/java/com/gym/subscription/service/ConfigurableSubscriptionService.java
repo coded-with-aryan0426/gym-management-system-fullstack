@@ -96,8 +96,6 @@ public class ConfigurableSubscriptionService {
         LocalDateTime trialEnd = now.plusDays(planConfig.getTrialDays());
         LocalDateTime periodEnd = trialEnd.plusDays(planConfig.getGracePeriodDays());
 
-        PlansConfigLoader.PlanConfig finalPlanConfig = planConfig;
-
         SubscriptionPlan subscriptionPlan = SubscriptionPlan.builder()
                 .name(planConfig.getName())
                 .displayName(planConfig.getDisplayName())
@@ -391,10 +389,6 @@ public class ConfigurableSubscriptionService {
                 SubscriptionStatus.ACTIVE, LocalDateTime.now());
 
         for (UserSubscription subscription : expired) {
-            PlansConfigLoader.PlanConfig planConfig = configLoader.getPlanById(
-                    subscription.getPlan().getName().toLowerCase());
-            int graceDays = planConfig != null ? planConfig.getGracePeriodDays() : 3;
-
             if (subscription.getCancelAtPeriodEnd()) {
                 subscription.setStatus(SubscriptionStatus.CANCELLED);
                 subscription.setCancelledAt(LocalDateTime.now());

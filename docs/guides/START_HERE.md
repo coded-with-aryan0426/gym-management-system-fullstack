@@ -7,21 +7,21 @@ Welcome! You've received a complete, enterprise-grade design system for all 27 A
 ### 1️⃣ **This File** (You are here!)
 Quick orientation - 2 minutes
 
-### 2️⃣ **README_ICON_DESIGN_SYSTEM.md**
+### 2️⃣ **icons/README_ICON_DESIGN_SYSTEM.md**
 Full overview and quick start - 5 minutes  
 → Open this next
 
 ### 3️⃣ **Based on your role:**
 
 #### 👔 Designer / Product Manager
-- Read: `ICON_DESIGN_SYSTEM_SUMMARY.md` (10 min)
+- Read: `icons/ICON_DESIGN_SYSTEM_SUMMARY.md` (10 min)
 - Review: "Icon Enhancement Specifications" section
 - Approve design improvements
 
 #### 👨‍💻 Developer  
-- Read: `ICON_IMPLEMENTATION_GUIDE.md` (20 min)
-- Copy: `ICON_CSS_VARIABLES.css` into your project
-- Reference: `ICON_SVG_DEFS.xml` when implementing
+- Read: `icons/ICON_IMPLEMENTATION_GUIDE.md` (20 min)
+- Copy: `icons/ICON_CSS_VARIABLES.css` into your project
+- Reference: `icons/ICON_SVG_DEFS.xml` when implementing
 - Start: Building icons
 
 #### 🧪 QA / Testing
@@ -36,18 +36,18 @@ Full overview and quick start - 5 minutes
 ```
 START_HERE.md (you are here)
     ↓
-README_ICON_DESIGN_SYSTEM.md (5 min overview)
+icons/README_ICON_DESIGN_SYSTEM.md (5 min overview)
     ↓
 Choose your role:
-├─ Designer: ICON_DESIGN_SYSTEM_SUMMARY.md
-├─ Developer: ICON_IMPLEMENTATION_GUIDE.md
-└─ QA: Testing section of IMPLEMENTATION_GUIDE.md
+├─ Designer: icons/ICON_DESIGN_SYSTEM_SUMMARY.md
+├─ Developer: icons/ICON_IMPLEMENTATION_GUIDE.md
+└─ QA: Testing section of icons/ICON_IMPLEMENTATION_GUIDE.md
     ↓
 Deep dives (as needed):
-├─ Design details: ICON_DESIGN_SYSTEM.md
-├─ CSS: ICON_CSS_VARIABLES.css
-├─ SVG: ICON_SVG_DEFS.xml
-└─ Navigation: ICON_DESIGN_SYSTEM_INDEX.md
+├─ Design details: icons/ICON_DESIGN_SYSTEM.md
+├─ CSS: icons/ICON_CSS_VARIABLES.css
+├─ SVG: icons/ICON_SVG_DEFS.xml
+└─ Navigation: icons/ICON_DESIGN_SYSTEM_INDEX.md
 ```
 
 ---
@@ -73,7 +73,7 @@ All 27 icons are specified with:
 
 ## 🎯 Next 30 Seconds
 
-1. **Open:** `README_ICON_DESIGN_SYSTEM.md`
+1. **Open:** `icons/README_ICON_DESIGN_SYSTEM.md`
 2. **Read:** The quick start section (5 min)
 3. **Choose:** Your path (Designer/Developer/QA)
 4. **Start:** Reading your next document
@@ -85,11 +85,11 @@ That's it! Everything else builds from there.
 ## 📋 All Available Files
 
 **Documentation:**
-- `README_ICON_DESIGN_SYSTEM.md` ← Read next
-- `ICON_DESIGN_SYSTEM_SUMMARY.md` ← Executive overview
-- `ICON_DESIGN_SYSTEM.md` ← Complete reference
-- `ICON_DESIGN_SYSTEM_INDEX.md` ← Navigation
-- `ICON_IMPLEMENTATION_GUIDE.md` ← Developer guide
+- `icons/README_ICON_DESIGN_SYSTEM.md` ← Read next
+- `icons/ICON_DESIGN_SYSTEM_SUMMARY.md` ← Executive overview
+- `icons/ICON_DESIGN_SYSTEM.md` ← Complete reference
+- `icons/ICON_DESIGN_SYSTEM_INDEX.md` ← Navigation
+- `icons/ICON_IMPLEMENTATION_GUIDE.md` ← Developer guide
 
 **Code (Ready to Use):**
 - `ICON_CSS_VARIABLES.css` ← Import in your CSS
@@ -103,7 +103,7 @@ That's it! Everything else builds from there.
 
 ## ✅ Success = Following This Path
 
-1. ✅ You read `README_ICON_DESIGN_SYSTEM.md` (5 min)
+1. ✅ You read `icons/README_ICON_DESIGN_SYSTEM.md` (5 min)
 2. ✅ You chose your role
 3. ✅ You read your role-specific document
 4. ✅ You knew exactly what to do next
@@ -146,7 +146,7 @@ Everything is documented. Everything works. You're good to go! 🚀
 
 ---
 
-**Next Step:** Open `README_ICON_DESIGN_SYSTEM.md` (5 min read)
+**Next Step:** Open `icons/README_ICON_DESIGN_SYSTEM.md` (5 min read)
 
 Then follow the path for your role.
 

@@ -2,8 +2,6 @@ package com.gym.management.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +23,7 @@ import com.gym.management.dto.finance.IncomeSummaryDTO;
 import com.gym.management.model.ExpenseCategory;
 import com.gym.management.model.FinancialTransaction;
 import com.gym.management.model.FinancialTransaction.TransactionStatus;
-import com.gym.management.model.FinancialTransaction.TransactionType;
 import com.gym.management.model.IncomeCategory;
-import com.gym.management.model.PaymentGateway;
 import com.gym.management.repository.FinancialTransactionRepository;
 
 import lombok.RequiredArgsConstructor;

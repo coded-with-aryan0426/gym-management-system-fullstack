@@ -28,7 +28,6 @@ public class LicenseService {
 
     private final LicenseKeyRepository licenseKeyRepository;
     private final LicenseActivationRepository activationRepository;
-    private final UserSubscriptionRepository subscriptionRepository;
     private final SubscriptionPlanRepository planRepository;
     private final UserRepository userRepository;
 

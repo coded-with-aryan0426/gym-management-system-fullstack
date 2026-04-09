@@ -28,7 +28,7 @@ public class Invoice {
     @Column(name = "invoice_id")
     private Long id;
 
-    @Column(name = "gym_id", nullable = false)
+    @Column(name = "gym_id")
     private Long gymId;
 
     @Column(name = "invoice_number", nullable = false, unique = true, length = 50)

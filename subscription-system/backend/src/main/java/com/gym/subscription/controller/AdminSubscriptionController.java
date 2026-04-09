@@ -4,7 +4,6 @@ import com.gym.subscription.config.PlansConfigLoader;
 import com.gym.subscription.dto.SubscriptionMetricsDTO;
 import com.gym.subscription.dto.LicenseDTO;
 import com.gym.subscription.entity.UserSubscription;
-import com.gym.subscription.repository.LicenseKeyRepository;
 import com.gym.subscription.repository.UserSubscriptionRepository;
 import com.gym.subscription.service.LicenseService;
 import com.gym.subscription.service.MetricsService;
@@ -24,7 +23,6 @@ import java.util.Map;
 public class AdminSubscriptionController {
 
     private final UserSubscriptionRepository subscriptionRepository;
-    private final LicenseKeyRepository licenseKeyRepository;
     private final PlanManagementService planManagementService;
     private final LicenseService licenseService;
     private final MetricsService metricsService;

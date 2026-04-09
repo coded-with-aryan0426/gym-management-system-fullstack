@@ -12,8 +12,8 @@ interface ChartDataPoint {
 
 interface FinancialChartProps {
     data: ChartDataPoint[];
-    period: 'day' | 'week' | 'month';
-    onPeriodChange: (p: 'day' | 'week' | 'month') => void;
+    period: 'day' | 'week' | 'month' | 'custom';
+    onPeriodChange: (p: 'day' | 'week' | 'month' | 'custom') => void;
 }
 
 const FinancialChart: React.FC<FinancialChartProps> = ({ data, period }) => {
@@ -37,11 +37,11 @@ const FinancialChart: React.FC<FinancialChartProps> = ({ data, period }) => {
     const fmtLabel = (value: string) => {
         if (period === 'month') {
             const d = new Date(value);
-            return isNaN(d.getTime()) ? value : d.getDate().toString();
+            return isNaN(d.getTime()) ? value : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
         }
         if (period === 'week') {
             const d = new Date(value);
-            return isNaN(d.getTime()) ? value : d.toLocaleDateString('en-US', { weekday: 'short' });
+            return isNaN(d.getTime()) ? value : d.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit' });
         }
         return value;
     };
@@ -105,37 +105,7 @@ const FinancialChart: React.FC<FinancialChartProps> = ({ data, period }) => {
                     <p className="chart-subtitle">Track income and spending trends</p>
                 </div>
                 
-                {/* Enhanced Summary Cards */}
-                <div className="chart-summary chart-summary--enhanced">
-                    <div className="summary-card summary-card--revenue">
-                        <div className="card-header">
-                            <span className="summary-dot emerald" />
-                            <span className="card-label">Revenue</span>
-                        </div>
-                        <div className="card-value emerald-text">{formatCurrency(totalRevenue)}</div>
-                        <div className="card-meta">Avg: {formatCurrency(avgRevenue)}/{period.slice(0, 1)}</div>
-                    </div>
-                    
-                    <div className="summary-card summary-card--expenses">
-                        <div className="card-header">
-                            <span className="summary-dot crimson" />
-                            <span className="card-label">Expenses</span>
-                        </div>
-                        <div className="card-value crimson-text">{formatCurrency(totalExpenses)}</div>
-                        <div className="card-meta">{expenseRatio}% of revenue</div>
-                    </div>
-                    
-                    <div className={`summary-card summary-card--profit ${netProfit >= 0 ? 'positive' : 'negative'}`}>
-                        <div className="card-header">
-                            <span className="summary-dot teal" />
-                            <span className="card-label">Net Profit</span>
-                        </div>
-                        <div className={`card-value ${netProfit >= 0 ? 'positive-text' : 'negative-text'}`}>
-                            {netProfit >= 0 ? '+' : ''}{formatCurrency(netProfit)}
-                        </div>
-                        <div className="card-meta margin-text">{profitPercent}% margin</div>
-                    </div>
-                </div>
+
             </div>
 
             <div className="chart-container">
@@ -163,8 +133,8 @@ const FinancialChart: React.FC<FinancialChartProps> = ({ data, period }) => {
                             tick={{ fill: '#71717a', fontSize: 10 }}
                             dy={6}
                             tickFormatter={fmtLabel}
-                            interval="preserveStartEnd"
-                            minTickGap={30}
+                            interval={period === 'day' ? 0 : period === 'week' ? 0 : 1}
+                            minTickGap={period === 'day' ? 0 : 30}
                         />
                         <YAxis
                             axisLine={false}

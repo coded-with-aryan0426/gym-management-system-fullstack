@@ -1,7 +1,6 @@
 package com.gym.subscription.scheduler;
 
 import com.gym.subscription.entity.UserSubscription;
-import com.gym.subscription.entity.SubscriptionNotification;
 import com.gym.subscription.enums.NotificationType;
 import com.gym.subscription.enums.SubscriptionStatus;
 import com.gym.subscription.repository.SubscriptionNotificationRepository;

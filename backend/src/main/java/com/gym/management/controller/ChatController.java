@@ -3,7 +3,6 @@ package com.gym.management.controller;
 import com.gym.management.dto.ChatUserDTO;
 import com.gym.management.dto.ConversationDTO;
 import com.gym.management.model.Conversation;
-import com.gym.management.model.GymRole;
 import com.gym.management.model.Message;
 import com.gym.management.model.MessageStatus;
 import com.gym.management.security.CustomUserDetails;
@@ -394,38 +393,16 @@ public class ChatController {
     @GetMapping("/users/search")
     public ResponseEntity<?> searchUsers(
             @RequestParam String query,
-            @RequestParam(required = false) Long gymId,
             @RequestParam(required = false) String role) {
 
         Long userId = getAuthenticatedUserId();
-        GymRole roleFilter = role != null ? GymRole.valueOf(role.toUpperCase()) : null;
-
-        // If gymId not provided, use first available gym (or handle accordingly)
-        List<ChatUserDTO> users;
-        if (gymId != null) {
-            users = chatUserService.searchUsers(userId, query, gymId, roleFilter);
-        } else {
-            // Search across all user's gyms
-            users = chatUserService.getAvailableChatUsers(userId).stream()
-                    .filter(u -> u.getFullName() != null &&
-                            u.getFullName().toLowerCase().contains(query.toLowerCase()))
+        List<ChatUserDTO> users = chatUserService.searchUsers(userId, query);
+        if (role != null) {
+            users = users.stream()
+                    .filter(u -> role.equalsIgnoreCase(u.getRole()))
                     .collect(java.util.stream.Collectors.toList());
         }
 
-        return ResponseEntity.ok(apiResponse(true, users, null));
-    }
-
-    /**
-     * Get users by role (for filter tabs).
-     */
-    @GetMapping("/users/byRole")
-    public ResponseEntity<?> getUsersByRole(
-            @RequestParam Long gymId,
-            @RequestParam String role) {
-
-        Long userId = getAuthenticatedUserId();
-        GymRole gymRole = GymRole.valueOf(role.toUpperCase());
-        List<ChatUserDTO> users = chatUserService.getUsersByRole(userId, gymId, gymRole);
         return ResponseEntity.ok(apiResponse(true, users, null));
     }
 

@@ -203,50 +203,45 @@ public class AuthService {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Check if user has access to the gym
-            if (!permissionService.getUserRolesForGym(userId, gymId).isEmpty()) {
-                // Enrich user with permissions for the specific gym
-                permissionService.enrichUserWithPermissions(user);
+            // Single-gym deployment: always enrich permissions for the single gym
+            permissionService.enrichUserWithPermissions(user);
 
-                Set<String> roleNames = user.getAllRoles().stream()
-                        .map(Enum::name)
-                        .collect(Collectors.toSet());
+            Set<String> roleNames = user.getAllRoles().stream()
+                    .map(Enum::name)
+                    .collect(Collectors.toSet());
 
-                Set<String> permissionNames = permissionService.getUserPermissionsForGym(userId, gymId)
-                        .stream()
-                        .map(Enum::name)
-                        .collect(Collectors.toSet());
+            Set<String> permissionNames = permissionService.getUserPermissions(userId)
+                    .stream()
+                    .map(Enum::name)
+                    .collect(Collectors.toSet());
 
-                String primaryRoleName = user.getPrimaryRole() != null ? user.getPrimaryRole().name() : null;
+            String primaryRoleName = user.getPrimaryRole() != null ? user.getPrimaryRole().name() : null;
 
-                // Generate new token with gym context
-                String token = tokenProvider.generateTokenFromUser(
-                        user,
-                        "web",
-                        gymId,
-                        null, // staffRole
-                        null, // membershipStatus
-                        permissionNames,
-                        roleNames,
-                        primaryRoleName);
+            // Generate new token with gym context
+            String token = tokenProvider.generateTokenFromUser(
+                    user,
+                    "web",
+                    gymId,
+                    null, // staffRole
+                    null, // membershipStatus
+                    permissionNames,
+                    roleNames,
+                    primaryRoleName);
 
-                AuthResponse response = new AuthResponse();
-                response.setToken(token);
-                response.setType("Bearer");
-                response.setUserId(user.getUserId());
-                response.setUsername(user.getUsername());
-                response.setFullName(user.getFullName());
-                response.setEmail(user.getEmail());
-                response.setRoles(roleNames);
-                response.setPermissions(permissionNames);
-                response.setPrimaryRole(primaryRoleName);
-                response.setIsFirstLogin(user.getIsFirstLogin());
+            AuthResponse response = new AuthResponse();
+            response.setToken(token);
+            response.setType("Bearer");
+            response.setUserId(user.getUserId());
+            response.setUsername(user.getUsername());
+            response.setFullName(user.getFullName());
+            response.setEmail(user.getEmail());
+            response.setRoles(roleNames);
+            response.setPermissions(permissionNames);
+            response.setPrimaryRole(primaryRoleName);
+            response.setIsFirstLogin(user.getIsFirstLogin());
 
-                log.info("User {} switched to gym context: {}", user.getUsername(), gymId);
-                return response;
-            } else {
-                throw new RuntimeException("User does not have access to this gym");
-            }
+            log.info("User {} switched to gym context: {}", user.getUsername(), gymId);
+            return response;
 
         } catch (Exception e) {
             log.error("Gym context switch failed for user: {}, gym: {}", userId, gymId, e);

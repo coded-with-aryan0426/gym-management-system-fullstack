@@ -1,7 +1,6 @@
 package com.gym.subscription.service;
 
 import com.gym.subscription.entity.TrialRateLimit;
-import com.gym.subscription.entity.User;
 import com.gym.subscription.entity.UserSubscription;
 import com.gym.subscription.enums.SubscriptionStatus;
 import com.gym.subscription.repository.TrialRateLimitRepository;
@@ -11,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

@@ -15,19 +15,15 @@ public class TrainerClass {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "gym_id")
+    private Long gymId;
+
     @Column(nullable = false, length = 100)
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trainer_id", nullable = false)
     private User trainer; // Changed from Long to User entity
-
-    @Column(name = "gym_id")
-    private Long gymId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "gym_id", insertable = false, updatable = false)
-    private Gym gym;
 
     @Column(name = "class_date", nullable = false)
     private LocalDate classDate;

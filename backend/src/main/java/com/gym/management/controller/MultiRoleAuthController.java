@@ -92,13 +92,11 @@ public class MultiRoleAuthController {
             var permissions = permissionService.getUserPermissions(userId);
             var roles = permissionService.getUserRoles(userId);
             var primaryRole = permissionService.getPrimaryRole(userId);
-            var rolesByGym = permissionService.getUserRolesByGym(userId);
             
             return ResponseEntity.ok(java.util.Map.of(
                 "permissions", permissions,
                 "roles", roles,
-                "primaryRole", primaryRole,
-                "rolesByGym", rolesByGym
+                "primaryRole", primaryRole
             ));
         } catch (Exception e) {
             log.error("Failed to get user permissions", e);

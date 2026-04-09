@@ -17,7 +17,6 @@ public class TaxCalculationService {
 
     private static final BigDecimal GST_RATE = new BigDecimal("0.18");
     private static final BigDecimal TDS_RATE = new BigDecimal("0.10");
-    private static final BigDecimal PANEL_TAX_RATE = new BigDecimal("0.30");
 
     private final Map<String, BigDecimal> stateTaxRates = new HashMap<>();
 

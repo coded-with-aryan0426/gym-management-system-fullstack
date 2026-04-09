@@ -25,10 +25,6 @@ public class Equipment {
     @Column(name = "gym_id")
     private Long gymId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "gym_id", insertable = false, updatable = false)
-    private Gym gym;
-
     @Column(nullable = false)
     private String name;
 

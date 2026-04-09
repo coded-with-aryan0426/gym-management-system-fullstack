@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { ChevronDown, CheckCircle2 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { showToast } from '../../utils/showToast';
 import type { KPIStats, Transaction } from '../../types/finance';
-import KPIStrip from './components/KPIStrip';
+
 import FinancialChart from './components/FinancialChart';
 import TransactionTable from './components/TransactionTable';
 import RevenueChart from './components/RevenueChart';
@@ -16,16 +18,20 @@ import CategoryStats from './components/CategoryStats';
 import QuickInsights from './components/QuickInsights';
 import { exportToCSV, exportFinancialPDF } from '../../utils/exportUtils';
 import { financeApi } from '../../services/financeApi';
+import { apiClient } from '../../services/api';
+import type { GymHoursDTO } from '../../types/gymSettings';
 import { formatCurrency } from '../../utils/formatters';
+import { generateCalendarSequence } from '../../utils/dateUtils';
 import './Financials.css';
 
 type TabKey = 'overview' | 'transactions' | 'reports';
-type Period = 'day' | 'week' | 'month';
+type Period = 'day' | 'week' | 'month' | 'custom';
 
 const PERIODS: { key: Period; label: string }[] = [
     { key: 'day', label: 'Today' },
-    { key: 'week', label: 'Week' },
-    { key: 'month', label: 'Month' },
+    { key: 'week', label: 'Last 7 Days' },
+    { key: 'month', label: 'Last 30 Days' },
+    { key: 'custom', label: 'Custom Range' },
 ];
 
 const generateDateSequence = (period: Period): string[] => {
@@ -33,11 +39,9 @@ const generateDateSequence = (period: Period): string[] => {
     const today = new Date();
 
     if (period === 'day') {
-        for (let i = 0; i < 24; i++) {
-            const d = new Date(today);
-            d.setHours(i, 0, 0, 0);
-            dates.push(d.toISOString());
-        }
+        const d = new Date(today);
+        d.setHours(0, 0, 0, 0);
+        dates.push(d.toISOString().split('T')[0]);
     } else if (period === 'week') {
         for (let i = 6; i >= 0; i--) {
             const d = new Date(today);
@@ -57,22 +61,52 @@ const generateDateSequence = (period: Period): string[] => {
 };
 
 const processChartData = (apiData: any[], period: Period): { name: string; revenue: number; expenses: number; profit: number }[] => {
+    if (period === 'day') {
+        const openHour = 6, closeHour = 22;
+        const hourlyMap = new Map<number, { revenue: number; expenses: number }>();
+        for (let h = openHour; h <= closeHour; h++) hourlyMap.set(h, { revenue: 0, expenses: 0 });
+
+        (apiData as any[]).forEach((item: any) => {
+            const dateStr = item.date || item.name || item.day || item.label;
+            if (!dateStr) return;
+            const dt = new Date(dateStr);
+            if (isNaN(dt.getTime())) return;
+            const today = new Date().toISOString().split('T')[0];
+            const itemDate = dt.toISOString().split('T')[0];
+            if (itemDate !== today) return;
+            const hour = dt.getHours();
+            if (hour >= openHour && hour <= closeHour) {
+                const existing = hourlyMap.get(hour) || { revenue: 0, expenses: 0 };
+                existing.revenue += Number(item.revenue) || 0;
+                existing.expenses += Number(item.expenses) || 0;
+                hourlyMap.set(hour, existing);
+            }
+        });
+
+        return Array.from(hourlyMap.entries()).map(([hour, data]) => ({
+            name: `${hour.toString().padStart(2, '0')}:00`,
+            revenue: data.revenue,
+            expenses: data.expenses,
+            profit: data.revenue - data.expenses
+        }));
+    }
+
     const dateSequence = generateDateSequence(period);
     const dataMap = new Map<string, { revenue: number; expenses: number }>();
-
-    apiData.forEach(item => {
-        if (item.date) {
-            dataMap.set(item.date, {
-                revenue: item.revenue || 0,
-                expenses: item.expenses || 0
-            });
-        }
+    (apiData as any[]).forEach((item: any) => {
+        const rawDate = item.date || item.name || item.day || item.label || '';
+        const key = String(rawDate).split('T')[0];
+        if (!key) return;
+        if (!dataMap.has(key)) dataMap.set(key, { revenue: 0, expenses: 0 });
+        const entry = dataMap.get(key)!;
+        entry.revenue += Number(item.revenue) || 0;
+        entry.expenses += Number(item.expenses) || 0;
     });
 
-    return dateSequence.map(date => {
-        const data = dataMap.get(date) || { revenue: 0, expenses: 0 };
+    return dateSequence.map(dateStr => {
+        const data = dataMap.get(dateStr) || { revenue: 0, expenses: 0 };
         return {
-            name: date,
+            name: dateStr,
             revenue: data.revenue,
             expenses: data.expenses,
             profit: data.revenue - data.expenses
@@ -102,9 +136,19 @@ const Financials: React.FC = () => {
     });
 
     const [chartPeriod, setChartPeriod] = useState<Period>('month');
+    const [customFrom, setCustomFrom] = useState(() => {
+        const d = new Date(); d.setDate(d.getDate() - 7);
+        return d.toISOString().split('T')[0];
+    });
+    const [customTo, setCustomTo] = useState(() => new Date().toISOString().split('T')[0]);
+    const [selectedDay, setSelectedDay] = useState(() => new Date().toISOString().split('T')[0]);
+    const [periodDropdownOpen, setPeriodDropdownOpen] = useState(false);
+    const periodDropdownRef = useRef<HTMLDivElement>(null);
+    const apiPeriod = chartPeriod === 'custom' ? 'month' : chartPeriod;
     const [filterCategory, setFilterCategory] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [breakdownData, setBreakdownData] = useState<{ revenue: any[]; expenses: any[] }>({ revenue: [], expenses: [] });
+    const [gymHours, setGymHours] = useState<Record<string, { open: string; close: string; isClosed?: boolean }>>({});
     const [chartData, setChartData] = useState<any[]>([]);
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
     const [pendingTxs, setPendingTxs] = useState<any[]>([]);
@@ -115,19 +159,20 @@ const Financials: React.FC = () => {
     const [topExpenseTxs, setTopExpenseTxs] = useState<any[]>([]);
 
     const loadData = useCallback(async () => {
+        const effectivePeriod = chartPeriod === 'custom' ? 'month' : chartPeriod;
         try {
             setIsLoading(true);
             const [stats, txs, breakdown, cData, pending, incStats, expStats, trend, topInc, topExp] = await Promise.all([
-                financeApi.getOverview(chartPeriod),
+                financeApi.getOverview(effectivePeriod),
                 financeApi.getTransactions({ page: 0, size: 100 }),
-                financeApi.getBreakdown(chartPeriod),
-                financeApi.getChartData(chartPeriod),
-                financeApi.getPendingTransactions(chartPeriod).catch(() => []),
-                financeApi.getCategoryStats('INCOME', chartPeriod).catch(() => []),
-                financeApi.getCategoryStats('EXPENSE', chartPeriod).catch(() => []),
-                financeApi.getDailyTrend(chartPeriod).catch(() => []),
-                financeApi.getTopTransactions('INCOME', chartPeriod, 5).catch(() => []),
-                financeApi.getTopTransactions('EXPENSE', chartPeriod, 5).catch(() => [])
+                financeApi.getBreakdown(effectivePeriod),
+                financeApi.getChartData(effectivePeriod),
+                financeApi.getPendingTransactions(effectivePeriod).catch(() => []),
+                financeApi.getCategoryStats('INCOME', effectivePeriod).catch(() => []),
+                financeApi.getCategoryStats('EXPENSE', effectivePeriod).catch(() => []),
+                financeApi.getDailyTrend(effectivePeriod).catch(() => []),
+                financeApi.getTopTransactions('INCOME', effectivePeriod, 5).catch(() => []),
+                financeApi.getTopTransactions('EXPENSE', effectivePeriod, 5).catch(() => [])
             ]);
 
             if (stats) {
@@ -157,9 +202,19 @@ const Financials: React.FC = () => {
                 method: 'UPI',
             }));
 
+            const processedChartData = chartPeriod === 'custom'
+                ? processChartData(
+                    (cData || []).filter((item: any) => {
+                        const itemDate = (item.date || item.name || item.day || item.label || '').split('T')[0];
+                        return itemDate >= customFrom && itemDate <= customTo;
+                    }),
+                    chartPeriod
+                )
+                : processChartData(cData || [], chartPeriod);
+
             setTransactions(mappedTxs);
             setBreakdownData(breakdown || { revenue: [], expenses: [] });
-            setChartData(processChartData(cData || [], chartPeriod));
+            setChartData(processedChartData);
             setPendingTxs(pending || []);
             setIncomeCatStats(incStats || []);
             setExpenseCatStats(expStats || []);
@@ -173,9 +228,29 @@ const Financials: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [chartPeriod]);
+    }, [chartPeriod, customFrom, customTo]);
 
     useEffect(() => { loadData(); }, [loadData]);
+
+    useEffect(() => {
+        apiClient.get<GymHoursDTO[]>('/settings/gym/gym-hours').then(r => {
+            const map: Record<string, { open: string; close: string; isClosed?: boolean }> = {};
+            r.data.forEach((h: GymHoursDTO) => {
+                map[h.dayOfWeek.toLowerCase()] = { open: h.openTime, close: h.closeTime, isClosed: h.isClosed };
+            });
+            setGymHours(map);
+        }).catch(() => {});
+    }, []);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (periodDropdownRef.current && !periodDropdownRef.current.contains(e.target as Node)) {
+                setPeriodDropdownOpen(false);
+            }
+        };
+        if (periodDropdownOpen) document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [periodDropdownOpen]);
     useEffect(() => {
         const interval = setInterval(loadData, 30000);
         return () => clearInterval(interval);
@@ -278,15 +353,85 @@ const Financials: React.FC = () => {
                     </span>
                 </div>
 
-                {/* Center: period toggle */}
-                <div className="fin-period-toggle">
-                    {PERIODS.map(p => (
-                        <button
-                            key={p.key}
-                            className={`fin-period-btn${chartPeriod === p.key ? ' active' : ''}`}
-                            onClick={() => setChartPeriod(p.key)}
-                        >{p.label}</button>
-                    ))}
+                {/* Center: period dropdown */}
+                <div className="fin-period-dropdown" ref={periodDropdownRef}>
+                    <button
+                        className={`fin-period-btn fin-period-dropdown__trigger ${periodDropdownOpen ? 'open' : ''}`}
+                        onClick={() => setPeriodDropdownOpen(v => !v)}
+                        aria-haspopup="listbox"
+                        aria-expanded={periodDropdownOpen}
+                    >
+                        {PERIODS.find(p => p.key === chartPeriod)?.label || 'Select'}
+                        <ChevronDown size={13} className={`fin-period-dropdown__chevron ${periodDropdownOpen ? 'rotated' : ''}`} />
+                    </button>
+
+                    <AnimatePresence>
+                        {periodDropdownOpen && (
+                            <motion.div
+                                className="fin-period-dropdown__menu"
+                                initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                                transition={{ duration: 0.15 }}
+                                role="listbox"
+                            >
+                                {PERIODS.map(p => (
+                                    <button
+                                        key={p.key}
+                                        className={`fin-period-dropdown__option ${chartPeriod === p.key ? 'selected' : ''}`}
+                                        onClick={() => {
+                                            setChartPeriod(p.key);
+                                            setPeriodDropdownOpen(false);
+                                        }}
+                                        role="option"
+                                        aria-selected={chartPeriod === p.key}
+                                    >
+                                        <span>{p.label}</span>
+                                        {chartPeriod === p.key && (
+                                            <CheckCircle2 size={13} className="fin-period-dropdown__check" />
+                                        )}
+                                    </button>
+                                ))}
+
+                                {chartPeriod === 'custom' && (
+                                    <div className="fin-period-dropdown__custom">
+                                        <label className="fin-period-dropdown__custom-label">
+                                            <span>From</span>
+                                            <input
+                                                type="date"
+                                                value={customFrom}
+                                                max={customTo}
+                                                onChange={e => setCustomFrom(e.target.value)}
+                                                className="fin-period-dropdown__date-input"
+                                                aria-label="From date"
+                                            />
+                                        </label>
+                                        <label className="fin-period-dropdown__custom-label">
+                                            <span>To</span>
+                                            <input
+                                                type="date"
+                                                value={customTo}
+                                                min={customFrom}
+                                                max={new Date().toISOString().split('T')[0]}
+                                                onChange={e => setCustomTo(e.target.value)}
+                                                className="fin-period-dropdown__date-input"
+                                                aria-label="To date"
+                                            />
+                                        </label>
+                                        <button
+                                            className="fin-period-dropdown__apply"
+                                            onClick={() => {
+                                                setPeriodDropdownOpen(false);
+                                                loadData();
+                                            }}
+                                        >
+                                            Apply
+                                        </button>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {/* Right: stat chips + export + add */}
@@ -307,13 +452,11 @@ const Financials: React.FC = () => {
                             <span className="fin-chip__label">Profit</span>
                             <span className={`fin-chip__val ${profitColor}`}>{formatCurrency(kpiStats.netProfit)}</span>
                         </span>
-                        {kpiStats.pendingCount > 0 && (
-                            <span className="fin-chip fin-chip--alert">
-                                <span className="fin-chip__dot amber" />
-                                <span className="fin-chip__label">Pending</span>
-                                <span className="fin-chip__val amber">{kpiStats.pendingCount}</span>
-                            </span>
-                        )}
+                        <span className={`fin-chip ${kpiStats.pendingPayments > 0 ? 'fin-chip--alert' : ''}`}>
+                            <span className="fin-chip__dot amber" />
+                            <span className="fin-chip__label">Pending Dues</span>
+                            <span className="fin-chip__val amber">{formatCurrency(kpiStats.pendingPayments)}</span>
+                        </span>
                     </div>
 
                     <div className="fin-export-wrap" ref={exportRef}>
@@ -400,8 +543,7 @@ const Financials: React.FC = () => {
                 {/* ══ OVERVIEW ══ */}
                 {activeTab === 'overview' && (
                     <div className="fin-grid">
-                        {/* Row 1: 4 KPI cards */}
-                        <KPIStrip stats={kpiStats} />
+                        {/* Row 1: KPI strip removed as per new header design */}
 
                         {/* Row 2: Main chart (left 2/3) + right panel: Health Score + Quick Insights stacked (1/3) */}
                         <div className="fin-row fin-row--chart">
@@ -501,7 +643,6 @@ const Financials: React.FC = () => {
                 {/* ══ TRANSACTIONS ══ */}
                 {activeTab === 'transactions' && (
                     <div className="fin-grid">
-                        <KPIStrip stats={kpiStats} />
                         <div className="fin-card fin-card--table fin-card--full">
                             <div className="fin-card__hd">
                                 <span className="fin-card__title">All Transactions</span>
@@ -518,8 +659,6 @@ const Financials: React.FC = () => {
                 {/* ══ REPORTS ══ */}
                 {activeTab === 'reports' && (
                     <div className="fin-grid">
-                        <KPIStrip stats={kpiStats} />
-
                         {/* P&L + Health */}
                         <div className="fin-row fin-row--half">
                             <div className="fin-card fin-card--pl">

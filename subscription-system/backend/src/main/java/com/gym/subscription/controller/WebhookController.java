@@ -1,6 +1,5 @@
 package com.gym.subscription.controller;
 
-import com.gym.subscription.dto.WebhookPayload;
 import com.gym.subscription.webhook.PaddleWebhookHandler;
 import com.gym.subscription.webhook.PayPalWebhookHandler;
 import com.gym.subscription.webhook.RazorpayWebhookHandler;

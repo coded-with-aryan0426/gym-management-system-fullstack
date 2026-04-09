@@ -15,10 +15,6 @@ public class ProgressNote {
     private Long gymId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "gym_id", insertable = false, updatable = false)
-    private Gym gym;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trainer_id")
     private User trainer;
 

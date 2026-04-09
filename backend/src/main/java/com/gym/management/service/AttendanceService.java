@@ -3,10 +3,8 @@ package com.gym.management.service;
 import com.gym.management.model.CheckIn;
 import com.gym.management.model.CheckInMethod;
 import com.gym.management.model.CheckInStatus;
-import com.gym.management.model.Gym;
 import com.gym.management.model.User;
 import com.gym.management.repository.CheckInRepository;
-import com.gym.management.repository.GymRepository;
 import com.gym.management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,9 +27,6 @@ public class AttendanceService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private GymRepository gymRepository;
-
     public record CheckInResult(boolean success, String message, CheckIn checkIn) {}
 
     @Transactional
@@ -45,7 +40,6 @@ public class AttendanceService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-        Long resolvedGymId = resolveGymId(gymId, userId);
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().plusDays(1).atStartOfDay();
 
@@ -59,7 +53,7 @@ public class AttendanceService {
                     active);
         }
 
-        CheckIn checkIn = new CheckIn(user, resolvedGymId);
+        CheckIn checkIn = new CheckIn(user);
         checkIn.setCheckInMethod(method != null ? method : CheckInMethod.MANUAL);
         checkIn.setDeviceInfo(deviceInfo);
         checkIn.setIpAddress(ipAddress);
@@ -294,13 +288,6 @@ public class AttendanceService {
 
     // ── Internal helpers ────────────────────────────────────────────────────────
 
-    private Long resolveGymId(Long gymId, Long userId) {
-        if (gymId != null) return gymId;
-        List<Gym> gyms = gymRepository.findAll();
-        if (!gyms.isEmpty()) return gyms.get(0).getGymId();
-        return null;
-    }
-
     private List<CheckIn> fetchTodayCheckIns(LocalDateTime startOfDay, Long gymId) {
         return gymId != null
                 ? checkInRepository.findTodayCheckIns(startOfDay, gymId)
@@ -394,7 +381,6 @@ public class AttendanceService {
         map.put("ipAddress", c.getIpAddress());
         map.put("operatorUserId", c.getOperatorUserId());
         map.put("notes", c.getNotes());
-        map.put("gymId", c.getGymId());
         map.put("role", c.getUser() != null ? getPrimaryRole(c.getUser()) : null);
         if (c.getCheckInTime() != null && c.getCheckOutTime() != null) {
             map.put("durationMinutes", ChronoUnit.MINUTES.between(c.getCheckInTime(), c.getCheckOutTime()));

@@ -3,10 +3,8 @@ package com.gym.subscription.controller;
 import com.gym.subscription.dto.LicenseDTO;
 import com.gym.subscription.dto.SubscriptionDTO;
 import com.gym.subscription.dto.SubscriptionMetricsDTO;
-import com.gym.subscription.entity.LicenseKey;
 import com.gym.subscription.entity.UserSubscription;
 import com.gym.subscription.enums.SubscriptionStatus;
-import com.gym.subscription.repository.LicenseKeyRepository;
 import com.gym.subscription.repository.UserSubscriptionRepository;
 import com.gym.subscription.service.LicenseService;
 import com.gym.subscription.service.MetricsService;
@@ -24,7 +22,6 @@ import java.util.Map;
 public class AdminController {
 
     private final UserSubscriptionRepository subscriptionRepository;
-    private final LicenseKeyRepository licenseKeyRepository;
     private final SubscriptionService subscriptionService;
     private final LicenseService licenseService;
     private final MetricsService metricsService;

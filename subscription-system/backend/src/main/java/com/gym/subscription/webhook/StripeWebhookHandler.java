@@ -40,6 +40,7 @@ public class StripeWebhookHandler {
             : "whsec_test_secret";
 
     @Transactional
+    @SuppressWarnings("unchecked")
     public void handleWebhook(String payload, String signature) {
         if (!verifySignature(payload, signature)) {
             throw new IllegalArgumentException("Invalid Stripe webhook signature");
@@ -87,6 +88,7 @@ public class StripeWebhookHandler {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void handleCheckoutCompleted(Map<String, Object> event) {
         Map<String, Object> data = (Map<String, Object>) event.get("data");
         if (data == null) return;
@@ -95,12 +97,11 @@ public class StripeWebhookHandler {
         if (session == null) return;
 
         String subscriptionId = (String) session.get("subscription");
-        String customerEmail = (String) session.get("customer_email");
-        String metadata = (String) session.get("metadata");
 
         log.info("Checkout completed for subscription: {}", subscriptionId);
     }
 
+    @SuppressWarnings("unchecked")
     private void handleInvoicePaid(Map<String, Object> event) {
         Map<String, Object> data = (Map<String, Object>) event.get("data");
         if (data == null) return;
@@ -139,6 +140,7 @@ public class StripeWebhookHandler {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void handlePaymentFailed(Map<String, Object> event) {
         Map<String, Object> data = (Map<String, Object>) event.get("data");
         if (data == null) return;
@@ -163,6 +165,7 @@ public class StripeWebhookHandler {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void handleSubscriptionUpdated(Map<String, Object> event) {
         Map<String, Object> data = (Map<String, Object>) event.get("data");
         if (data == null) return;
@@ -176,6 +179,7 @@ public class StripeWebhookHandler {
         log.info("Subscription updated: {} - {}", subId, status);
     }
 
+    @SuppressWarnings("unchecked")
     private void handleSubscriptionDeleted(Map<String, Object> event) {
         Map<String, Object> data = (Map<String, Object>) event.get("data");
         if (data == null) return;

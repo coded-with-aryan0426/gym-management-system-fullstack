@@ -14,6 +14,9 @@ public class GymTask {
     @Column(name = "TASK_ID")
     private Long taskId;
 
+    @Column(name = "GYM_ID")
+    private Long gymId;
+
     @Column(name = "TITLE", nullable = false, length = 255)
     private String title;
 
@@ -48,9 +51,6 @@ public class GymTask {
     @Column(name = "COMPLETED_AT")
     private LocalDateTime completedAt;
 
-    @Column(name = "GYM_ID")
-    private Long gymId;
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -73,6 +73,14 @@ public class GymTask {
 
     public void setTaskId(Long taskId) {
         this.taskId = taskId;
+    }
+
+    public Long getGymId() {
+        return gymId;
+    }
+
+    public void setGymId(Long gymId) {
+        this.gymId = gymId;
     }
 
     public String getTitle() {
@@ -161,13 +169,5 @@ public class GymTask {
 
     public void setCompletedAt(LocalDateTime completedAt) {
         this.completedAt = completedAt;
-    }
-
-    public Long getGymId() {
-        return gymId;
-    }
-
-    public void setGymId(Long gymId) {
-        this.gymId = gymId;
     }
 }

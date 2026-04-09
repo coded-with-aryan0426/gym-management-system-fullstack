@@ -3,7 +3,6 @@ package com.gym.subscription.controller;
 import com.gym.subscription.config.PlansConfigLoader;
 import com.gym.subscription.dto.*;
 import com.gym.subscription.service.ConfigurableSubscriptionService;
-import com.gym.subscription.service.LicenseService;
 import com.gym.subscription.service.PaymentGatewayService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ public class SubscriptionController {
 
     private final ConfigurableSubscriptionService subscriptionService;
     private final PaymentGatewayService paymentGatewayService;
-    private final LicenseService licenseService;
     private final PlansConfigLoader configLoader;
 
     @GetMapping("/plans")

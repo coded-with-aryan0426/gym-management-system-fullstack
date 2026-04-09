@@ -411,6 +411,212 @@ const MemberDetailModal: React.FC<MemberDetailModalProps> = ({ isOpen, member, o
   );
 };
 
+// ─── Compact Dropdown Component ──────────────────────────────────────────────
+interface DropdownOption {
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+  color?: string;
+}
+
+interface CompactDropdownProps {
+  options: DropdownOption[];
+  value: string;
+  onChange: (id: string) => void;
+  label?: string;
+  icon?: React.ReactNode;
+  triggerClass?: string;
+}
+
+const CompactDropdown: React.FC<CompactDropdownProps> = ({
+  options, value, onChange, label, icon, triggerClass = ''
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const selected = options.find(o => o.id === value);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className={`att-compact-dropdown ${triggerClass}`} ref={dropdownRef}>
+      <button
+        className={`att-compact-dropdown__trigger ${isOpen ? 'open' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        {icon && <span className="att-compact-dropdown__trigger-icon">{icon}</span>}
+        <span className="att-compact-dropdown__trigger-label">{label || selected?.label}</span>
+        {selected?.color && (
+          <span
+            className="att-compact-dropdown__trigger-dot"
+            style={{ background: selected.color }}
+          />
+        )}
+        <ChevronDown size={12} className={`att-compact-dropdown__chevron ${isOpen ? 'rotated' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="att-compact-dropdown__menu"
+            initial={{ opacity: 0, y: -4, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+            role="listbox"
+          >
+            {options.map(opt => (
+              <button
+                key={opt.id}
+                className={`att-compact-dropdown__option ${value === opt.id ? 'selected' : ''}`}
+                onClick={() => { onChange(opt.id); setIsOpen(false); }}
+                role="option"
+                aria-selected={value === opt.id}
+              >
+                {opt.icon && <span className="att-compact-dropdown__option-icon">{opt.icon}</span>}
+                <span className="att-compact-dropdown__option-label">{opt.label}</span>
+                {opt.color && (
+                  <span
+                    className="att-compact-dropdown__option-dot"
+                    style={{ background: opt.color }}
+                  />
+                )}
+                {value === opt.id && (
+                  <CheckCircle2 size={12} className="att-compact-dropdown__check" />
+                )}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// ─── Period Dropdown with Custom ─────────────────────────────────────────────
+const PeriodDropdown: React.FC<{
+  period: number;
+  dateRangeMode: 'tabs' | 'custom';
+  customFrom: string;
+  customTo: string;
+  onPeriodChange: (days: number) => void;
+  onModeChange: (mode: 'tabs' | 'custom') => void;
+  onCustomFromChange: (d: string) => void;
+  onCustomToChange: (d: string) => void;
+}> = ({ period, dateRangeMode, customFrom, customTo, onPeriodChange, onModeChange, onCustomFromChange, onCustomToChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [showCustom, setShowCustom] = useState(dateRangeMode === 'custom');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const periodLabels: Record<number, string> = { 7: 'Last 7 days', 14: 'Last 14 days', 30: 'Last 30 days', 90: 'Last 90 days' };
+  const selectedLabel = dateRangeMode === 'custom'
+    ? `${new Date(customFrom).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} – ${new Date(customTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}`
+    : periodLabels[period] || 'Last 30 days';
+
+  return (
+    <div className="att-compact-dropdown att-period-dropdown" ref={dropdownRef}>
+      <button
+        className={`att-compact-dropdown__trigger ${isOpen ? 'open' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <Calendar size={13} />
+        <span className="att-compact-dropdown__trigger-label">{selectedLabel}</span>
+        <ChevronDown size={12} className={`att-compact-dropdown__chevron ${isOpen ? 'rotated' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="att-compact-dropdown__menu att-period-dropdown__menu"
+            initial={{ opacity: 0, y: -4, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+            role="listbox"
+          >
+            {PERIOD_OPTIONS.map(opt => (
+              <button
+                key={opt.days}
+                className={`att-compact-dropdown__option ${dateRangeMode === 'tabs' && period === opt.days ? 'selected' : ''}`}
+                onClick={() => { onPeriodChange(opt.days); onModeChange('tabs'); setShowCustom(false); setIsOpen(false); }}
+                role="option"
+                aria-selected={dateRangeMode === 'tabs' && period === opt.days}
+              >
+                <span className="att-compact-dropdown__option-label">{periodLabels[opt.days]}</span>
+                {dateRangeMode === 'tabs' && period === opt.days && (
+                  <CheckCircle2 size={12} className="att-compact-dropdown__check" />
+                )}
+              </button>
+            ))}
+            <div className="att-compact-dropdown__divider" />
+            <button
+              className={`att-compact-dropdown__option ${dateRangeMode === 'custom' ? 'selected' : ''}`}
+              onClick={() => { onModeChange('custom'); setShowCustom(true); setIsOpen(false); }}
+              role="option"
+              aria-selected={dateRangeMode === 'custom'}
+            >
+              <Calendar size={13} />
+              <span className="att-compact-dropdown__option-label">Custom range</span>
+              {dateRangeMode === 'custom' && (
+                <CheckCircle2 size={12} className="att-compact-dropdown__check" />
+              )}
+            </button>
+
+            {showCustom && (
+              <div className="att-period-dropdown__custom" onClick={e => e.stopPropagation()}>
+                <label className="att-period-dropdown__custom-label">
+                  <span>From</span>
+                  <input
+                    type="date"
+                    value={customFrom}
+                    max={customTo}
+                    onChange={e => onCustomFromChange(e.target.value)}
+                    className="att-period-dropdown__date-input"
+                    aria-label="From date"
+                  />
+                </label>
+                <label className="att-period-dropdown__custom-label">
+                  <span>To</span>
+                  <input
+                    type="date"
+                    value={customTo}
+                    min={customFrom}
+                    max={new Date().toISOString().split('T')[0]}
+                    onChange={e => onCustomToChange(e.target.value)}
+                    className="att-period-dropdown__date-input"
+                    aria-label="To date"
+                  />
+                </label>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 const AttendancePage: React.FC = () => {
   // Data state
@@ -688,117 +894,59 @@ const AttendancePage: React.FC = () => {
             <h1 className="att-header__title">Attendance Analytics</h1>
             <p className="att-header__sub">
               <span className="att-header__sub-text">
-                Managing flow for {activeRole === 'all' ? 'All Roles' : activeRole + 's'}
+                {activeRole === 'all' ? 'All Users' : ROLE_TABS.find(t => t.id === activeRole)?.label}
               </span>
               {autoRefresh && <span className="att-auto-refresh-badge">● Auto-refresh</span>}
             </p>
           </div>
         </div>
 
-        <nav className="att-header__center" aria-label="Role filter">
-          <div className="att-role-tabs" role="tablist">
-            {ROLE_TABS.map(tab => (
-              <button
-                key={tab.id}
-                className={`att-role-tab ${activeRole === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveRole(tab.id)}
-                style={{ '--tab-color': tab.color } as any}
-                role="tab"
-                aria-selected={activeRole === tab.id}
-                aria-controls="attendance-table"
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-        </nav>
+        <div className="att-header__controls">
+          <CompactDropdown
+            options={ROLE_TABS.map(t => ({ id: t.id, label: t.label, icon: t.icon, color: t.color }))}
+            value={activeRole}
+            onChange={(id) => { setActiveRole(id); }}
+            icon={<Activity size={13} />}
+          />
+          <PeriodDropdown
+            period={period}
+            dateRangeMode={dateRangeMode}
+            customFrom={customFrom}
+            customTo={customTo}
+            onPeriodChange={(days) => { setPeriod(days); }}
+            onModeChange={(mode) => { setDateRangeMode(mode); }}
+            onCustomFromChange={(d) => { setCustomFrom(d); }}
+            onCustomToChange={(d) => { setCustomTo(d); }}
+          />
+        </div>
 
         <div className="att-header__right">
-          <div className="att-date-range-toggle" role="group" aria-label="Date range mode">
-            <button
-              className={`att-range-mode-btn ${dateRangeMode === 'tabs' ? 'active' : ''}`}
-              onClick={() => { setDateRangeMode('tabs'); setPeriod(30); }}
-              aria-pressed={dateRangeMode === 'tabs'}
-            >
-              Quick
-            </button>
-            <button
-              className={`att-range-mode-btn ${dateRangeMode === 'custom' ? 'active' : ''}`}
-              onClick={() => setDateRangeMode('custom')}
-              aria-pressed={dateRangeMode === 'custom'}
-            >
-              Custom
-            </button>
-          </div>
-          {dateRangeMode === 'tabs' ? (
-          <div className="att-period-tabs" role="group" aria-label="Period filter">
-            {PERIOD_OPTIONS.map(opt => (
-              <button
-                key={opt.days}
-                className={`att-period-tab ${period === opt.days ? 'att-period-tab--active' : ''}`}
-                onClick={() => setPeriod(opt.days)}
-                aria-pressed={period === opt.days}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-          ) : (
-          <div className="att-custom-range" role="group" aria-label="Custom date range">
-            <label className="att-custom-range__label">
-              <span>From</span>
-              <input
-                type="date"
-                className="att-custom-range__input"
-                value={customFrom}
-                max={customTo}
-                onChange={e => setCustomFrom(e.target.value)}
-                aria-label="From date"
-              />
-            </label>
-            <label className="att-custom-range__label">
-              <span>To</span>
-              <input
-                type="date"
-                className="att-custom-range__input"
-                value={customTo}
-                min={customFrom}
-                max={new Date().toISOString().split('T')[0]}
-                onChange={e => setCustomTo(e.target.value)}
-                aria-label="To date"
-              />
-            </label>
-          </div>
-          )}
-          <div className="att-header__actions">
-            <button
-              className={`att-action-btn att-action-btn--refresh ${autoRefresh ? 'att-action-btn--active' : ''}`}
-              onClick={() => loadData(true)}
-              onDoubleClick={() => setAutoRefresh(!autoRefresh)}
-              title={autoRefresh ? 'Auto-refresh ON (30s) — double-click to disable' : 'Refresh — double-click to enable auto-refresh'}
-              disabled={refreshing}
-              aria-label="Refresh data"
-            >
-              <RefreshCw size={15} className={refreshing || autoRefresh ? 'att-icon-spin' : ''} />
-            </button>
-            <button
-              className="att-action-btn att-action-btn--primary"
-              onClick={() => setShowCheckInModal(true)}
-              title="Manual Check-In"
-              aria-label="Open manual check-in"
-            >
-              <Plus size={15} />
-            </button>
-            <button
-              className="att-action-btn"
-              onClick={handleExport}
-              title="Export to CSV"
-              aria-label="Export attendance data"
-            >
-              <Download size={15} />
-            </button>
-          </div>
+          <button
+            className={`att-action-btn att-action-btn--refresh ${autoRefresh ? 'att-action-btn--active' : ''}`}
+            onClick={() => loadData(true)}
+            onDoubleClick={() => setAutoRefresh(!autoRefresh)}
+            title={autoRefresh ? 'Auto-refresh ON (30s) — double-click to disable' : 'Refresh — double-click to enable auto-refresh'}
+            disabled={refreshing}
+            aria-label="Refresh data"
+          >
+            <RefreshCw size={15} className={refreshing || autoRefresh ? 'att-icon-spin' : ''} />
+          </button>
+          <button
+            className="att-action-btn att-action-btn--primary"
+            onClick={() => setShowCheckInModal(true)}
+            title="Manual Check-In"
+            aria-label="Open manual check-in"
+          >
+            <Plus size={15} />
+          </button>
+          <button
+            className="att-action-btn"
+            onClick={handleExport}
+            title="Export to CSV"
+            aria-label="Export attendance data"
+          >
+            <Download size={15} />
+          </button>
         </div>
       </header>
 

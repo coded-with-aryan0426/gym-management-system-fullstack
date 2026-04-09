@@ -1,7 +1,6 @@
 package com.gym.subscription.dto;
 
 import lombok.*;
-import java.time.LocalDateTime;
 
 @Data
 @Builder

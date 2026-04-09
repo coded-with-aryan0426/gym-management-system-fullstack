@@ -19,6 +19,7 @@ public class PaddleWebhookHandler {
     private final ObjectMapper objectMapper;
 
     @Transactional
+    @SuppressWarnings("unchecked")
     public void handleWebhook(String payload) {
         try {
             Map<String, Object> event = objectMapper.readValue(payload, Map.class);
