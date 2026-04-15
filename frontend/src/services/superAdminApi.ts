@@ -535,5 +535,33 @@ export const superAdminApi = {
     });
     return response.data;
   },
+
+  // ── Creator Portal Settings ──────────────────────────────────────────
+
+  async getCreatorSettings(): Promise<Record<string, string>> {
+    const token = this.getToken();
+    if (!token) throw new Error('Super Admin token missing or expired');
+    const response = await apiClient.get<Record<string, string>>('/superadmin/creator-settings', {
+      headers: { 'X-Superadmin-Token': token },
+    });
+    // Strip the "creator_" prefix that the backend adds
+    const raw = response.data || {};
+    const cleaned: Record<string, string> = {};
+    for (const [key, value] of Object.entries(raw)) {
+      cleaned[key.replace(/^creator_/, '')] = value;
+    }
+    return cleaned;
+  },
+
+  async saveCreatorSettings(settings: Record<string, string>): Promise<{ success: boolean; saved: number; message: string }> {
+    const token = this.getToken();
+    if (!token) throw new Error('Super Admin token missing or expired');
+    const response = await apiClient.put<{ success: boolean; saved: number; message: string }>(
+      '/superadmin/creator-settings',
+      settings,
+      { headers: { 'X-Superadmin-Token': token } },
+    );
+    return response.data;
+  },
 };
 

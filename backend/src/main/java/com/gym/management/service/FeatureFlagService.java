@@ -28,6 +28,12 @@ public class FeatureFlagService {
                 .map(this::convertToDTO);
     }
 
+    public boolean isEnabled(String featureKey) {
+        return featureFlagRepository.findByFeatureKey(featureKey)
+                .map(FeatureFlag::getEnabled)
+                .orElse(false);
+    }
+
     public List<FeatureFlagDTO> getAllFlagsForUser(CustomUserDetails userDetails) {
         List<FeatureFlag> allFlags = featureFlagRepository.findAll();
         return allFlags.stream()

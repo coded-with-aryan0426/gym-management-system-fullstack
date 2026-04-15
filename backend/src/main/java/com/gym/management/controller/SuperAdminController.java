@@ -15,6 +15,8 @@ import com.gym.management.model.MembershipStatus;
 import com.gym.management.model.StaffStatus;
 import com.gym.management.model.Transaction;
 import com.gym.management.repository.AuditLogRepository;
+import com.gym.management.repository.GymSettingsRepository;
+import com.gym.management.model.GymSettings;
 import com.gym.management.repository.GymRepository;
 import com.gym.management.repository.GymStaffRepository;
 import com.gym.management.repository.MembershipRepository;
@@ -60,6 +62,7 @@ public class SuperAdminController {
     private final GymStaffRepository gymStaffRepository;
     private final MembershipRepository membershipRepository;
     private final TransactionRepository transactionRepository;
+    private final GymSettingsRepository gymSettingsRepository;
 
     public SuperAdminController(
             SuperAdminAuthService superAdminAuthService,
@@ -74,7 +77,8 @@ public class SuperAdminController {
             GymRepository gymRepository,
             GymStaffRepository gymStaffRepository,
             MembershipRepository membershipRepository,
-            TransactionRepository transactionRepository) {
+            TransactionRepository transactionRepository,
+            GymSettingsRepository gymSettingsRepository) {
         this.superAdminAuthService = superAdminAuthService;
         this.superAdminDashboardService = superAdminDashboardService;
         this.superAdminUsersService = superAdminUsersService;
@@ -88,6 +92,7 @@ public class SuperAdminController {
         this.gymStaffRepository = gymStaffRepository;
         this.membershipRepository = membershipRepository;
         this.transactionRepository = transactionRepository;
+        this.gymSettingsRepository = gymSettingsRepository;
     }
 
     @PostMapping("/auth/login")
@@ -501,6 +506,44 @@ public class SuperAdminController {
 
     private String nullSafe(String value, String fallback) {
         return (value == null || value.isBlank()) ? fallback : value;
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  CREATOR SETTINGS — persistent key-value store (type=CREATOR_SETTINGS)
+    // ══════════════════════════════════════════════════════════════════
+
+    /** Load all creator portal settings. */
+    @GetMapping("/creator-settings")
+    public ResponseEntity<Map<String, String>> getCreatorSettings() {
+        List<GymSettings> rows = gymSettingsRepository.findBySettingType("CREATOR_SETTINGS");
+        Map<String, String> result = new HashMap<>();
+        for (GymSettings s : rows) {
+            result.put(s.getSettingKey(), s.getSettingValue());
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    /** Persist creator portal settings (upsert). Body: { key: value, ... } */
+    @PutMapping("/creator-settings")
+    public ResponseEntity<Map<String, Object>> saveCreatorSettings(
+            @RequestBody Map<String, String> settings) {
+        int saved = 0;
+        for (Map.Entry<String, String> entry : settings.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (key == null || key.isBlank()) continue;
+            GymSettings row = gymSettingsRepository.findBySettingKey("creator_" + key)
+                    .orElse(new GymSettings());
+            row.setSettingKey("creator_" + key);
+            row.setSettingValue(value != null ? value : "");
+            row.setSettingType("CREATOR_SETTINGS");
+            gymSettingsRepository.save(row);
+            saved++;
+        }
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "saved", saved,
+                "message", "Creator settings saved successfully"));
     }
 }
 

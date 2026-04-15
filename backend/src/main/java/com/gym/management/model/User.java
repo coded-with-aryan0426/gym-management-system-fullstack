@@ -257,6 +257,15 @@ public class User {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+    @Column(name = "birth_date_verified")
+    private Boolean birthDateVerified = false;
+
+    @Column(name = "birth_date_verified_at")
+    private LocalDateTime birthDateVerifiedAt;
+
+    @Column(name = "birth_date_verified_by")
+    private Long birthDateVerifiedBy;
+
     @Column(name = "gender")
     private String gender;
 
@@ -327,6 +336,19 @@ public class User {
     public void setHealthNotes(String healthNotes) { this.healthNotes = healthNotes; }
     public String getFitnessGoals() { return fitnessGoals; }
     public void setFitnessGoals(String fitnessGoals) { this.fitnessGoals = fitnessGoals; }
+
+    // Birth date related getters and setters
+    public LocalDate getDateOfBirth() { return dateOfBirth; }
+    public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+
+    public Boolean getBirthDateVerified() { return birthDateVerified; }
+    public void setBirthDateVerified(Boolean birthDateVerified) { this.birthDateVerified = birthDateVerified; }
+
+    public LocalDateTime getBirthDateVerifiedAt() { return birthDateVerifiedAt; }
+    public void setBirthDateVerifiedAt(LocalDateTime birthDateVerifiedAt) { this.birthDateVerifiedAt = birthDateVerifiedAt; }
+
+    public Long getBirthDateVerifiedBy() { return birthDateVerifiedBy; }
+    public void setBirthDateVerifiedBy(Long birthDateVerifiedBy) { this.birthDateVerifiedBy = birthDateVerifiedBy; }
 
     @Column(name = "height", precision = 5, scale = 2)
     private BigDecimal height;

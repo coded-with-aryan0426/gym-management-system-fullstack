@@ -74,8 +74,36 @@ public class EmailService {
             mailSender.send(message);
         } catch (Exception e) {
             System.err.println("Failed to send email to " + to + ": " + e.getMessage());
-            // Consume error to allow auth flow to proceed in dev mode
         }
+    }
+
+    public void sendParentalConsentVerification(com.gym.management.model.ParentalConsent consent) {
+        String subject = "Parental Consent Verification - AthlonX";
+        String verificationLink = appUrl + "/verify-consent?token=" + consent.getVerificationToken();
+        String body = String.format("""
+                Dear %s,
+
+                A parental consent request has been submitted for your dependent's gym membership.
+
+                Guardian Name: %s
+                Relationship: %s
+
+                Please click the link below to verify and approve this consent:
+                %s
+
+                This link will expire in 1 year.
+
+                If you did not submit this request, please ignore this email.
+
+                Best regards,
+                AthlonX Team
+                """,
+                consent.getGuardianName(),
+                consent.getGuardianName(),
+                consent.getGuardianRelation(),
+                verificationLink);
+
+        sendEmail(consent.getGuardianEmail(), subject, body);
     }
 
     private void sendEmail(String to, String subject, String body) {
@@ -86,15 +114,8 @@ public class EmailService {
             message.setSubject(subject);
             message.setText(body);
             mailSender.send(message);
-            System.out.println("Email sent to " + to);
         } catch (Exception e) {
             System.err.println("Failed to send email to " + to + ": " + e.getMessage());
-            // For development, we log the email content so we can "see" it
-            System.out.println("--- MOCK EMAIL ---");
-            System.out.println("To: " + to);
-            System.out.println("Subject: " + subject);
-            System.out.println("Body:\n" + body);
-            System.out.println("------------------");
         }
     }
 }

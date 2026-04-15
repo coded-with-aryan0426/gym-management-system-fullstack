@@ -1,0 +1,150 @@
+/* BirthDatePicker Styles */
+.birth-date-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.birth-date-picker__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.birth-date-picker__input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.birth-date-picker__icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.birth-date-picker__input {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-main);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.birth-date-picker__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.birth-date-picker__input.error {
+  border-color: var(--color-crimson);
+  background-color: rgba(var(--color-crimson-rgb), 0.05);
+}
+
+.birth-date-picker__input.warning {
+  border-color: var(--color-amber);
+  background-color: rgba(var(--color-amber-rgb), 0.05);
+}
+
+.birth-date-picker__input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.birth-date-picker__age-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+
+.birth-date-picker__age-display .age-label {
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.birth-date-picker__age-display .age-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.birth-date-picker__age-display .age-warning {
+  color: var(--color-amber);
+  font-size: 0.7rem;
+  font-weight: 500;
+  margin-left: auto;
+  background: rgba(var(--color-amber-rgb), 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.birth-date-picker__error,
+.birth-date-picker__warning {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.birth-date-picker__error {
+  color: var(--color-crimson);
+}
+
+.birth-date-picker__warning {
+  color: var(--color-amber);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .birth-date-picker__input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .birth-date-picker__age-display {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .birth-date-picker__age-display .age-warning {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .birth-date-picker__input {
+    background: var(--bg-elevated);
+    border-color: var(--border-secondary);
+  }
+  
+  .birth-date-picker__input:focus {
+    border-color: var(--color-primary);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .birth-date-picker__input {
+    border-width: 2px;
+  }
+  
+  .birth-date-picker__input.error {
+    border-width: 2px;
+  }
+  
+  .birth-date-picker__input.warning {
+    border-width: 2px;
+  }
+}
