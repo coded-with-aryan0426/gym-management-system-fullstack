@@ -256,6 +256,18 @@
   background: rgba(0, 0, 0, 0.3);
 }
 
+.sa-settings-input--error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+}
+
+.sa-settings-cancel-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sa-settings-cancel-btn { display: flex; align-items: center; gap: 6px; }
+
 .sa-settings-input:hover:not(:focus),
 .sa-settings-select:hover:not(:focus),
 .sa-settings-textarea:hover:not(:focus) {
