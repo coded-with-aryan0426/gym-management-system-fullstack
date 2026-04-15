@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Crown, CreditCard, Calendar, AlertCircle, Check, X, RefreshCw, ChevronDown, Zap } from 'lucide-react';
 import { useSubscription, SubscriptionFeatures } from '../../hooks/useSubscription';
 import { subscriptionApi, type PlanConfig, type Subscription } from '../../services/subscriptionApi';
-import './SaaSSubscription.css';
+// CSS moved to SASettings - this component is now used only in the creator portal
 
 interface PlanWithPricing extends PlanConfig {
   effectivePrice?: number;

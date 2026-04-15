@@ -27,6 +27,7 @@ export default function ForgotPasswordPage() {
     const [step, setStep] = useState<Step>('EMAIL');
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
+    const [resetToken, setResetToken] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -105,7 +106,8 @@ export default function ForgotPasswordPage() {
         setIsLoading(true);
 
         try {
-            await api.post('/auth/forgot-password/verify', { email, otp });
+            const response = await api.post('/auth/forgot-password/verify', { email, otp });
+            setResetToken(response.data?.resetToken || '');
             setSuccessMessage('Code verified! Set your new password');
             setStep('NEW_PASSWORD');
         } catch (err: any) {
@@ -130,13 +132,19 @@ export default function ForgotPasswordPage() {
             return;
         }
 
+        if (!resetToken) {
+            setError('Your verification session expired. Please start over.');
+            setStep('EMAIL');
+            return;
+        }
+
         setIsLoading(true);
 
         try {
             await api.post('/auth/forgot-password/reset', {
-                email,
-                otp,
-                newPassword
+                resetToken,
+                newPassword,
+                confirmPassword
             });
             setStep('SUCCESS');
         } catch (err: any) {

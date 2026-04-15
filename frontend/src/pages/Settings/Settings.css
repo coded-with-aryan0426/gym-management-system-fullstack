@@ -5746,3 +5746,174 @@ body.light-mode .toggle-switch {
     background: rgba(0, 0, 0, 0.1);
     border-color: rgba(0, 0, 0, 0.15);
 }
+
+/* =============================================================================
+   My Plan Section — Read-only subscription status for gym owners
+   ============================================================================= */
+
+.myplan-status-card {
+  padding: 8px 10px;
+}
+
+.myplan-plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.myplan-plan-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.myplan-plan-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--settings-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.myplan-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+
+.myplan-details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--settings-border-subtle);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.myplan-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--settings-border-subtle);
+  font-size: 12px;
+}
+
+.myplan-detail-item:last-child {
+  border-bottom: none;
+}
+
+.myplan-detail-item svg {
+  color: var(--settings-text-tertiary);
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+}
+
+.myplan-detail-label {
+  color: var(--settings-text-secondary);
+  flex: 1;
+}
+
+.myplan-detail-value {
+  color: var(--settings-text-primary);
+  font-weight: 600;
+}
+
+.myplan-detail-value--highlight {
+  color: var(--settings-accent-success);
+}
+
+.myplan-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 16px;
+  gap: 6px;
+  text-align: center;
+}
+
+.myplan-empty svg {
+  color: var(--settings-text-tertiary);
+  margin-bottom: 4px;
+}
+
+.myplan-empty p {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--settings-text-secondary);
+  margin: 0;
+}
+
+.myplan-empty span {
+  font-size: 11px;
+  color: var(--settings-text-tertiary);
+}
+
+.myplan-features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  padding: 4px 0;
+}
+
+.myplan-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--settings-text-secondary);
+}
+
+.myplan-feature-item svg {
+  color: var(--settings-accent-success);
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+}
+
+.myplan-license-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  gap: 12px;
+}
+
+.myplan-license-label {
+  font-size: 12px;
+  color: var(--settings-text-secondary);
+}
+
+.myplan-license-key {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--settings-border-subtle);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--settings-text-primary);
+  word-break: break-all;
+  max-width: 280px;
+}
+
+/* Light mode - My Plan */
+:root.theme-light .myplan-license-key,
+[data-theme="light"] .myplan-license-key,
+body.light-mode .myplan-license-key {
+  background: #F1F5F9;
+  border-color: var(--border-primary, #CBD5E1);
+}
+
+@media (max-width: 768px) {
+  .myplan-features-grid {
+    grid-template-columns: 1fr;
+  }
+}

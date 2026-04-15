@@ -27,7 +27,7 @@ public class OutboxEvent {
     @Column(name = "operation", nullable = false, length = 20)
     private String operation;
 
-    @Column(name = "payload", nullable = false, columnDefinition = "JSON")
+    @Column(name = "payload", nullable = false, columnDefinition = "CLOB")
     private String payload;
 
     @Column(name = "tenant_id", nullable = false)
@@ -51,7 +51,7 @@ public class OutboxEvent {
     @Column(name = "last_retry_at")
     private Instant lastRetryAt;
 
-    @Column(name = "error_message", columnDefinition = "TEXT")
+    @Column(name = "error_message", columnDefinition = "CLOB")
     private String errorMessage;
 
     public OutboxEvent() {

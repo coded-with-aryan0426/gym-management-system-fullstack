@@ -752,7 +752,7 @@ const Dashboard: React.FC = () => {
                       paddingAngle={3} dataKey="value" strokeWidth={0}>
                       {membershipDist.map((e, i) => <Cell key={i} fill={e.color} />)}
                     </Pie>
-                    <Tooltip contentStyle={{ background: "#111116", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, fontSize: 12 }} />
+                    <Tooltip contentStyle={{ background: "var(--s2)", border: "1px solid var(--border2)", borderRadius: 10, fontSize: 12, color: "var(--text)" }} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="dash__donut-center">

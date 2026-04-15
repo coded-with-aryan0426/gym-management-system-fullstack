@@ -3,7 +3,8 @@ import { Outlet, Navigate } from 'react-router-dom';
 import DashboardLayout from '../../components/shared/DashboardLayout';
 import {
     LayoutDashboard, Building2, Users, DollarSign,
-    Bug, ToggleRight, Shield, Database, BarChart3, MessageSquare
+    Bug, ToggleRight, Shield, Database, BarChart3, MessageSquare,
+    Bell, Settings
 } from 'lucide-react';
 import type { NavItem } from '../../components/Layout/CommandRail';
 import { superAdminApi } from '../../services/superAdminApi';
@@ -44,6 +45,8 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children }) => {
         { path: '/superadmin/security', icon: <Shield size={20} />, label: 'Security', color: '#06b6d4' },
         { path: '/superadmin/database', icon: <Database size={20} />, label: 'Database', color: '#a78bfa' },
         { path: '/superadmin/analytics', icon: <BarChart3 size={20} />, label: 'Analytics', color: '#fb923c' },
+        { path: '/superadmin/notifications', icon: <Bell size={20} />, label: 'Notifications', color: '#f97316' },
+        { path: '/superadmin/settings', icon: <Settings size={20} />, label: 'Settings', color: '#6b7280' },
     ];
 
     return (

@@ -86,6 +86,8 @@ const SAAnalytics = lazy(() => import('./pages/superadmin/SAAnalytics'));
 const SABetaFeedback = lazy(() => import('./pages/superadmin/SABetaFeedback'));
 const SAFeedback = lazy(() => import('./pages/superadmin/SAFeedback'));
 const SAInsights = lazy(() => import('./pages/superadmin/SAInsights'));
+const SASettings = lazy(() => import('./pages/superadmin/SASettings'));
+const SANotifications = lazy(() => import('./pages/superadmin/SANotifications'));
 const SuperAdminPortal = lazy(() => import('./pages/superadmin/SuperAdminPortal'));
 
 // Utility / Premium Pages
@@ -235,6 +237,8 @@ function App() {
                           <Route path="feedback" element={<SABetaFeedback />} />
                           <Route path="feedback-center" element={<SAFeedback />} />
                           <Route path="beta-insights" element={<SAInsights />} />
+                          <Route path="settings" element={<SASettings />} />
+                          <Route path="notifications" element={<SANotifications />} />
                           <Route path="*" element={<Navigate to="/superadmin" replace />} />
                         </Routes>
                       </SuperAdminLayout>

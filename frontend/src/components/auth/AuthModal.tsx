@@ -69,6 +69,7 @@ export default function AuthModal() {
     // Forgot Password State
     const [forgotEmail, setForgotEmail] = useState("");
     const [forgotOtp, setForgotOtp] = useState("");
+    const [forgotResetToken, setForgotResetToken] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmNewPassword, setConfirmNewPassword] = useState("");
     const [showNewPassword, setShowNewPassword] = useState(false);
@@ -113,6 +114,7 @@ export default function AuthModal() {
             setLoginOtp("");
             setForgotEmail("");
             setForgotOtp("");
+            setForgotResetToken("");
             setNewPassword("");
             setConfirmNewPassword("");
             setShowNewPassword(false);
@@ -355,7 +357,8 @@ export default function AuthModal() {
 
         setIsLoading(true);
         try {
-            await api.post('/auth/forgot-password/verify', { email: forgotEmail, otp: forgotOtp });
+            const response = await api.post('/auth/forgot-password/verify', { email: forgotEmail, otp: forgotOtp });
+            setForgotResetToken(response.data?.resetToken || "");
             setLoginStep('FORGOT_NEW_PASSWORD');
             setSuccessMessage("");
         } catch (err: any) {
@@ -380,12 +383,18 @@ export default function AuthModal() {
             return;
         }
 
+        if (!forgotResetToken) {
+            setError("Your verification session expired. Please request a new reset code.");
+            setLoginStep('FORGOT_EMAIL');
+            return;
+        }
+
         setIsLoading(true);
         try {
             await api.post('/auth/forgot-password/reset', {
-                email: forgotEmail,
-                otp: forgotOtp,
-                newPassword: newPassword
+                resetToken: forgotResetToken,
+                newPassword: newPassword,
+                confirmPassword: confirmNewPassword
             });
             setLoginStep('FORGOT_SUCCESS');
             setSuccessMessage("Password reset successful!");
@@ -400,6 +409,7 @@ export default function AuthModal() {
         setLoginStep('CREDENTIALS');
         setForgotEmail("");
         setForgotOtp("");
+        setForgotResetToken("");
         setNewPassword("");
         setConfirmNewPassword("");
         setError("");

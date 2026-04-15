@@ -60,7 +60,7 @@ public class FinancialTransaction {
     @Column(name = "transaction_date", nullable = false)
     private LocalDate transactionDate;
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "CLOB")
     private String description;
 
     @Column(name = "reference_number", length = 100)

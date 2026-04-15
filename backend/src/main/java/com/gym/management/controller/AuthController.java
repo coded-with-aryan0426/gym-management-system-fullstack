@@ -6,6 +6,7 @@ import com.gym.management.repository.*;
 import com.gym.management.security.JwtTokenProvider;
 import com.gym.management.service.AuditLogService;
 import com.gym.management.service.OtpService;
+import com.gym.management.service.PasswordResetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,6 +47,9 @@ public class AuthController {
 
     @Autowired
     private AuditLogService auditLogService;
+
+    @Autowired
+    private PasswordResetService passwordResetService;
 
     /**
      * V1 Simplified Login - No gym dependency
@@ -760,7 +764,8 @@ public class AuthController {
      * Step 2: Verify OTP for password reset
      */
     @PostMapping("/forgot-password/verify")
-    public ResponseEntity<?> forgotPasswordVerify(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> forgotPasswordVerify(@RequestBody Map<String, String> request,
+            HttpServletRequest httpRequest) {
         String email = request.get("email");
         String otp = request.get("otp");
 
@@ -776,9 +781,21 @@ public class AuthController {
                     "error", "Invalid or expired verification code"));
         }
 
+        PasswordResetService.TokenValidationResult tokenResult = passwordResetService
+                .issueResetTokenForVerifiedOtp(email.trim(), httpRequest);
+
+        if (!tokenResult.valid()) {
+            if (tokenResult.rateLimited()) {
+                return ResponseEntity.status(429).body(Map.of("error", tokenResult.message()));
+            }
+            return ResponseEntity.badRequest().body(Map.of("error", tokenResult.message()));
+        }
+
         return ResponseEntity.ok(Map.of(
                 "message", "Verification successful. You can now reset your password.",
-                "verified", true));
+                "verified", true,
+                "resetToken", tokenResult.token(),
+                "expiresAt", tokenResult.expiresAt()));
     }
 
     /**
@@ -787,73 +804,27 @@ public class AuthController {
      */
     @PostMapping("/forgot-password/reset")
     public ResponseEntity<?> forgotPasswordReset(@RequestBody Map<String, String> request, jakarta.servlet.http.HttpServletRequest httpRequest) {
-        String email = request.get("email");
-        String otp = request.get("otp");
+        String resetToken = request.get("resetToken");
         String newPassword = request.get("newPassword");
+        String confirmPassword = request.get("confirmPassword");
 
-        if (email == null || otp == null || newPassword == null) {
+        if (resetToken == null || newPassword == null || confirmPassword == null) {
             return ResponseEntity.badRequest().body(Map.of(
-                    "error", "Email, OTP, and new password are required"));
+                    "error", "Reset token, new password, and confirmation are required"));
         }
 
-        // Validate password strength
-        String passwordError = validatePasswordStrength(newPassword);
-        if (passwordError != null) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "error", passwordError));
-        }
+        PasswordResetService.ResetResult result = passwordResetService.resetPassword(
+                resetToken.trim(), newPassword, confirmPassword, httpRequest);
 
-        // Re-verify OTP (ensures it was recently verified and not reused)
-        boolean isValid = otpService.verifyOtp(email.trim(), otp, OtpPurpose.PASSWORD_RESET);
-        if (!isValid) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "error", "Invalid or expired verification code. Please start over."));
-        }
-
-        // Find user
-        Optional<User> userOpt = userRepository.findByEmail(email.trim());
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "error", "User not found"));
-        }
-
-        User user = userOpt.get();
-
-        // Update password
-        user.setPassword(passwordEncoder.encode(newPassword));
-        user.setPasswordChangedAt(java.time.LocalDateTime.now());
-        user.setIsFirstLogin(false);
-        userRepository.save(user);
-
-        // Log the password reset
-        try {
-            auditLogService.logAction("PASSWORD_RESET", "User", String.valueOf(user.getUserId()),
-                    user.getUsername(), user.getUserId(), null, "Password reset via forgot password flow",
-                    null, httpRequest != null ? httpRequest.getRemoteAddr() : null);
-        } catch (Exception ignored) {
+        if (!result.success()) {
+            if (result.rateLimited()) {
+                return ResponseEntity.status(429).body(Map.of("error", result.message()));
+            }
+            return ResponseEntity.badRequest().body(Map.of("error", result.message()));
         }
 
         return ResponseEntity.ok(Map.of(
-                "message", "Password reset successfully. Please login with your new password."));
-    }
-
-    /**
-     * Validate password strength
-     */
-    private String validatePasswordStrength(String password) {
-        if (password == null || password.length() < 8) {
-            return "Password must be at least 8 characters long";
-        }
-        if (!password.matches(".*[A-Z].*")) {
-            return "Password must contain at least one uppercase letter";
-        }
-        if (!password.matches(".*[a-z].*")) {
-            return "Password must contain at least one lowercase letter";
-        }
-        if (!password.matches(".*[0-9].*")) {
-            return "Password must contain at least one number";
-        }
-        return null; // Valid password
+                "message", result.message()));
     }
 
     /**

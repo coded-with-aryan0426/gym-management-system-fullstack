@@ -17,6 +17,8 @@ public class DataMigrationConfig {
             List<MembershipPackage> packages = repository.findAll();
             for (MembershipPackage pkg : packages) {
                 boolean changed = false;
+                String originalName = pkg.getPackageName();
+                String normalizedName = originalName;
 
                 // Initialize durationMonths if null
                 if (pkg.getDurationMonths() == null) {
@@ -30,13 +32,26 @@ public class DataMigrationConfig {
 
                 // Clean package name (remove "Monthly" / "Annual")
                 // Current names: "Basic Monthly", "Standard Monthly", "Annual Basic"
-                String name = pkg.getPackageName();
-                if (name.contains(" Monthly")) {
-                    pkg.setPackageName(name.replace(" Monthly", ""));
-                    changed = true;
-                } else if (name.contains("Annual ")) {
-                    pkg.setPackageName(name.replace("Annual ", ""));
-                    changed = true;
+                if (originalName.contains(" Monthly")) {
+                    normalizedName = originalName.replace(" Monthly", "");
+                } else if (originalName.contains("Annual ")) {
+                    normalizedName = originalName.replace("Annual ", "");
+                }
+
+                if (!normalizedName.equals(originalName)) {
+                    boolean nameConflict = repository.existsByPackageNameAndDurationDaysAndPackageIdNot(
+                            normalizedName,
+                            pkg.getDurationDays(),
+                            pkg.getPackageId());
+
+                    if (nameConflict) {
+                        System.out.println(
+                                "Skipping package rename for '" + originalName + "' -> '" + normalizedName
+                                        + "' because that package name + duration already exists.");
+                    } else {
+                        pkg.setPackageName(normalizedName);
+                        changed = true;
+                    }
                 }
 
                 if (changed) {
